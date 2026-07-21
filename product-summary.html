@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  width: 1440px;
+  background: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  color: #1F2937;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ───────────────────────────────────────────── */
+.header {
+  text-align: center;
+  padding: 36px 60px 28px;
+  border-bottom: 1px solid #E8F3EC;
+  background: linear-gradient(180deg, #ffffff 0%, #FAFDF8 100%);
+}
+.logo-row {
+  display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 8px;
+}
+.logo-row img { width: 56px; height: 56px; object-fit: contain; }
+.brand-text { text-align: left; }
+.brand-name {
+  font-size: 34px; font-weight: 800; letter-spacing: -0.5px;
+  color: #1B5E35; line-height: 1;
+}
+.brand-sub { font-size: 13px; color: #6B7280; margin-top: 3px; font-weight: 400; }
+
+.tagline-row {
+  display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 16px;
+}
+.tagline-line { flex: 1; height: 1.5px; background: linear-gradient(90deg, transparent, #C3DFC9); max-width: 180px; }
+.tagline-line.right { background: linear-gradient(90deg, #C3DFC9, transparent); }
+.tagline {
+  font-size: 17px; font-weight: 700; color: #1B5E35;
+  white-space: nowrap;
+}
+
+/* ── FEATURES ─────────────────────────────────────────── */
+.features-section { padding: 28px 40px 24px; }
+
+.features-row {
+  display: flex; align-items: stretch; gap: 0;
+}
+
+.feature-card {
+  flex: 1;
+  border-radius: 20px;
+  padding: 22px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.feature-card.green  { background: #EBF5EE; }
+.feature-card.gold   { background: #FBF3E3; }
+.feature-card.dgreen { background: #E2EFE7; }
+.feature-card.result { background: #ffffff; border: 2px solid #1B5E35; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 28px 20px; }
+
+/* badge */
+.badge-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.badge-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.badge-num.green  { background: linear-gradient(135deg, #1B5E35, #2D7A4F); }
+.badge-num.gold   { background: linear-gradient(135deg, #B8944A, #D4A855); }
+.badge-num.dgreen { background: linear-gradient(135deg, #0f3d22, #1B5E35); }
+
+.badge-title {
+  font-size: 13px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase;
+}
+.badge-title.green  { color: #1B5E35; }
+.badge-title.gold   { color: #8B6914; }
+.badge-title.dgreen { color: #0f3d22; }
+
+.feature-desc { font-size: 12px; color: #4B5563; line-height: 1.5; margin-bottom: 16px; }
+
+/* phone + list row */
+.phone-list-row { display: flex; gap: 14px; align-items: flex-start; flex: 1; }
+
+.phone-frame {
+  width: 126px;
+  flex-shrink: 0;
+  border-radius: 18px;
+  border: 4px solid #1a1a2e;
+  background: #000;
+  overflow: hidden;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.22);
+  position: relative;
+}
+.phone-frame::before {
+  content: '';
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 42px; height: 7px;
+  background: #1a1a2e; border-radius: 0 0 6px 6px; z-index: 2;
+}
+.phone-frame img {
+  width: 100%; display: block;
+  object-fit: cover; object-position: top;
+  height: 252px;
+}
+
+/* feature list */
+.feat-list { flex: 1; display: flex; flex-direction: column; gap: 8px; padding-top: 2px; }
+.feat-item { display: flex; align-items: flex-start; gap: 8px; }
+.feat-icon {
+  width: 26px; height: 26px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.feat-icon.green  { background: #C3DFC9; }
+.feat-icon.gold   { background: #E8C98A; }
+.feat-icon.dgreen { background: #A8C8B0; }
+
+.feat-icon svg { width: 14px; height: 14px; }
+.feat-text { font-size: 11.5px; color: #374151; line-height: 1.4; font-weight: 500; }
+
+/* arrow */
+.arrow-col {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; flex-shrink: 0; z-index: 2;
+}
+.arrow-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #fff;
+  border: 1.5px solid #C3DFC9;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* result card */
+.result-icon-wrap {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, #1B5E35, #2D7A4F);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 20px rgba(27,94,53,0.3);
+}
+.result-title {
+  font-size: 14px; font-weight: 800; color: #1B5E35;
+  text-transform: uppercase; letter-spacing: 0.3px;
+  line-height: 1.4; margin-bottom: 10px;
+}
+.result-desc { font-size: 11.5px; color: #4B5563; line-height: 1.6; }
+.result-tags { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; width: 100%; }
+.result-tag {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; color: #1B5E35;
+  background: #E8F3EC; border-radius: 8px; padding: 5px 10px;
+}
+
+/* ── INTEGRATED SYSTEMS ───────────────────────────────── */
+.systems-section {
+  margin: 0 40px;
+  background: #F9FAFB;
+  border-radius: 16px;
+  padding: 18px 32px;
+  border: 1px solid #E5E7EB;
+}
+.systems-title {
+  text-align: center;
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  color: #6B7280; text-transform: uppercase; margin-bottom: 14px;
+}
+.systems-grid {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.sys-item { display: flex; align-items: center; gap: 8px; }
+.sys-icon {
+  width: 34px; height: 34px; border-radius: 10px; background: #fff;
+  border: 1px solid #E5E7EB;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.sys-icon svg { width: 16px; height: 16px; }
+.sys-label { font-size: 11px; font-weight: 600; color: #374151; line-height: 1.3; max-width: 80px; }
+
+.sys-divider { width: 1px; height: 32px; background: #E5E7EB; }
+
+/* ── ECOSYSTEM ────────────────────────────────────────── */
+.ecosystem-section { padding: 20px 40px 36px; }
+.eco-title {
+  text-align: center;
+  font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+  color: #6B7280; text-transform: uppercase; margin-bottom: 14px;
+}
+.eco-row { display: flex; gap: 16px; }
+.eco-card {
+  flex: 1; border-radius: 16px; padding: 18px 20px;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.eco-card.green  { background: #E8F3EC; border: 1.5px solid #C3DFC9; }
+.eco-card.gold   { background: #FBF3E3; border: 1.5px solid #E8C98A; }
+.eco-card.dgreen { background: #E2EFE7; border: 1.5px solid #A8C8B0; }
+
+.eco-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.eco-icon.green  { background: linear-gradient(135deg, #1B5E35, #2D7A4F); }
+.eco-icon.gold   { background: linear-gradient(135deg, #B8944A, #D4A855); }
+.eco-icon.dgreen { background: linear-gradient(135deg, #0f3d22, #1B5E35); }
+.eco-icon svg { width: 22px; height: 22px; }
+
+.eco-text {}
+.eco-label {
+  font-size: 12px; font-weight: 800; letter-spacing: 0.4px;
+  text-transform: uppercase; margin-bottom: 5px;
+}
+.eco-label.green  { color: #1B5E35; }
+.eco-label.gold   { color: #8B6914; }
+.eco-label.dgreen { color: #0f3d22; }
+.eco-desc { font-size: 11.5px; color: #4B5563; line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="logo-row">
+    <img src="logo.png" alt="Manaseek">
+    <div class="brand-text">
+      <div class="brand-name">manaseek</div>
+      <div class="brand-sub">Pendamping Ibadah Haji &amp; Umrah Anda</div>
+    </div>
+  </div>
+  <div class="tagline-row">
+    <div class="tagline-line"></div>
+    <div class="tagline">Tiga Lapisan Bantuan, Satu Tujuan: Ibadah Lebih Mudah, Aman, dan Terarah</div>
+    <div class="tagline-line right"></div>
+  </div>
+</div>
+
+<!-- ── FEATURES ── -->
+<div class="features-section">
+  <div class="features-row">
+
+    <!-- 1. GUIDANCE MANDIRI -->
+    <div class="feature-card green">
+      <div class="badge-row">
+        <div class="badge-num green">1</div>
+        <div class="badge-title green">Guidance Mandiri</div>
+      </div>
+      <p class="feature-desc">Akses panduan ibadah kapan saja sesuai fase perjalanan Anda, tanpa koneksi internet sekalipun.</p>
+      <div class="phone-list-row">
+        <div class="phone-frame">
+          <img src="out/03_guidance.png" alt="Guidance Screen">
+        </div>
+        <div class="feat-list">
+          <!-- Book icon -->
+          <div class="feat-item">
+            <div class="feat-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="2" stroke-linecap="round">
+                <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+              </svg>
+            </div>
+            <span class="feat-text">Panduan Langkah demi Langkah per Fase Ibadah</span>
+          </div>
+          <!-- Mic/Doa icon -->
+          <div class="feat-item">
+            <div class="feat-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="2" stroke-linecap="round">
+                <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/>
+              </svg>
+            </div>
+            <span class="feat-text">Kumpulan Doa &amp; Dzikir dengan Audio</span>
+          </div>
+          <!-- Checklist -->
+          <div class="feat-item">
+            <div class="feat-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="2" stroke-linecap="round">
+                <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+              </svg>
+            </div>
+            <span class="feat-text">Checklist Persiapan Keberangkatan</span>
+          </div>
+          <!-- Map -->
+          <div class="feat-item">
+            <div class="feat-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="2" stroke-linecap="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+            </div>
+            <span class="feat-text">Peta &amp; Lokasi Penting di Tanah Suci</span>
+          </div>
+          <!-- Offline -->
+          <div class="feat-item">
+            <div class="feat-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="2" stroke-linecap="round">
+                <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.56 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01"/>
+              </svg>
+            </div>
+            <span class="feat-text">Mode Offline (Tanpa Internet)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARROW -->
+    <div class="arrow-col">
+      <div class="arrow-circle">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 7h8M8 4l3 3-3 3" stroke="#1B5E35" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 2. CHATBOT AI -->
+    <div class="feature-card gold">
+      <div class="badge-row">
+        <div class="badge-num gold">2</div>
+        <div class="badge-title gold">Chatbot AI Assistant</div>
+      </div>
+      <p class="feature-desc">Tanyakan apa pun seputar ibadah haji &amp; umrah kapan saja, dijawab secara cepat dan kontekstual.</p>
+      <div class="phone-list-row">
+        <div class="phone-frame">
+          <img src="out/05_chatbot.png" alt="Chatbot Screen">
+        </div>
+        <div class="feat-list">
+          <!-- Zap / instant -->
+          <div class="feat-item">
+            <div class="feat-icon gold">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#8B6914" stroke-width="2" stroke-linecap="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <span class="feat-text">Jawaban Instan &amp; Kontekstual</span>
+          </div>
+          <!-- Chat -->
+          <div class="feat-item">
+            <div class="feat-icon gold">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#8B6914" stroke-width="2" stroke-linecap="round">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+            </div>
+            <span class="feat-text">Bahasa Alami (Sehari-hari)</span>
+          </div>
+          <!-- Shield -->
+          <div class="feat-item">
+            <div class="feat-icon gold">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#8B6914" stroke-width="2" stroke-linecap="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+            </div>
+            <span class="feat-text">Berdasarkan Rujukan Terpercaya</span>
+          </div>
+          <!-- Alert -->
+          <div class="feat-item">
+            <div class="feat-icon gold">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#8B6914" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <span class="feat-text">AI Assistant, Bukan Pemberi Fatwa</span>
+          </div>
+          <!-- Arrow up right -->
+          <div class="feat-item">
+            <div class="feat-icon gold">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#8B6914" stroke-width="2" stroke-linecap="round">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 8 16 12 12 16"/><line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+            </div>
+            <span class="feat-text">Rekomendasi Fitur atau Langkah Selanjutnya</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARROW -->
+    <div class="arrow-col">
+      <div class="arrow-circle">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 7h8M8 4l3 3-3 3" stroke="#1B5E35" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 3. MUTAWIF ON-DEMAND -->
+    <div class="feature-card dgreen">
+      <div class="badge-row">
+        <div class="badge-num dgreen">3</div>
+        <div class="badge-title dgreen">Mutawif On-Demand</div>
+      </div>
+      <p class="feature-desc">Butuh bantuan langsung? Pesan mutawif terverifikasi di lokasi Anda dalam hitungan menit.</p>
+      <div class="phone-list-row">
+        <div class="phone-frame">
+          <img src="out/06_mutawif_list.png" alt="Mutawif Screen">
+        </div>
+        <div class="feat-list">
+          <!-- Map pin -->
+          <div class="feat-item">
+            <div class="feat-icon dgreen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#0f3d22" stroke-width="2" stroke-linecap="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+              </svg>
+            </div>
+            <span class="feat-text">Deteksi Lokasi Otomatis</span>
+          </div>
+          <!-- List -->
+          <div class="feat-item">
+            <div class="feat-icon dgreen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#0f3d22" stroke-width="2" stroke-linecap="round">
+                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+              </svg>
+            </div>
+            <span class="feat-text">Pilih Jenis Bantuan yang Dibutuhkan</span>
+          </div>
+          <!-- User check -->
+          <div class="feat-item">
+            <div class="feat-icon dgreen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#0f3d22" stroke-width="2" stroke-linecap="round">
+                <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/>
+                <polyline points="17 11 19 13 23 9"/>
+              </svg>
+            </div>
+            <span class="feat-text">Mutawif Terdekat &amp; Terverifikasi</span>
+          </div>
+          <!-- Star -->
+          <div class="feat-item">
+            <div class="feat-icon dgreen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#0f3d22" stroke-width="2" stroke-linecap="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+              </svg>
+            </div>
+            <span class="feat-text">Lihat Profil, Rating &amp; Estimasi Biaya</span>
+          </div>
+          <!-- Navigation -->
+          <div class="feat-item">
+            <div class="feat-icon dgreen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#0f3d22" stroke-width="2" stroke-linecap="round">
+                <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+              </svg>
+            </div>
+            <span class="feat-text">Pesan &amp; Lacak Mutawif Secara Real-time</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ARROW -->
+    <div class="arrow-col">
+      <div class="arrow-circle">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <path d="M3 7h8M8 4l3 3-3 3" stroke="#1B5E35" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- RESULT -->
+    <div class="feature-card result" style="min-width:190px; max-width:190px;">
+      <div class="result-icon-wrap">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round">
+          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <div class="result-title">Ibadah Lebih Mudah, Aman, dan Terarah</div>
+      <p class="result-desc">Dengan pendampingan yang tepat di setiap kebutuhan Anda.</p>
+      <div class="result-tags">
+        <div class="result-tag">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Mudah diakses
+        </div>
+        <div class="result-tag">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Terpercaya &amp; terverifikasi
+        </div>
+        <div class="result-tag">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Tersedia kapan saja
+        </div>
+        <div class="result-tag">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Aman &amp; transparan
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end features-row -->
+</div><!-- end features-section -->
+
+<!-- ── INTEGRATED SYSTEMS ── -->
+<div class="systems-section" style="margin-bottom: 18px;">
+  <div class="systems-title">Didukung oleh Sistem Terintegrasi</div>
+  <div class="systems-grid">
+
+    <div class="sys-item">
+      <div class="sys-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="1.8" stroke-linecap="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/>
+        </svg>
+      </div>
+      <div class="sys-label">Verifikasi Mutawif Berstandar</div>
+    </div>
+
+    <div class="sys-divider"></div>
+
+    <div class="sys-item">
+      <div class="sys-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="1.8" stroke-linecap="round">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </div>
+      <div class="sys-label">Rating &amp; Review Transparan</div>
+    </div>
+
+    <div class="sys-divider"></div>
+
+    <div class="sys-item">
+      <div class="sys-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="1.8" stroke-linecap="round">
+          <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+        </svg>
+      </div>
+      <div class="sys-label">Pembayaran Aman (Escrow)</div>
+    </div>
+
+    <div class="sys-divider"></div>
+
+    <div class="sys-item">
+      <div class="sys-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="1.8" stroke-linecap="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+        </svg>
+      </div>
+      <div class="sys-label">Keamanan Data &amp; Privasi</div>
+    </div>
+
+    <div class="sys-divider"></div>
+
+    <div class="sys-item">
+      <div class="sys-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="1.8" stroke-linecap="round">
+          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.68A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92v2z"/>
+        </svg>
+      </div>
+      <div class="sys-label">Customer Support 24/7</div>
+    </div>
+
+    <div class="sys-divider"></div>
+
+    <div class="sys-item">
+      <div class="sys-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#1B5E35" stroke-width="1.8" stroke-linecap="round">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
+      </div>
+      <div class="sys-label">Notifikasi &amp; Reminder Personal</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── ECOSYSTEM ── -->
+<div class="ecosystem-section">
+  <div class="eco-title">Ekosistem Manaseek</div>
+  <div class="eco-row">
+
+    <div class="eco-card green">
+      <div class="eco-icon green">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+        </svg>
+      </div>
+      <div class="eco-text">
+        <div class="eco-label green">Jamaah (B2C)</div>
+        <div class="eco-desc">Mendapatkan informasi, jawaban, dan bantuan langsung selama ibadah di mana saja.</div>
+      </div>
+    </div>
+
+    <div class="eco-card gold">
+      <div class="eco-icon gold">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+        </svg>
+      </div>
+      <div class="eco-text">
+        <div class="eco-label gold">Mitra B2B (Travel &amp; KBIHU)</div>
+        <div class="eco-desc">Mengelola jamaah, memantau layanan, dan meningkatkan kualitas pelayanan perjalanan ibadah.</div>
+      </div>
+    </div>
+
+    <div class="eco-card dgreen">
+      <div class="eco-icon dgreen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round">
+          <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/>
+          <polyline points="17 11 19 13 23 9"/>
+        </svg>
+      </div>
+      <div class="eco-text">
+        <div class="eco-label dgreen">Mutawif Profesional</div>
+        <div class="eco-desc">Mendapatkan penugasan, penghasilan, dan sistem kerja yang terstruktur dan profesional.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
