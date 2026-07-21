@@ -1,6 +1,6 @@
 import {
   Bell, Home, BookOpen, MessageCircle, UserCheck, Settings,
-  ChevronRight, FileText, Star,
+  ChevronRight, FileText, Signal,
   Layers, RotateCcw, ArrowRightLeft, Sunrise
 } from 'lucide-react'
 
@@ -14,7 +14,7 @@ const NAV_TABS = [
 
 export function BottomNav({ active, navigate }) {
   return (
-    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-[390px] bg-white border-t border-gray-100 flex shadow-lg z-50">
+    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-white border-t border-gray-100 flex shadow-lg z-50">
       {NAV_TABS.map(({ id, label, Icon }) => {
         const isActive = active === id
         return (
@@ -100,6 +100,24 @@ export default function HomeScreen({ navigate }) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* eSIM banner */}
+      <div className="px-5 mt-4">
+        <button
+          onClick={() => navigate('esim')}
+          className="w-full flex items-center gap-3 rounded-2xl p-4 shadow-md text-left"
+          style={{ background: 'linear-gradient(135deg, #0f3d22 0%, #1B5E35 100%)' }}
+        >
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.15)' }}>
+            <Signal size={22} color="white" strokeWidth={1.8} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-semibold text-sm">eSIM Saudi Arabia</p>
+            <p className="text-green-100 text-xs mt-0.5">Tetap terhubung selama ibadah — aktivasi instan</p>
+          </div>
+          <ChevronRight size={18} color="rgba(255,255,255,0.8)" />
+        </button>
       </div>
 
       {/* Quick phases */}
