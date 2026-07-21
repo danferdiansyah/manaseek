@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "npm --prefix manaseek-ui install",
+  "buildCommand": "npm --prefix manaseek-ui run build",
+  "outputDirectory": "manaseek-ui/dist",
+  "build": {
+    "env": {
+      "PUPPETEER_SKIP_DOWNLOAD": "true"
+    }
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
