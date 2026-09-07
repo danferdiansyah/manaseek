@@ -225,6 +225,10 @@ export class MutawifService {
    * (latitude, longitude) index, then haversine gives the exact distance.
    * Plain Postgres, no PostGIS extension required.
    *
+   * The rate comes through a lateral join so a mutawif offering several
+   * services still yields exactly one row. Without a serviceType filter the
+   * cheapest active rate is returned, as a "from" price.
+   *
    * Exported for the booking module and for Engineer B's chatbot escalation.
    */
   async findNearby(dto: NearbyDto): Promise<NearbyMutawif[]> {
@@ -244,7 +248,7 @@ export class MutawifService {
         m."ratingAverage",
         m."ratingCount",
         m."completedBookings",
-        r."hourlyRate" AS hourly_rate,
+        rate."hourlyRate" AS hourly_rate,
         (6371 * 2 * asin(sqrt(
           power(sin(radians(m.latitude - ${dto.latitude}::double precision) / 2), 2)
           + cos(radians(${dto.latitude}::double precision)) * cos(radians(m.latitude))
@@ -252,16 +256,21 @@ export class MutawifService {
         ))) AS distance_km
       FROM mutawif_profiles m
       JOIN users u ON u.id = m."userId"
-      LEFT JOIN mutawif_service_rates r
-        ON r."mutawifId" = m.id
-       AND r.active = true
-       AND (${dto.serviceType ?? null}::"ServiceType" IS NULL OR r."serviceType" = ${dto.serviceType ?? null}::"ServiceType")
+      LEFT JOIN LATERAL (
+        SELECT r."hourlyRate"
+        FROM mutawif_service_rates r
+        WHERE r."mutawifId" = m.id
+          AND r.active = true
+          AND (${dto.serviceType ?? null}::"ServiceType" IS NULL OR r."serviceType" = ${dto.serviceType ?? null}::"ServiceType")
+        ORDER BY r."hourlyRate" ASC
+        LIMIT 1
+      ) rate ON true
       WHERE m."verificationStatus" = 'APPROVED'
         AND m."availabilityStatus" = 'ONLINE'
         AND u.status = 'ACTIVE'
         AND m.latitude BETWEEN ${box.minLat} AND ${box.maxLat}
         AND m.longitude BETWEEN ${box.minLng} AND ${box.maxLng}
-        AND (${dto.serviceType ?? null}::"ServiceType" IS NULL OR r.id IS NOT NULL)
+        AND (${dto.serviceType ?? null}::"ServiceType" IS NULL OR rate."hourlyRate" IS NOT NULL)
       ORDER BY distance_km ASC
       LIMIT ${dto.limit}
     `;
