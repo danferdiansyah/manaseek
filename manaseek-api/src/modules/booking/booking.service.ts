@@ -120,6 +120,8 @@ export class BookingService {
 
   async list(actor: AuthenticatedUser, dto: ListBookingsDto): Promise<Paginated<unknown>> {
     const where = await this.scopeFor(actor, dto);
+    await this.expireStaleWithin(where);
+
     const { skip, take } = toSkipTake(dto);
 
     const [items, total] = await this.prisma.$transaction([
@@ -137,6 +139,8 @@ export class BookingService {
   }
 
   async getById(actor: AuthenticatedUser, id: string) {
+    await this.expireStaleWithin({ id });
+
     const booking = await this.prisma.booking.findUnique({
       where: { id },
       include: { ...bookingInclude, events: { orderBy: { createdAt: 'asc' } }, review: true },
@@ -240,6 +244,39 @@ export class BookingService {
     }
 
     return expired;
+  }
+
+  /**
+   * Closes out requests whose deadline passed, limited to the rows the caller
+   * is about to read.
+   *
+   * The scheduled sweep is the one that notifies; this only stops a client
+   * from ever seeing a request that is visibly past its deadline. It matters on
+   * hosts where the platform scheduler runs infrequently.
+   */
+  private async expireStaleWithin(where: Prisma.BookingWhereInput): Promise<void> {
+    const now = new Date();
+
+    const { count } = await this.prisma.booking.updateMany({
+      where: { ...where, status: BookingStatus.REQUESTED, expiresAt: { lte: now } },
+      data: { status: BookingStatus.EXPIRED },
+    });
+
+    if (count === 0) return;
+
+    const expired = await this.prisma.booking.findMany({
+      where: { ...where, status: BookingStatus.EXPIRED, updatedAt: { gte: now } },
+      select: { id: true },
+    });
+
+    await this.prisma.bookingEvent.createMany({
+      data: expired.map((booking) => ({
+        bookingId: booking.id,
+        fromStatus: BookingStatus.REQUESTED,
+        toStatus: BookingStatus.EXPIRED,
+        reason: 'Not answered before the request deadline',
+      })),
+    });
   }
 
   // -- internals ----------------------------------------------------------
