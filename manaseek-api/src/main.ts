@@ -1,4 +1,4 @@
-import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
+import { INestApplication, Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger as PinoLogger } from 'nestjs-pino';
@@ -32,7 +32,7 @@ async function bootstrap(): Promise<void> {
   app.setGlobalPrefix(prefix);
   app.enableCors({ origin: config.corsOrigins, credentials: true });
   app.enableShutdownHooks();
-  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+  // Validation is per-route via ZodValidationPipe; no global class-validator pipe.
 
   if (!config.isProduction || config.get('SWAGGER_ENABLED')) {
     setupSwagger(app, prefix);
