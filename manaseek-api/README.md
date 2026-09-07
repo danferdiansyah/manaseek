@@ -192,14 +192,69 @@ in `src/common/errors/app-error.ts`.
 
 ## Deployment
 
-The default target is a long-running Node process: `docker build .` produces an
-image that applies migrations on boot and serves on port 3000. Any container
-host works.
+The API deploys to Vercel as a single serverless function, with Supabase as the
+managed Postgres. A `Dockerfile` is also kept for any container host.
 
-For a serverless host, set `SCHEDULER_ENABLED=false` and wire the platform
-scheduler to the internal task endpoint above; everything else runs unchanged.
+### Supabase
 
-Required in production: `DATABASE_URL`, `JWT_ACCESS_SECRET`,
-`CORS_ORIGINS`, `GOOGLE_CLIENT_IDS`. Push delivery needs `PUSH_PROVIDER=fcm`
-with `FCM_PROJECT_ID` / `FCM_CLIENT_EMAIL` / `FCM_PRIVATE_KEY`; until then it
-stays on the no-op provider and notifications are recorded but not delivered.
+Create a project, then take two connection strings from
+**Project settings → Database**:
+
+| Variable | Which string | Why |
+| --- | --- | --- |
+| `DATABASE_URL` | Transaction pooler, port 6543, plus `?pgbouncer=true&connection_limit=1` | Serverless opens many short-lived connections; the pooler absorbs them |
+| `DIRECT_URL` | Direct connection, port 5432 | A transaction pooler cannot run migrations |
+
+Only Postgres and, later, Storage are used. Authentication stays in this
+service.
+
+### Vercel
+
+The API is its own Vercel project, separate from the web app, with the root
+directory set to `manaseek-api`. `vercel.json` already defines the build, the
+function, the catch-all rewrite and the cron.
+
+Environment variables to set on the project:
+
+```
+DATABASE_URL, DIRECT_URL      from Supabase, as above
+JWT_ACCESS_SECRET             openssl rand -hex 32
+GOOGLE_CLIENT_IDS             the OAuth client ids, comma separated
+CORS_ORIGINS                  the web app origin
+AUTH_DEV_LOGIN                false   (the app refuses to boot otherwise)
+SCHEDULER_ENABLED             false   (see below)
+INTERNAL_TASK_TOKEN           openssl rand -hex 24
+CRON_SECRET                   the same value as INTERNAL_TASK_TOKEN
+```
+
+Then `vercel --cwd manaseek-api` to deploy.
+
+`npx prisma migrate deploy` runs as part of the build, so a deploy always
+carries its schema with it. That does mean a preview deploy migrates whichever
+database its environment points at — give previews their own Supabase branch if
+that ever matters.
+
+### Why the scheduler is off on Vercel
+
+Serverless instances do not stay alive, so the in-process cron cannot be
+trusted; `SCHEDULER_ENABLED=false` disables it. Vercel Cron calls
+`GET /api/internal/tasks/expire-bookings` instead, authenticated with
+`CRON_SECRET`, which the internal guard accepts as a bearer token.
+
+On the Hobby plan that cron only fires once a day, which is far too slow for a
+15-minute booking deadline. So expiry does not depend on it: reading a booking
+also closes out any request of its own that is past its deadline. The cron is
+the sweep that sends the notification, not the thing that keeps the data
+honest.
+
+### Container hosts
+
+`docker build .` produces an image that applies migrations on boot and serves
+on port 3000. Leave `SCHEDULER_ENABLED=true` there and the in-process cron
+handles expiry on its own.
+
+Required in production everywhere: `DATABASE_URL`, `DIRECT_URL`,
+`JWT_ACCESS_SECRET`, `CORS_ORIGINS`, `GOOGLE_CLIENT_IDS`. Push delivery needs
+`PUSH_PROVIDER=fcm` with `FCM_PROJECT_ID` / `FCM_CLIENT_EMAIL` /
+`FCM_PRIVATE_KEY`; until then it stays on the no-op provider and notifications
+are recorded but not delivered.
