@@ -15,7 +15,10 @@ export const envSchema = z.object({
   REDIS_URL: z.string().default('redis://localhost:6379'),
 
   JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must be at least 32 characters'),
-  JWT_ACCESS_TTL: z.string().default('15m'),
+  JWT_ACCESS_TTL: z
+    .string()
+    .regex(/^\d+[smhd]$/, 'JWT_ACCESS_TTL must look like 15m, 24h or 7d')
+    .default('15m'),
   JWT_REFRESH_TTL_DAYS: z.coerce.number().int().positive().default(30),
 
   OTP_TTL_SECONDS: z.coerce.number().int().positive().default(300),
