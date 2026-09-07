@@ -25,6 +25,7 @@
     "noFallthroughCasesInSwitch": true,
     "resolveJsonModule": true
   },
-  "include": ["src/**/*", "prisma/**/*"],
+  // Only src is compiled; prisma/seed.ts runs through tsx.
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
