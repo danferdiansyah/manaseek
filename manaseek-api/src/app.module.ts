@@ -13,6 +13,7 @@ import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BookingModule } from './modules/booking/booking.module';
 import { HealthModule } from './modules/health/health.module';
+import { InternalModule } from './modules/internal/internal.module';
 import { MutawifModule } from './modules/mutawif/mutawif.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
@@ -34,6 +35,7 @@ import { UsersModule } from './modules/users/users.module';
     MutawifModule,
     BookingModule,
     ReviewsModule,
+    InternalModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

@@ -191,7 +191,14 @@ export class BookingService {
    * lazily so the jamaah sees the booking close on its own and can rebook.
    */
   @Cron(CronExpression.EVERY_MINUTE)
-  async expireStaleRequests(): Promise<void> {
+  async expireStaleRequestsOnSchedule(): Promise<number> {
+    if (!this.config.get('SCHEDULER_ENABLED')) return 0;
+    return this.expireStaleRequests();
+  }
+
+  /** Same work, callable from the internal task endpoint on serverless hosts. */
+  async expireStaleRequests(): Promise<number> {
+    let expired = 0;
     const stale = await this.prisma.booking.findMany({
       where: {
         status: BookingStatus.REQUESTED,
@@ -224,11 +231,15 @@ export class BookingService {
           vars: { code: booking.code },
           data: { bookingId: booking.id, type: 'booking.expired' },
         });
+
+        expired += 1;
       } catch (error) {
         // A concurrent accept wins the race; nothing to repair.
         this.logger.debug(`Skipped expiring ${booking.code}: ${(error as Error).message}`);
       }
     }
+
+    return expired;
   }
 
   // -- internals ----------------------------------------------------------

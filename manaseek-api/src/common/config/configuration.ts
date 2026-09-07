@@ -34,6 +34,13 @@ export const envSchema = z.object({
   SMS_PROVIDER: z.enum(['noop', 'fonnte']).default('noop'),
   FONNTE_TOKEN: z.string().optional(),
 
+  // Set false on serverless hosts and drive tasks through the internal endpoint.
+  SCHEDULER_ENABLED: z
+    .string()
+    .optional()
+    .transform((value) => value !== 'false'),
+  INTERNAL_TASK_TOKEN: z.string().min(24).optional(),
+
   BOOKING_REQUEST_TTL_MINUTES: z.coerce.number().int().positive().default(15),
   NEARBY_DEFAULT_RADIUS_KM: z.coerce.number().positive().default(10),
   NEARBY_MAX_RADIUS_KM: z.coerce.number().positive().default(50),
