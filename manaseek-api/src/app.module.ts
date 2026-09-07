@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppConfigModule } from './common/config/config.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
@@ -10,6 +11,7 @@ import { PrismaModule } from './common/prisma/prisma.module';
 import { RedisModule } from './common/redis/redis.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { BookingModule } from './modules/booking/booking.module';
 import { HealthModule } from './modules/health/health.module';
 import { MutawifModule } from './modules/mutawif/mutawif.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
@@ -23,11 +25,13 @@ import { UsersModule } from './modules/users/users.module';
     RedisModule,
     AuditModule,
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
+    ScheduleModule.forRoot(),
     HealthModule,
     NotificationsModule,
     AuthModule,
     UsersModule,
     MutawifModule,
+    BookingModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
