@@ -8,15 +8,15 @@ import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
 import type { AuthenticatedUser } from '@/common/types/authenticated-user';
 import { AuthService } from './auth.service';
 import {
+  DevLoginBody,
+  GoogleLoginBody,
   RefreshBody,
-  RequestOtpBody,
-  VerifyOtpBody,
+  devLoginSchema,
+  googleLoginSchema,
   refreshSchema,
-  requestOtpSchema,
-  verifyOtpSchema,
+  type DevLoginDto,
+  type GoogleLoginDto,
   type RefreshDto,
-  type RequestOtpDto,
-  type VerifyOtpDto,
 } from './dto/auth.dto';
 import type { SessionContext } from './token.service';
 
@@ -26,23 +26,31 @@ export class AuthController {
   constructor(private readonly auth: AuthService) {}
 
   @Public()
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  @Post('otp/request')
+  @Throttle({ default: { limit: 20, ttl: 60_000 } })
+  @Post('google')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Send a login verification code to a phone number' })
-  @ApiBody({ type: RequestOtpBody })
-  requestOtp(@Body(new ZodValidationPipe(requestOtpSchema)) dto: RequestOtpDto, @Req() req: Request) {
-    return this.auth.requestOtp(dto, req.ip);
+  @ApiOperation({ summary: 'Exchange a Google ID token for a session (also registers new users)' })
+  @ApiBody({ type: GoogleLoginBody })
+  loginWithGoogle(
+    @Body(new ZodValidationPipe(googleLoginSchema)) dto: GoogleLoginDto,
+    @Req() req: Request,
+  ) {
+    return this.auth.loginWithGoogle(dto, this.sessionContext(req));
   }
 
   @Public()
   @Throttle({ default: { limit: 20, ttl: 60_000 } })
-  @Post('otp/verify')
+  @Post('dev-login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Verify a code and start a session (also registers new users)' })
-  @ApiBody({ type: VerifyOtpBody })
-  verifyOtp(@Body(new ZodValidationPipe(verifyOtpSchema)) dto: VerifyOtpDto, @Req() req: Request) {
-    return this.auth.verifyOtp(dto, this.sessionContext(req));
+  @ApiOperation({
+    summary: 'Mint a session from an email address (development only, requires AUTH_DEV_LOGIN)',
+  })
+  @ApiBody({ type: DevLoginBody })
+  devLogin(
+    @Body(new ZodValidationPipe(devLoginSchema)) dto: DevLoginDto,
+    @Req() req: Request,
+  ) {
+    return this.auth.devLogin(dto, this.sessionContext(req));
   }
 
   @Public()

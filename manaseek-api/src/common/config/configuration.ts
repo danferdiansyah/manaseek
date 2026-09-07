@@ -21,18 +21,19 @@ export const envSchema = z.object({
     .default('15m'),
   JWT_REFRESH_TTL_DAYS: z.coerce.number().int().positive().default(30),
 
-  OTP_TTL_SECONDS: z.coerce.number().int().positive().default(300),
-  OTP_MAX_ATTEMPTS: z.coerce.number().int().positive().default(5),
-  OTP_RESEND_COOLDOWN_SECONDS: z.coerce.number().int().positive().default(60),
-  OTP_DEV_BYPASS_CODE: z.string().optional(),
+  // Every OAuth client that may call us: web, Android and iOS each have their
+  // own client id, and all of them are valid `aud` values on a Google ID token.
+  GOOGLE_CLIENT_IDS: z
+    .string()
+    .default('')
+    .transform((value) => value.split(',').map((id) => id.trim()).filter(Boolean)),
+  // Lets a developer mint a session without real Google credentials.
+  AUTH_DEV_LOGIN: booleanish,
 
   PUSH_PROVIDER: z.enum(['noop', 'fcm']).default('noop'),
   FCM_PROJECT_ID: z.string().optional(),
   FCM_CLIENT_EMAIL: z.string().optional(),
   FCM_PRIVATE_KEY: z.string().optional(),
-
-  SMS_PROVIDER: z.enum(['noop', 'fonnte']).default('noop'),
-  FONNTE_TOKEN: z.string().optional(),
 
   // Set false on serverless hosts and drive tasks through the internal endpoint.
   SCHEDULER_ENABLED: z
@@ -62,8 +63,13 @@ export function validateEnv(raw: Record<string, unknown>): Env {
 
   const env = parsed.data;
 
-  if (env.NODE_ENV === 'production' && env.OTP_DEV_BYPASS_CODE) {
-    throw new Error('OTP_DEV_BYPASS_CODE must not be set in production');
+  if (env.NODE_ENV === 'production') {
+    if (env.AUTH_DEV_LOGIN) {
+      throw new Error('AUTH_DEV_LOGIN must not be enabled in production');
+    }
+    if (env.GOOGLE_CLIENT_IDS.length === 0) {
+      throw new Error('GOOGLE_CLIENT_IDS is required in production');
+    }
   }
 
   return env;

@@ -14,8 +14,8 @@ boundaries so two engineers can work in parallel without colliding.
 | Cache / rate limiting | Redis |
 | Validation | Zod (per-route pipe) |
 | API contract | Swagger / OpenAPI at `/api/docs` |
-| Auth | Phone OTP, JWT access token + rotating refresh token |
-| Push / messaging | Pluggable providers (FCM, Fonnte WhatsApp), no-op in development |
+| Auth | Google Sign-In, JWT access token + rotating refresh token |
+| Push | Pluggable provider (FCM), no-op in development |
 
 Geospatial search runs on plain Postgres: a bounding box prefilter on the
 `(latitude, longitude)` index followed by an exact haversine distance. No
@@ -43,21 +43,52 @@ npm run dev
 Local ports are 5433/6380 on purpose, so the containers do not fight a
 Postgres or Redis already installed on the host.
 
-### Logging in without an SMS provider
+## Authentication
 
-With `SMS_PROVIDER=noop` the code is written to the server log, and
-`POST /api/auth/otp/request` also returns it as `devCode` in development.
-Setting `OTP_DEV_BYPASS_CODE` makes that fixed code valid for every number,
-which is what the seeded accounts expect. The config validator refuses to
-start with that variable set while `NODE_ENV=production`.
+Google Sign-In is the only login method, and it is also the sign-up path: the
+Google account is the identity, so there is no separate registration endpoint.
+
+```
+client runs Google Sign-In  ->  POST /api/auth/google { idToken }
+                            ->  we verify the token against Google's JWKS
+                            ->  we return our own accessToken + refreshToken
+```
+
+We never hold a Google client secret. The client (web, Android or iOS) obtains
+the ID token; we only verify it. Each platform has its own OAuth client id and
+all of them must be listed in `GOOGLE_CLIENT_IDS`, because the client id is the
+`aud` claim we check. Create them under
+[Google Cloud credentials](https://console.cloud.google.com/apis/credentials).
+
+Verification checks the RS256 signature against Google's published keys, the
+`aud` against our client ids, the `iss`, the expiry, and that the account's
+email is verified. `src/modules/auth/google-auth.service.spec.ts` covers each
+of those rejections, including a forged signature.
+
+The phone number is now contact information only, set through
+`PATCH /api/users/me`. It never authenticates anyone.
+
+### Logging in locally without Google credentials
+
+Set `AUTH_DEV_LOGIN=true` and post an email address:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/dev-login \
+  -H 'content-type: application/json' \
+  -d '{"email":"ahmad@manaseek.test"}'
+```
+
+This mints a normal session for that address, creating the account if it does
+not exist. The config validator refuses to start with the flag enabled while
+`NODE_ENV=production`.
 
 Seeded accounts:
 
-| Phone | Role |
+| Email | Role |
 | --- | --- |
-| `+6281200000099` | admin |
-| `+966500000001` `+966500000002` `+966500000003` | verified mutawif |
-| `+6281234567890` | jamaah |
+| `admin@manaseek.test` | admin |
+| `hasan@manaseek.test` `yusuf@manaseek.test` `maryam@manaseek.test` | verified mutawif |
+| `ahmad@manaseek.test` | jamaah |
 
 ## Module map
 
@@ -66,12 +97,12 @@ Engineer A owns everything currently in the repository.
 | Module | Responsibility |
 | --- | --- |
 | `common/` | config, Prisma, Redis, logging, error contract, guards, shared utils |
-| `modules/auth` | OTP issue/verify, JWT, refresh rotation with reuse detection |
+| `modules/auth` | Google ID token verification, JWT, refresh rotation with reuse detection |
 | `modules/users` | account, jamaah profile, travel documents, trips, admin user list |
 | `modules/mutawif` | application, verification, rates, weekly schedule, availability, nearby search |
 | `modules/booking` | quote, lifecycle state machine, conflict detection, request expiry |
 | `modules/reviews` | ratings on completed bookings, aggregate recalculation |
-| `modules/notifications` | templates, push/SMS providers, device tokens, history |
+| `modules/notifications` | templates, push provider, device tokens, history |
 | `modules/audit` | append-only trail for security and money-adjacent actions |
 | `modules/internal` | token-guarded task endpoints for an external scheduler |
 
@@ -170,6 +201,6 @@ For a serverless host, set `SCHEDULER_ENABLED=false` and wire the platform
 scheduler to the internal task endpoint above; everything else runs unchanged.
 
 Required in production: `DATABASE_URL`, `REDIS_URL`, `JWT_ACCESS_SECRET`,
-`CORS_ORIGINS`, plus provider credentials once real delivery is switched on
-(`SMS_PROVIDER=fonnte` with `FONNTE_TOKEN`, `PUSH_PROVIDER=fcm` with
-`FCM_PROJECT_ID` / `FCM_CLIENT_EMAIL` / `FCM_PRIVATE_KEY`).
+`CORS_ORIGINS`, `GOOGLE_CLIENT_IDS`. Push delivery needs `PUSH_PROVIDER=fcm`
+with `FCM_PROJECT_ID` / `FCM_CLIENT_EMAIL` / `FCM_PRIVATE_KEY`; until then it
+stays on the no-op provider and notifications are recorded but not delivered.

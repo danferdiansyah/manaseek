@@ -20,8 +20,6 @@ const define = (title: string, body: string): TemplateFn => (vars) => ({
 });
 
 export const NotificationTemplates = {
-  'auth.otp': define('Kode verifikasi Manaseek', 'Kode OTP Anda: {code}. Berlaku {minutes} menit. Jangan bagikan ke siapa pun.'),
-
   'booking.requested': define(
     'Permintaan pendampingan baru',
     '{jamaahName} meminta {serviceLabel} pada {schedule}. Konfirmasi sebelum {expiresAt}.',

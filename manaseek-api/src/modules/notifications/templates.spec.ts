@@ -3,9 +3,13 @@ import { renderTemplate } from './templates';
 
 describe('renderTemplate', () => {
   it('interpolates variables', () => {
-    const result = renderTemplate('auth.otp', { code: '123456', minutes: '5' });
-    expect(result.body).toContain('123456');
-    expect(result.body).toContain('5 menit');
+    const result = renderTemplate('booking.accepted', {
+      mutawifName: 'Ustadz Hasan',
+      schedule: '12 Nov 2026 08.00',
+      meetingPoint: 'Gate King Abdul Aziz',
+    });
+    expect(result.body).toContain('Ustadz Hasan');
+    expect(result.body).toContain('Gate King Abdul Aziz');
   });
 
   it('leaves unknown placeholders visible instead of printing undefined', () => {

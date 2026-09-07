@@ -2,15 +2,13 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import type { SignOptions } from 'jsonwebtoken';
 import { AppConfigService } from '@/common/config/config.service';
-import { NotificationsModule } from '@/modules/notifications/notifications.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { OtpService } from './otp.service';
+import { GoogleAuthService } from './google-auth.service';
 import { TokenService } from './token.service';
 
 @Module({
   imports: [
-    NotificationsModule,
     JwtModule.registerAsync({
       inject: [AppConfigService],
       useFactory: (config: AppConfigService) => ({
@@ -23,7 +21,7 @@ import { TokenService } from './token.service';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, OtpService, TokenService],
+  providers: [AuthService, GoogleAuthService, TokenService],
   exports: [JwtModule, TokenService],
 })
 export class AuthModule {}

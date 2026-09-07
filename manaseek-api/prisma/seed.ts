@@ -20,9 +20,10 @@ import {
 
 const prisma = new PrismaClient();
 
-const ADMIN_PHONE = '+6281200000099';
+const ADMIN_EMAIL = 'admin@manaseek.test';
 
 interface MutawifSeed {
+  email: string;
   phone: string;
   name: string;
   bio: string;
@@ -36,6 +37,7 @@ interface MutawifSeed {
 
 const MUTAWIF_SEEDS: MutawifSeed[] = [
   {
+    email: 'hasan@manaseek.test',
     phone: '+966500000001',
     name: 'Ustadz Hasan Al-Makki',
     bio: 'Mutawif bersertifikat, delapan tahun mendampingi jamaah Indonesia di Masjidil Haram. Fokus pada jamaah lansia.',
@@ -51,6 +53,7 @@ const MUTAWIF_SEEDS: MutawifSeed[] = [
     ],
   },
   {
+    email: 'yusuf@manaseek.test',
     phone: '+966500000002',
     name: 'Ustadz Yusuf Abdillah',
     bio: 'Alumni Universitas Islam Madinah. Berpengalaman menangani jamaah yang terpisah dari rombongan.',
@@ -65,6 +68,7 @@ const MUTAWIF_SEEDS: MutawifSeed[] = [
     ],
   },
   {
+    email: 'maryam@manaseek.test',
     phone: '+966500000003',
     name: 'Ustadzah Maryam Salsabila',
     bio: 'Pendamping khusus jamaah perempuan dan lansia, terbiasa membantu pengguna kursi roda saat thawaf.',
@@ -82,30 +86,31 @@ const MUTAWIF_SEEDS: MutawifSeed[] = [
 
 async function seedAdmin(): Promise<string> {
   const admin = await prisma.user.upsert({
-    where: { phone: ADMIN_PHONE },
+    where: { email: ADMIN_EMAIL },
     create: {
-      phone: ADMIN_PHONE,
+      email: ADMIN_EMAIL,
       name: 'Admin Manaseek',
       role: UserRole.ADMIN,
-      phoneVerifiedAt: new Date(),
+      emailVerifiedAt: new Date(),
     },
     update: { role: UserRole.ADMIN },
   });
 
-  console.log(`admin: ${admin.phone}`);
+  console.log(`admin: ${admin.email}`);
   return admin.id;
 }
 
 async function seedMutawif(seed: MutawifSeed, adminId: string): Promise<string> {
   const user = await prisma.user.upsert({
-    where: { phone: seed.phone },
+    where: { email: seed.email },
     create: {
+      email: seed.email,
       phone: seed.phone,
       name: seed.name,
       role: UserRole.MUTAWIF,
-      phoneVerifiedAt: new Date(),
+      emailVerifiedAt: new Date(),
     },
-    update: { name: seed.name, role: UserRole.MUTAWIF },
+    update: { name: seed.name, phone: seed.phone, role: UserRole.MUTAWIF },
   });
 
   const profile = await prisma.mutawifProfile.upsert({
@@ -162,11 +167,12 @@ async function seedMutawif(seed: MutawifSeed, adminId: string): Promise<string> 
 
 async function seedJamaah(): Promise<string> {
   const user = await prisma.user.upsert({
-    where: { phone: '+6281234567890' },
+    where: { email: 'ahmad@manaseek.test' },
     create: {
+      email: 'ahmad@manaseek.test',
       phone: '+6281234567890',
       name: 'Ahmad Fauzi',
-      phoneVerifiedAt: new Date(),
+      emailVerifiedAt: new Date(),
       jamaahProfile: {
         create: {
           gender: Gender.MALE,
@@ -207,7 +213,7 @@ async function seedJamaah(): Promise<string> {
     update: { userId: user.id },
   });
 
-  console.log(`jamaah: ${user.phone}`);
+  console.log(`jamaah: ${user.email}`);
   return user.id;
 }
 
@@ -262,7 +268,9 @@ async function main(): Promise<void> {
   const jamaahId = await seedJamaah();
   await seedBooking(jamaahId, mutawifIds[0]);
 
-  console.log('\nSeed complete. Log in with OTP_DEV_BYPASS_CODE using any seeded phone number.');
+  console.log(
+    '\nSeed complete. With AUTH_DEV_LOGIN=true, POST /api/auth/dev-login with any seeded email.',
+  );
 }
 
 main()

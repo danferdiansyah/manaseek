@@ -1,39 +1,40 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 import { z } from 'zod';
 
-export const requestOtpSchema = z.object({
-  phone: z.string().min(8).max(20),
+export const googleLoginSchema = z.object({
+  idToken: z.string().min(20),
 });
 
-export const verifyOtpSchema = z.object({
-  phone: z.string().min(8).max(20),
-  code: z.string().regex(/^\d{4,8}$/, 'OTP code must be 4-8 digits'),
+export const devLoginSchema = z.object({
+  email: z.string().email(),
   name: z.string().min(2).max(80).optional(),
+  role: z.nativeEnum(UserRole).optional(),
 });
 
 export const refreshSchema = z.object({
   refreshToken: z.string().min(20),
 });
 
-export type RequestOtpDto = z.infer<typeof requestOtpSchema>;
-export type VerifyOtpDto = z.infer<typeof verifyOtpSchema>;
+export type GoogleLoginDto = z.infer<typeof googleLoginSchema>;
+export type DevLoginDto = z.infer<typeof devLoginSchema>;
 export type RefreshDto = z.infer<typeof refreshSchema>;
 
 // Swagger-only shapes. Zod owns validation; these describe the contract.
-export class RequestOtpBody {
-  @ApiProperty({ example: '081234567890', description: 'Local or E.164 phone number' })
-  phone!: string;
+export class GoogleLoginBody {
+  @ApiProperty({ description: 'The ID token returned by Google Sign-In on the client' })
+  idToken!: string;
 }
 
-export class VerifyOtpBody {
-  @ApiProperty({ example: '081234567890' })
-  phone!: string;
+export class DevLoginBody {
+  @ApiProperty({ example: 'ahmad@example.com' })
+  email!: string;
 
-  @ApiProperty({ example: '123456' })
-  code!: string;
-
-  @ApiProperty({ required: false, example: 'Ahmad Fauzi', description: 'Set on first login' })
+  @ApiProperty({ required: false, example: 'Ahmad Fauzi' })
   name?: string;
+
+  @ApiProperty({ required: false, enum: UserRole, description: 'Only honoured on first creation' })
+  role?: UserRole;
 }
 
 export class RefreshBody {

@@ -15,7 +15,8 @@ const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Expected an ISO date (Y
 export const updateAccountSchema = z
   .object({
     name: z.string().min(2).max(80),
-    email: z.string().email(),
+    // Contact number only. Authentication is Google, never the phone number.
+    phone: z.string().min(8).max(20),
     avatarUrl: z.string().url(),
   })
   .partial();

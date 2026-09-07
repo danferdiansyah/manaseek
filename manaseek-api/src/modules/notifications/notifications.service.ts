@@ -1,9 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { NotificationChannel, NotificationStatus } from '@prisma/client';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { maskPhone } from '@/common/utils/phone.util';
 import { PUSH_PROVIDER, type PushProvider } from './providers/push.provider';
-import { SMS_PROVIDER, type SmsProvider } from './providers/sms.provider';
 import { renderTemplate, type NotificationTemplateKey } from './templates';
 
 export interface SendToUserOptions {
@@ -25,7 +23,6 @@ export class NotificationsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(PUSH_PROVIDER) private readonly push: PushProvider,
-    @Inject(SMS_PROVIDER) private readonly sms: SmsProvider,
   ) {}
 
   /**
@@ -75,18 +72,6 @@ export class NotificationsService {
       await this.markSent(notification.id);
     } catch (error) {
       await this.markFailed(notification.id, error);
-    }
-  }
-
-  /** Direct text delivery for flows with no user row yet, such as login OTP. */
-  async sendSms(phone: string, body: string, templateKey = 'raw'): Promise<void> {
-    try {
-      await this.sms.send({ phone, body });
-    } catch (error) {
-      this.logger.error(
-        `SMS delivery failed for ${maskPhone(phone)} (${templateKey}): ${(error as Error).message}`,
-      );
-      throw error;
     }
   }
 

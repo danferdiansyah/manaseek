@@ -3,6 +3,7 @@ import { Prisma, UserStatus } from '@prisma/client';
 import { AppError } from '@/common/errors/app-error';
 import { paginate, toSkipTake, type Paginated } from '@/common/dto/pagination.dto';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { normalizePhone } from '@/common/utils/phone.util';
 import { AuditService } from '@/modules/audit/audit.service';
 import { TokenService } from '@/modules/auth/token.service';
 import type {
@@ -32,7 +33,7 @@ export class UsersService {
   async updateAccount(userId: string, dto: UpdateAccountDto) {
     return this.prisma.user.update({
       where: { id: userId },
-      data: dto,
+      data: { ...dto, phone: dto.phone ? normalizePhone(dto.phone) : undefined },
       select: { id: true, phone: true, name: true, email: true, avatarUrl: true, role: true },
     });
   }

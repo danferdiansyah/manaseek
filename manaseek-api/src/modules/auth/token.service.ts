@@ -27,7 +27,7 @@ export class TokenService {
   ) {}
 
   async issue(user: User, context: SessionContext = {}): Promise<TokenPair> {
-    const payload: AccessTokenPayload = { sub: user.id, phone: user.phone, role: user.role };
+    const payload: AccessTokenPayload = { sub: user.id, role: user.role };
     const accessToken = await this.jwt.signAsync(payload);
     const refreshToken = await this.createRefreshToken(user.id, context);
 
@@ -77,11 +77,7 @@ export class TokenService {
       data: { revokedAt: new Date(), replacedById: replacement.id },
     });
 
-    const payload: AccessTokenPayload = {
-      sub: stored.user.id,
-      phone: stored.user.phone,
-      role: stored.user.role,
-    };
+    const payload: AccessTokenPayload = { sub: stored.user.id, role: stored.user.role };
 
     return {
       accessToken: await this.jwt.signAsync(payload),

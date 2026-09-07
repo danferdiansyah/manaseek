@@ -29,10 +29,15 @@ enum UserStatus {
 }
 
 model User {
-  id        String     @id @default(uuid()) @db.Uuid
-  phone     String     @unique
+  id String @id @default(uuid()) @db.Uuid
+
+  /// Google account subject claim. The identity we authenticate against.
+  googleId String? @unique
+  email    String? @unique
+  /// Contact number. Collected in the profile, not used to authenticate.
+  phone    String? @unique
+
   name      String?
-  email     String?    @unique
   avatarUrl String?
   role      UserRole   @default(JAMAAH)
   status    UserStatus @default(ACTIVE)
@@ -40,7 +45,7 @@ model User {
   // B2B hook. Kept nullable and relation-free until the partner module lands.
   organizationId String? @db.Uuid
 
-  phoneVerifiedAt DateTime?
+  emailVerifiedAt DateTime?
   lastLoginAt     DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -59,27 +64,6 @@ model User {
   @@index([role, status])
   @@index([organizationId])
   @@map("users")
-}
-
-enum OtpPurpose {
-  LOGIN
-  PHONE_CHANGE
-}
-
-model OtpRequest {
-  id         String     @id @default(uuid()) @db.Uuid
-  phone      String
-  purpose    OtpPurpose @default(LOGIN)
-  codeHash   String
-  attempts   Int        @default(0)
-  expiresAt  DateTime
-  consumedAt DateTime?
-  ipAddress  String?
-  createdAt  DateTime   @default(now())
-
-  @@index([phone, purpose, createdAt])
-  @@index([expiresAt])
-  @@map("otp_requests")
 }
 
 model RefreshToken {
