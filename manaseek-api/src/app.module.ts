@@ -8,7 +8,6 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { LoggerModule } from './common/logger/logger.module';
 import { PrismaModule } from './common/prisma/prisma.module';
-import { RedisModule } from './common/redis/redis.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BookingModule } from './modules/booking/booking.module';
@@ -24,7 +23,6 @@ import { UsersModule } from './modules/users/users.module';
     AppConfigModule,
     LoggerModule,
     PrismaModule,
-    RedisModule,
     AuditModule,
     ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 120 }]),
     ScheduleModule.forRoot(),

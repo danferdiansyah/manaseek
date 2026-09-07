@@ -11,7 +11,6 @@ boundaries so two engineers can work in parallel without colliding.
 | --- | --- |
 | Runtime | Node.js 24, TypeScript, NestJS |
 | Database | PostgreSQL via Prisma |
-| Cache / rate limiting | Redis |
 | Validation | Zod (per-route pipe) |
 | API contract | Swagger / OpenAPI at `/api/docs` |
 | Auth | Google Sign-In, JWT access token + rotating refresh token |
@@ -27,7 +26,7 @@ PostGIS extension is required, which keeps managed-Postgres options open.
 cp .env.example .env                 # then fill in the secrets
 openssl rand -hex 32                 # -> JWT_ACCESS_SECRET
 npm install
-docker compose up -d                 # Postgres on 5433, Redis on 6380
+docker compose up -d                 # Postgres on 5433
 npm run db:deploy                    # apply migrations
 npm run db:seed                      # admin, three verified mutawif, sample booking
 npm run dev
@@ -40,8 +39,8 @@ npm run dev
 | Health | http://localhost:3000/api/health |
 | Readiness | http://localhost:3000/api/health/ready |
 
-Local ports are 5433/6380 on purpose, so the containers do not fight a
-Postgres or Redis already installed on the host.
+Port 5433 is deliberate, so the container does not fight a Postgres already
+installed on the host.
 
 ## Authentication
 
@@ -96,7 +95,7 @@ Engineer A owns everything currently in the repository.
 
 | Module | Responsibility |
 | --- | --- |
-| `common/` | config, Prisma, Redis, logging, error contract, guards, shared utils |
+| `common/` | config, Prisma, logging, error contract, guards, shared utils |
 | `modules/auth` | Google ID token verification, JWT, refresh rotation with reuse detection |
 | `modules/users` | account, jamaah profile, travel documents, trips, admin user list |
 | `modules/mutawif` | application, verification, rates, weekly schedule, availability, nearby search |
@@ -200,7 +199,7 @@ host works.
 For a serverless host, set `SCHEDULER_ENABLED=false` and wire the platform
 scheduler to the internal task endpoint above; everything else runs unchanged.
 
-Required in production: `DATABASE_URL`, `REDIS_URL`, `JWT_ACCESS_SECRET`,
+Required in production: `DATABASE_URL`, `JWT_ACCESS_SECRET`,
 `CORS_ORIGINS`, `GOOGLE_CLIENT_IDS`. Push delivery needs `PUSH_PROVIDER=fcm`
 with `FCM_PROJECT_ID` / `FCM_CLIENT_EMAIL` / `FCM_PRIVATE_KEY`; until then it
 stays on the no-op provider and notifications are recorded but not delivered.

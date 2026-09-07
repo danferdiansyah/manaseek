@@ -2,17 +2,13 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Public } from '@/common/decorators/public.decorator';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { RedisService } from '@/common/redis/redis.service';
 
 @ApiTags('health')
 @Controller('health')
 export class HealthController {
   private readonly startedAt = Date.now();
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly redis: RedisService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   @Public()
   @Get()
@@ -27,14 +23,13 @@ export class HealthController {
 
   @Public()
   @Get('ready')
-  @ApiOperation({ summary: 'Readiness probe including database and cache' })
+  @ApiOperation({ summary: 'Readiness probe including the database' })
   async ready() {
-    const [database, cache] = await Promise.all([this.pingDatabase(), this.redis.ping()]);
-    const status = database && cache ? 'ok' : 'degraded';
+    const database = await this.pingDatabase();
 
     return {
-      status,
-      dependencies: { database, cache },
+      status: database ? 'ok' : 'degraded',
+      dependencies: { database },
       timestamp: new Date().toISOString(),
     };
   }
