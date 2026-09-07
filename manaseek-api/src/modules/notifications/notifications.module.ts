@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppConfigService } from '@/common/config/config.service';
+import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 import { FcmPushProvider } from './providers/fcm-push.provider';
 import { FonnteSmsProvider } from './providers/fonnte-sms.provider';
@@ -9,6 +10,7 @@ import { PUSH_PROVIDER } from './providers/push.provider';
 import { SMS_PROVIDER } from './providers/sms.provider';
 
 @Module({
+  controllers: [NotificationsController],
   providers: [
     NotificationsService,
     NoopPushProvider,
