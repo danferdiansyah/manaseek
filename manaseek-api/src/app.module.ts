@@ -6,9 +6,17 @@ import { LoggerModule } from './common/logger/logger.module';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { RedisModule } from './common/redis/redis.module';
 import { HealthModule } from './modules/health/health.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
-  imports: [AppConfigModule, LoggerModule, PrismaModule, RedisModule, HealthModule],
+  imports: [
+    AppConfigModule,
+    LoggerModule,
+    PrismaModule,
+    RedisModule,
+    HealthModule,
+    NotificationsModule,
+  ],
   providers: [{ provide: APP_FILTER, useClass: AllExceptionsFilter }],
 })
 export class AppModule {}
