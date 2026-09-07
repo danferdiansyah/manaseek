@@ -15,6 +15,7 @@ import { BookingModule } from './modules/booking/booking.module';
 import { HealthModule } from './modules/health/health.module';
 import { MutawifModule } from './modules/mutawif/mutawif.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ReviewsModule } from './modules/reviews/reviews.module';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -32,6 +33,7 @@ import { UsersModule } from './modules/users/users.module';
     UsersModule,
     MutawifModule,
     BookingModule,
+    ReviewsModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
