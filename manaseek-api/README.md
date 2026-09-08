@@ -200,15 +200,28 @@ managed Postgres. A `Dockerfile` is also kept for any container host.
 ### Supabase
 
 Create a project, then take two connection strings from
-**Project settings → Database**:
+**Project settings → Database**. Both come from the **pooler**, not from the
+direct host:
 
 | Variable | Which string | Why |
 | --- | --- | --- |
 | `DATABASE_URL` | Transaction pooler, port 6543, plus `?pgbouncer=true&connection_limit=1` | Serverless opens many short-lived connections; the pooler absorbs them |
-| `DIRECT_URL` | Direct connection, port 5432 | A transaction pooler cannot run migrations |
+| `DIRECT_URL` | Session pooler, port 5432 | A transaction pooler cannot run DDL, so migrations need session mode |
 
-Only Postgres and, later, Storage are used. Authentication stays in this
-service.
+Two things will cost you an hour each if you do not know them:
+
+- **`sslmode=require` is mandatory on both URLs.** Without it the Prisma engine
+  fails with `P1001: Can't reach database server`, while `psql` connects to the
+  very same URL without complaint. The error names the wrong cause.
+- **Do not use `db.<ref>.supabase.co`.** On the free plan that host resolves to
+  an AAAA record only, so any IPv4 network fails to reach it. The pooler host
+  has A records and works everywhere.
+
+Only Postgres and Storage are used. Authentication stays in this service, so
+leave the Supabase **Authentication** section alone.
+
+Storage buckets: `mutawif-documents` (private, holds identity documents) and
+`avatars` (public).
 
 ### Vercel
 
