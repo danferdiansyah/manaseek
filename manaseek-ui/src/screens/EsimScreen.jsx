@@ -1,6 +1,6 @@
 import {
   ArrowLeft, Signal, ShieldCheck, Zap, QrCode, Phone,
-  Globe, Check, CreditCard, Sparkles, ChevronRight
+  Globe, CreditCard, Sparkles
 } from 'lucide-react'
 
 // NB: nama provider di bawah masih placeholder / dummy — ganti saat mitra final
