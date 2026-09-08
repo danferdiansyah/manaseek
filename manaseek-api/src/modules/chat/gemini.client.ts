@@ -163,10 +163,15 @@ export class GeminiClient {
 
     try {
       const response = await fetch(
-        `${ENDPOINT}/${options.model}:generateContent?key=${encodeURIComponent(options.apiKey)}`,
+        `${ENDPOINT}/${options.model}:generateContent`,
         {
           method: 'POST',
-          headers: { 'content-type': 'application/json' },
+          // Header rather than a ?key= query parameter: the key never lands in
+          // a URL, and newer Google key formats only accept the header.
+          headers: {
+            'content-type': 'application/json',
+            'x-goog-api-key': options.apiKey,
+          },
           signal: controller.signal,
           body: JSON.stringify({
             systemInstruction: { parts: [{ text: options.system }] },
@@ -190,6 +195,13 @@ export class GeminiClient {
 
       // 500 and 503 are Gemini being briefly overloaded, not our request.
       if (response.status === 503 || response.status === 500) {
+        throw new ModelUnavailable(options.model, 'unavailable');
+      }
+
+      // A key can be scoped to a project where a model id is retired. Treat it
+      // as one more reason to move down the chain, not as a hard failure.
+      if (response.status === 404) {
+        this.logger.warn(`${options.model} is not available to this API key`);
         throw new ModelUnavailable(options.model, 'unavailable');
       }
 

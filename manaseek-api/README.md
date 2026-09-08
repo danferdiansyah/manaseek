@@ -140,9 +140,16 @@ call, because six sequential calls at 45s each would outlast the function's own
 60s ceiling. A model that hangs is abandoned at 10s and treated like any other
 unavailable model.
 
-Keep model aliases such as `gemini-flash-latest` out of the list. During
-testing that alias answered correctly but took 164 seconds, which consumed the
-entire budget and starved the healthy models behind it.
+Measure a model before adding it to the list. Several ids answer correctly but
+take over a minute — `gemini-flash-latest`, `gemini-3.6-flash` and
+`gemini-3.8-flash` all did during testing — which consumes the entire budget
+and starves the healthy models behind them. Which ids exist at all depends on
+the key: models retired for one project still appear in the catalogue listing
+but return 404 on use, so a 404 is treated as one more reason to move down the
+chain rather than a hard failure.
+
+The key travels in the `x-goog-api-key` header rather than a `?key=` query
+parameter, so it never lands in a URL that something might log.
 
 When every model is spent the API answers `429 AI_QUOTA_EXCEEDED`; when they
 are merely busy it answers `503 AI_UNAVAILABLE`. The two say different things
