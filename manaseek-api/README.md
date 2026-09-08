@@ -225,11 +225,24 @@ Storage buckets: `mutawif-documents` (private, holds identity documents) and
 
 ### Vercel
 
-The API is its own Vercel project, separate from the web app, with the root
-directory set to `manaseek-api`. `vercel.json` already defines the build, the
-function, the catch-all rewrite and the cron.
+Two projects deploy from this one repository:
 
-Environment variables to set on the project:
+| Project | Root directory | Serves |
+| --- | --- | --- |
+| `manaseek` | repo root | the web app, and proxies `/api/*` to the API |
+| `manaseek-api` | `manaseek-api` | this service |
+
+**Setting the API project's root directory is not optional.** Left empty, a
+push builds the repo root — the web app — and aliases it to
+`manaseek-api.vercel.app`. The web app's `/api/*` rewrite then points at
+itself and every API request dies with `INFINITE_LOOP_DETECTED`.
+
+The web app's `vercel.json` rewrites `/api/:path*` to the API deployment, so
+the browser only ever talks to one origin. That is why `CORS_ORIGINS` matters
+so little in practice, why the frontend calls `/api/…` with no base URL, and
+why Google needs only one authorised JavaScript origin.
+
+Environment variables on the API project:
 
 ```
 DATABASE_URL, DIRECT_URL      from Supabase, as above
@@ -241,8 +254,6 @@ SCHEDULER_ENABLED             false   (see below)
 INTERNAL_TASK_TOKEN           openssl rand -hex 24
 CRON_SECRET                   the same value as INTERNAL_TASK_TOKEN
 ```
-
-Then `vercel --cwd manaseek-api` to deploy.
 
 `npx prisma migrate deploy` runs as part of the build, so a deploy always
 carries its schema with it. That does mean a preview deploy migrates whichever
