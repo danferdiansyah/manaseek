@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import {
-  Home, BookOpen, MessageCircle, UserCheck, Settings,
+  Bell, Home, BookOpen, MessageCircle, UserCheck, Settings,
   ChevronRight, FileText,
-  Layers, RotateCcw, ArrowRightLeft, Sunrise
+  Layers, RotateCcw, ArrowRightLeft, Sunrise, Scissors, Moon, Target,
+  Heart, ClipboardList,
 } from 'lucide-react'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth-context'
@@ -39,19 +40,20 @@ export function BottomNav({ active, navigate }) {
   )
 }
 
-const PHASES = [
-  { label: 'Ihram',  Icon: Layers },
-  { label: 'Tawaf',  Icon: RotateCcw },
-  { label: "Sa'i",   Icon: ArrowRightLeft },
-  { label: 'Wukuf',  Icon: Sunrise },
-]
+// The API names an icon; the client owns the mapping to a component.
+const ICONS = {
+  BookOpen, Scissors, Sunrise, Moon, Target, Heart, RotateCcw, ArrowRightLeft,
+  Layers, ClipboardList,
+}
 
 export default function HomeScreen({ navigate }) {
   const { user } = useAuth()
   const [activeBooking, setActiveBooking] = useState(null)
+  const [topics, setTopics] = useState([])
+  const [notificationCount, setNotificationCount] = useState(0)
 
-  // Surface whatever booking still needs the jamaah's attention.
   useEffect(() => {
+    // Surface whatever booking still needs the jamaah's attention.
     api
       .get('/bookings?limit=5')
       .then((page) => {
@@ -60,6 +62,16 @@ export default function HomeScreen({ navigate }) {
         )
         setActiveBooking(live ?? null)
       })
+      .catch(() => {})
+
+    api
+      .get('/content/topics')
+      .then((page) => setTopics(page.items))
+      .catch(() => {})
+
+    api
+      .get('/notifications?limit=1')
+      .then((page) => setNotificationCount(page.meta.total))
       .catch(() => {})
   }, [])
 
@@ -75,6 +87,20 @@ export default function HomeScreen({ navigate }) {
             <h2 className="text-white text-xl font-bold truncate max-w-[200px]">{displayName}</h2>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate('notifications')}
+              className="relative w-9 h-9 rounded-full bg-white/15 flex items-center justify-center"
+            >
+              <Bell size={18} color="white" strokeWidth={1.8} />
+              {notificationCount > 0 && (
+                <span
+                  className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center text-white"
+                  style={{ background: '#B8944A' }}
+                >
+                  {notificationCount > 9 ? '9+' : notificationCount}
+                </span>
+              )}
+            </button>
             <button
               onClick={() => navigate('profile')}
               className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden"
@@ -147,18 +173,23 @@ export default function HomeScreen({ navigate }) {
           </button>
         </div>
         <div className="grid grid-cols-4 gap-2">
-          {PHASES.map(({ label, Icon }) => (
-            <button
-              key={label}
-              onClick={() => navigate('guidance-detail')}
-              className="flex flex-col items-center py-3 rounded-xl bg-white shadow-sm border border-gray-100"
-            >
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-1" style={{ background: '#E8F3EC' }}>
-                <Icon size={17} color="#1B5E35" strokeWidth={1.8} />
-              </div>
-              <span className="text-xs text-gray-600 font-medium">{label}</span>
-            </button>
-          ))}
+          {topics.slice(0, 4).map((topic) => {
+            const Icon = ICONS[topic.icon] ?? BookOpen
+            return (
+              <button
+                key={topic.slug}
+                onClick={() => navigate('guidance-detail', { slug: topic.slug })}
+                className="flex flex-col items-center py-3 rounded-xl bg-white shadow-sm border border-gray-100"
+              >
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-1" style={{ background: '#E8F3EC' }}>
+                  <Icon size={17} color="#1B5E35" strokeWidth={1.8} />
+                </div>
+                <span className="text-xs text-gray-600 font-medium text-center leading-tight px-1 truncate w-full">
+                  {topic.title}
+                </span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -168,26 +199,25 @@ export default function HomeScreen({ navigate }) {
           <h3 className="font-bold text-gray-800 text-sm">Tips &amp; Informasi</h3>
         </div>
         <div className="space-y-3">
-          {[
-            { title: 'Doa Masuk Masjidil Haram', tag: 'Doa', time: '2 menit baca' },
-            { title: 'Larangan Selama Berihram', tag: 'Panduan', time: '5 menit baca' },
-          ].map((t) => (
-            <div
-              key={t.title}
-              onClick={() => navigate('guidance-detail')}
-              className="flex items-center gap-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 cursor-pointer"
+          {topics.slice(4, 6).map((topic) => (
+            <button
+              key={topic.slug}
+              onClick={() => navigate('guidance-detail', { slug: topic.slug })}
+              className="w-full flex items-center gap-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-left"
             >
               <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #E8F3EC, #C3DFC9)' }}>
                 <FileText size={18} color="#1B5E35" strokeWidth={1.8} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-800 truncate">{t.title}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{t.time}</p>
+                <p className="text-sm font-semibold text-gray-800 truncate">{topic.title}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{topic.readingMinutes} menit baca</p>
               </div>
-              <span className="text-xs px-2 py-1 rounded-full font-medium flex-shrink-0" style={{ background: '#F5EDD8', color: '#B8944A' }}>
-                {t.tag}
-              </span>
-            </div>
+              {topic.obligation && (
+                <span className="text-xs px-2 py-1 rounded-full font-medium flex-shrink-0" style={{ background: '#F5EDD8', color: '#B8944A' }}>
+                  {topic.obligation}
+                </span>
+              )}
+            </button>
           ))}
         </div>
       </div>

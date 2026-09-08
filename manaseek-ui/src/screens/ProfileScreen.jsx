@@ -1,31 +1,24 @@
 import { useEffect, useState } from 'react'
 import {
-  ClipboardList, Bookmark, CheckSquare, Bell, Lock, HelpCircle, FileText,
-  ChevronRight, LogOut, Landmark, Star,
+  ClipboardList, CheckSquare, Bell, ChevronRight, LogOut, Landmark, Star,
 } from 'lucide-react'
 import { BottomNav } from './HomeScreen'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth-context'
 import { BOOKING_STATUS_LABELS, formatSchedule, initialsOf, SERVICE_LABELS } from '../lib/format'
 
-// Still prototype-only: these belong to the content and checklist modules.
-const STATIC_MENU = [
-  { Icon: Bookmark, label: 'Panduan Tersimpan', sub: 'Segera hadir' },
-  { Icon: CheckSquare, label: 'Checklist Persiapan', sub: 'Segera hadir' },
-  { Icon: Bell, label: 'Notifikasi', sub: 'Aktif' },
-  { Icon: Lock, label: 'Keamanan Akun', sub: '' },
-  { Icon: HelpCircle, label: 'Bantuan & FAQ', sub: '' },
-  { Icon: FileText, label: 'Syarat & Ketentuan', sub: '' },
-]
-
 export default function ProfileScreen({ navigate }) {
   const { user, signOut } = useAuth()
   const [bookings, setBookings] = useState([])
   const [trip, setTrip] = useState(null)
+  const [checklist, setChecklist] = useState(null)
+  const [notificationCount, setNotificationCount] = useState(null)
 
   useEffect(() => {
     api.get('/bookings?limit=5').then((page) => setBookings(page.items)).catch(() => {})
     api.get('/users/me/trips').then((trips) => setTrip(trips[0] ?? null)).catch(() => {})
+    api.get('/content/checklist').then((page) => setChecklist(page.meta)).catch(() => {})
+    api.get('/notifications?limit=1').then((page) => setNotificationCount(page.meta.total)).catch(() => {})
   }, [])
 
   const handleSignOut = async () => {
@@ -119,19 +112,40 @@ export default function ProfileScreen({ navigate }) {
         )}
       </div>
 
-      {/* Static menu */}
+      {/* Menu: only entries that actually go somewhere */}
       <div className="mx-5 mt-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        {STATIC_MENU.map(({ Icon, label, sub }, i) => (
-          <div key={label} className={`flex items-center gap-3 px-4 py-3.5 ${i < STATIC_MENU.length - 1 ? 'border-b border-gray-50' : ''}`}>
+        {[
+          {
+            Icon: CheckSquare,
+            label: 'Checklist Persiapan',
+            sub: checklist ? `${checklist.completed} dari ${checklist.total} selesai` : 'Memuat…',
+            screen: 'checklist',
+          },
+          {
+            Icon: Bell,
+            label: 'Notifikasi',
+            sub: notificationCount === null
+              ? 'Memuat…'
+              : notificationCount === 0
+                ? 'Belum ada notifikasi'
+                : `${notificationCount} notifikasi`,
+            screen: 'notifications',
+          },
+        ].map(({ Icon, label, sub, screen }, i, all) => (
+          <button
+            key={label}
+            onClick={() => navigate(screen)}
+            className={`w-full flex items-center gap-3 px-4 py-3.5 text-left ${i < all.length - 1 ? 'border-b border-gray-50' : ''}`}
+          >
             <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#E8F3EC' }}>
               <Icon size={15} color="#1B5E35" strokeWidth={1.8} />
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-700">{label}</p>
-              {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+              <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
             </div>
             <ChevronRight size={15} color="#D1D5DB" />
-          </div>
+          </button>
         ))}
       </div>
 
