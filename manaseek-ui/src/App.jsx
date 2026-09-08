@@ -12,6 +12,8 @@ import MutawifProfileScreen from './screens/MutawifProfileScreen'
 import BookingScreen from './screens/BookingScreen'
 import BookingSuccessScreen from './screens/BookingSuccessScreen'
 import ProfileScreen from './screens/ProfileScreen'
+import ChecklistScreen from './screens/ChecklistScreen'
+import NotificationsScreen from './screens/NotificationsScreen'
 
 const screens = {
   splash: SplashScreen,
@@ -24,6 +26,8 @@ const screens = {
   booking: BookingScreen,
   'booking-success': BookingSuccessScreen,
   profile: ProfileScreen,
+  checklist: ChecklistScreen,
+  notifications: NotificationsScreen,
 }
 
 /** Screens reachable without a session. */
