@@ -78,11 +78,15 @@ Config validator menolak start bila flag ini menyala di produksi.
 | Panduan ibadah, doa, larangan | jalan, konten masih draf |
 | Checklist persiapan | jalan |
 | Riwayat notifikasi | jalan |
-| Chatbot AI | belum, menunggu Gemini API key |
+| Chatbot AI | jalan, menjawab dari pustaka panduan dengan sitasi |
 | Push notification (FCM) | belum, menunggu kredensial Firebase |
 | Upload dokumen verifikasi mutawif | belum, API baru menerima URL |
 | Pembayaran | di luar cakupan; booking diselesaikan di luar aplikasi |
 | Mitra B2B travel dan KBIHU | ditunda |
+
+Chatbot menjawab **hanya** dari pustaka panduan yang dikurasi, mencantumkan
+panduan yang dipakai, dan mengalihkan ke mutawif untuk pertanyaan hukum ibadah,
+kondisi darurat, atau apa pun yang tidak ada di pustaka. Ia bukan pemberi fatwa.
 
 Seluruh konten panduan berstatus `DRAFT` dan **belum ditinjau pembimbing**.
 Aplikasi menyatakan hal itu secara terbuka kepada jamaah. Tidak ada konten yang
