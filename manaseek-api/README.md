@@ -26,7 +26,7 @@ PostGIS extension is required, which keeps managed-Postgres options open.
 cp .env.example .env                 # then fill in the secrets
 openssl rand -hex 32                 # -> JWT_ACCESS_SECRET
 npm install
-docker compose up -d                 # Postgres on 5433
+docker compose up -d                 # Postgres on 5434
 npm run db:deploy                    # apply migrations
 npm run db:seed                      # admin, three verified mutawif, sample booking
 npm run dev
@@ -39,8 +39,10 @@ npm run dev
 | Health | http://localhost:3000/api/health |
 | Readiness | http://localhost:3000/api/health/ready |
 
-Port 5433 is deliberate, so the container does not fight a Postgres already
-installed on the host.
+Port 5434 is deliberate: it keeps the container clear of a Postgres already
+installed on the host, and of anything else holding the ports next to 5432.
+Change the mapping in `docker-compose.yml` and `DATABASE_URL` together if it is
+taken on your machine.
 
 ## Authentication
 
