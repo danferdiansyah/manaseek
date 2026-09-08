@@ -16,7 +16,6 @@ const screens = [
   { id: 'booking',          label: '08_booking' },
   { id: 'booking-success',  label: '09_booking_success' },
   { id: 'profile',          label: '10_profile' },
-  { id: 'esim',             label: '11_esim' },
 ]
 
 fs.mkdirSync(OUT_DIR, { recursive: true })

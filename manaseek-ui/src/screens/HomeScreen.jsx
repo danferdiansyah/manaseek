@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
-  Bell, Home, BookOpen, MessageCircle, UserCheck, Settings,
-  ChevronRight, FileText, Signal,
+  Home, BookOpen, MessageCircle, UserCheck, Settings,
+  ChevronRight, FileText,
   Layers, RotateCcw, ArrowRightLeft, Sunrise
 } from 'lucide-react'
 import { api } from '../lib/api'
@@ -75,12 +75,6 @@ export default function HomeScreen({ navigate }) {
             <h2 className="text-white text-xl font-bold truncate max-w-[200px]">{displayName}</h2>
           </div>
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center">
-                <Bell size={18} color="white" strokeWidth={1.8} />
-              </div>
-              <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-400 border border-white/50" />
-            </div>
             <button
               onClick={() => navigate('profile')}
               className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden"
@@ -142,24 +136,6 @@ export default function HomeScreen({ navigate }) {
             </button>
           ))}
         </div>
-      </div>
-
-      {/* eSIM banner */}
-      <div className="px-5 mt-4">
-        <button
-          onClick={() => navigate('esim')}
-          className="w-full flex items-center gap-3 rounded-2xl p-4 shadow-md text-left"
-          style={{ background: 'linear-gradient(135deg, #0f3d22 0%, #1B5E35 100%)' }}
-        >
-          <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.15)' }}>
-            <Signal size={22} color="white" strokeWidth={1.8} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white font-semibold text-sm">eSIM Saudi Arabia</p>
-            <p className="text-green-100 text-xs mt-0.5">Tetap terhubung selama ibadah — aktivasi instan</p>
-          </div>
-          <ChevronRight size={18} color="rgba(255,255,255,0.8)" />
-        </button>
       </div>
 
       {/* Quick phases */}
