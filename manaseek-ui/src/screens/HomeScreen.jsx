@@ -1,8 +1,12 @@
+import { useEffect, useState } from 'react'
 import {
   Bell, Home, BookOpen, MessageCircle, UserCheck, Settings,
   ChevronRight, FileText, Signal,
   Layers, RotateCcw, ArrowRightLeft, Sunrise
 } from 'lucide-react'
+import { api } from '../lib/api'
+import { useAuth } from '../lib/auth-context'
+import { BOOKING_STATUS_LABELS, formatSchedule, initialsOf } from '../lib/format'
 
 const NAV_TABS = [
   { id: 'home', label: 'Beranda', Icon: Home },
@@ -43,6 +47,24 @@ const PHASES = [
 ]
 
 export default function HomeScreen({ navigate }) {
+  const { user } = useAuth()
+  const [activeBooking, setActiveBooking] = useState(null)
+
+  // Surface whatever booking still needs the jamaah's attention.
+  useEffect(() => {
+    api
+      .get('/bookings?limit=5')
+      .then((page) => {
+        const live = page.items.find((b) =>
+          ['REQUESTED', 'ACCEPTED', 'ONGOING'].includes(b.status),
+        )
+        setActiveBooking(live ?? null)
+      })
+      .catch(() => {})
+  }, [])
+
+  const displayName = user?.name ?? user?.email ?? 'Jamaah'
+
   return (
     <div className="flex flex-col min-h-full bg-gray-50">
       {/* Header */}
@@ -50,7 +72,7 @@ export default function HomeScreen({ navigate }) {
         <div className="flex items-center justify-between mb-5">
           <div>
             <p className="text-green-200 text-xs mb-0.5">Assalamu'alaikum</p>
-            <h2 className="text-white text-xl font-bold">Ahmad Fauzi</h2>
+            <h2 className="text-white text-xl font-bold truncate max-w-[200px]">{displayName}</h2>
           </div>
           <div className="flex items-center gap-3">
             <div className="relative">
@@ -59,24 +81,44 @@ export default function HomeScreen({ navigate }) {
               </div>
               <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-400 border border-white/50" />
             </div>
-            <div
-              className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+            <button
+              onClick={() => navigate('profile')}
+              className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden"
               style={{ background: 'linear-gradient(135deg, #B8944A 0%, #D4A855 100%)', color: 'white' }}
             >
-              AF
-            </div>
+              {user?.avatarUrl
+                ? <img src={user.avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                : initialsOf(displayName)}
+            </button>
           </div>
         </div>
 
-        {/* Status card */}
-        <div className="rounded-2xl p-4 backdrop-blur-sm" style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)' }}>
-          <p className="text-green-100 text-xs mb-1">Rencana Ibadah</p>
-          <p className="text-white font-semibold">Umrah — Maret 2025</p>
-          <div className="mt-3 bg-white/20 rounded-full h-1.5">
-            <div className="h-1.5 rounded-full w-2/5" style={{ background: 'linear-gradient(90deg, #B8944A, #D4A855)' }} />
-          </div>
-          <p className="text-green-200 text-xs mt-1.5">Persiapan 40% selesai</p>
-        </div>
+        {/* Active booking, or a nudge to make one */}
+        {activeBooking ? (
+          <button
+            onClick={() => navigate('booking-success', { bookingId: activeBooking.id })}
+            className="w-full rounded-2xl p-4 text-left backdrop-blur-sm"
+            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)' }}
+          >
+            <p className="text-green-100 text-xs mb-1">Pesanan Aktif</p>
+            <p className="text-white font-semibold truncate">
+              {activeBooking.mutawif?.user?.name ?? 'Mutawif'} — {BOOKING_STATUS_LABELS[activeBooking.status]}
+            </p>
+            <p className="text-green-200 text-xs mt-1.5">
+              {formatSchedule(activeBooking.scheduledStartAt)} WAS • {activeBooking.meetingPointLabel}
+            </p>
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate('mutawif')}
+            className="w-full rounded-2xl p-4 text-left backdrop-blur-sm"
+            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)' }}
+          >
+            <p className="text-green-100 text-xs mb-1">Belum ada pesanan aktif</p>
+            <p className="text-white font-semibold">Cari mutawif di sekitarmu</p>
+            <p className="text-green-200 text-xs mt-1.5">Pendampingan ibadah, bantuan lansia, atau darurat</p>
+          </button>
+        )}
       </div>
 
       {/* Main features */}
