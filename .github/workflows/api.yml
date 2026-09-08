@@ -30,7 +30,10 @@ jobs:
           --health-retries 10
 
     env:
+      # Both are required: the schema declares a directUrl for migrations.
+      # In CI they point at the same server, since there is no pooler here.
       DATABASE_URL: postgresql://manaseek:manaseek@localhost:5432/manaseek_test?schema=public
+      DIRECT_URL: postgresql://manaseek:manaseek@localhost:5432/manaseek_test?schema=public
       JWT_ACCESS_SECRET: ci-secret-ci-secret-ci-secret-ci-secret
 
     steps:
@@ -49,3 +52,6 @@ jobs:
       - run: npm test
       - name: Verify migrations apply cleanly
         run: npx prisma migrate deploy
+
+      - name: Verify the seed runs against a fresh database
+        run: npm run db:seed
