@@ -66,6 +66,7 @@ model User {
   jamaahBookings      Booking[]           @relation("JamaahBookings")
   reviewsWritten      Review[]            @relation("ReviewAuthor")
   checklistProgresses ChecklistProgress[]
+  chatSessions        ChatSession[]
 
   @@index([role, status])
   @@index([organizationId])
@@ -618,4 +619,57 @@ model ChecklistProgress {
   @@unique([userId, itemId])
   @@index([userId])
   @@map("checklist_progress")
+}
+
+// ---------------------------------------------------------------------------
+// Chatbot
+//
+// The assistant answers from the curated guidance library only. It is an
+// information assistant, never a source of fatwa: anything that needs a ruling
+// or physical help is handed to a human mutawif.
+// ---------------------------------------------------------------------------
+
+enum ChatRole {
+  USER
+  ASSISTANT
+}
+
+model ChatSession {
+  id     String  @id @default(uuid()) @db.Uuid
+  userId String  @db.Uuid
+  /// First question, trimmed. Used as the label in the history list.
+  title  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@index([userId, updatedAt])
+  @@map("chat_sessions")
+}
+
+model ChatMessage {
+  id        String   @id @default(uuid()) @db.Uuid
+  sessionId String   @db.Uuid
+  role      ChatRole
+  content   String
+
+  /// Guidance topics the answer drew on, so the client can link to them.
+  citedSlugs String[] @default([])
+  /// Set when the assistant decided this needs a human mutawif.
+  escalated  Boolean  @default(false)
+
+  /// Kept per message so AI spend can be attributed without a separate ledger.
+  promptTokens     Int?
+  completionTokens Int?
+  model            String?
+
+  createdAt DateTime @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@map("chat_messages")
 }

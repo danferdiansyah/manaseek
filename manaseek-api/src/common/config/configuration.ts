@@ -29,6 +29,11 @@ export const envSchema = z.object({
   // Lets a developer mint a session without real Google credentials.
   AUTH_DEV_LOGIN: booleanish,
 
+  // Google AI Studio key. Without it the chatbot endpoints answer with a clear
+  // "not configured" error instead of failing somewhere deeper.
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
+
   PUSH_PROVIDER: z.enum(['noop', 'fcm']).default('noop'),
   FCM_PROJECT_ID: z.string().optional(),
   FCM_CLIENT_EMAIL: z.string().optional(),

@@ -105,10 +105,30 @@ Engineer A owns everything currently in the repository.
 | `modules/reviews` | ratings on completed bookings, aggregate recalculation |
 | `modules/notifications` | templates, push provider, device tokens, history |
 | `modules/audit` | append-only trail for security and money-adjacent actions |
+| `modules/content` | guidance topics, prayers, prohibitions, departure checklist |
+| `modules/chat` | the assistant: curated context, guardrails, token accounting |
 | `modules/internal` | token-guarded task endpoints for an external scheduler |
 
-Engineer B's modules (`content`, `sync`, `chatbot`, `media`, `admin console`)
-land alongside these under `src/modules/`.
+The content and chat modules were originally the other track's; they now live
+here too. What remains unbuilt is media upload for mutawif verification
+documents and an admin console.
+
+## The assistant
+
+`POST /api/chat/messages` answers from the guidance library and nothing else.
+The whole curated library is small enough to sit in one prompt, so there is no
+retrieval step and the model has nothing outside it to draw on. Three rules are
+enforced rather than hoped for:
+
+- The answer comes back as structured output with `citedSlugs` and
+  `needsHuman`, so escalation is a field we branch on, not a phrase we grep.
+- Any slug the model cites that is not in the library is dropped before the
+  reply is stored; a citation that leads nowhere is worse than none.
+- Prompt and completion tokens are stored per message, so AI spend can be
+  attributed without a separate ledger.
+
+Set `GEMINI_API_KEY` from https://aistudio.google.com/apikey. Without it the
+endpoint answers 503 with a clear message instead of failing deeper in.
 
 **Boundary rule:** a module never queries another module's tables. Cross-module
 access goes through the owning module's exported service.
