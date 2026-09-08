@@ -132,7 +132,7 @@ export default function BookingScreen({ navigate, params }) {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-full bg-gray-50 pt-24">
+      <div className="min-h-full bg-stone pt-24">
         <Loading label="Menyiapkan pemesanan…" />
       </div>
     )
@@ -140,7 +140,7 @@ export default function BookingScreen({ navigate, params }) {
 
   if (status === 'error') {
     return (
-      <div className="min-h-full bg-gray-50 pt-20">
+      <div className="min-h-full bg-stone pt-20">
         <ErrorState message={error} onRetry={reload} />
         <div className="px-5">
           <button onClick={() => navigate('mutawif')} className="w-full py-3 rounded-xl text-sm font-semibold" style={{ background: '#E8F3EC', color: '#1B5E35' }}>
@@ -152,21 +152,21 @@ export default function BookingScreen({ navigate, params }) {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-gray-50">
+    <div className="flex flex-col min-h-full bg-stone">
       {/* Header */}
-      <div className="px-5 pt-14 pb-4 bg-white border-b border-gray-100 shadow-sm">
+      <div className="glass-topbar px-5 pt-14 pb-4 sticky top-0 z-40">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('mutawif-profile', { mutawifId })} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#E8F3EC' }}>
             <ArrowLeft size={16} color="#1B5E35" />
           </button>
-          <h2 className="font-bold text-gray-800 text-base">Konfirmasi Pemesanan</h2>
+          <h2 className="font-semibold text-ink text-base">Konfirmasi Pemesanan</h2>
         </div>
       </div>
 
       <div className="px-5 py-5 space-y-4 mb-44">
         {/* Mutawif */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Mutawif Dipilih</p>
+        <div className="glass rounded-[20px] p-4">
+          <p className="text-sm font-semibold text-ink-soft mb-3">Mutawif Dipilih</p>
           <div className="flex items-center gap-3">
             {profile.user.avatarUrl ? (
               <img src={profile.user.avatarUrl} alt={profile.user.name} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
@@ -176,25 +176,25 @@ export default function BookingScreen({ navigate, params }) {
               </div>
             )}
             <div>
-              <p className="font-bold text-gray-800 text-sm">{profile.user.name}</p>
+              <p className="font-semibold text-ink text-sm">{profile.user.name}</p>
               <div className="flex items-center gap-1 mt-0.5">
                 {profile.ratingCount > 0 && (
                   <>
                     <Star size={11} color="#B8944A" fill="#B8944A" />
                     <span className="text-xs font-semibold" style={{ color: '#B8944A' }}>{profile.ratingAverage.toFixed(1)}</span>
-                    <span className="text-xs text-gray-300">•</span>
+                    <span className="text-xs text-ink-faint">•</span>
                   </>
                 )}
                 <CheckCircle size={11} color="#1B5E35" />
-                <span className="text-xs text-gray-500">Terverifikasi</span>
+                <span className="text-xs text-ink-soft">Terverifikasi</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Service type */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Jenis Layanan</p>
+        <div className="glass rounded-[20px] p-4">
+          <p className="text-sm font-semibold text-ink-soft mb-3">Jenis Layanan</p>
           <div className="space-y-2">
             {profile.rates.map((r) => {
               const Icon = SERVICE_ICONS[r.serviceType] ?? Star
@@ -209,7 +209,7 @@ export default function BookingScreen({ navigate, params }) {
                   <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: selected ? '#C3DFC9' : '#F3F4F6' }}>
                     <Icon size={14} color={selected ? '#1B5E35' : '#9CA3AF'} strokeWidth={1.8} />
                   </div>
-                  <p className="flex-1 text-sm font-medium text-gray-700">
+                  <p className="flex-1 text-sm font-medium text-ink">
                     {SERVICE_LABELS[r.serviceType] ?? r.serviceType}
                   </p>
                   <p className="text-xs font-bold" style={{ color: '#1B5E35' }}>{formatRupiah(r.hourlyRate)}/jam</p>
@@ -223,8 +223,8 @@ export default function BookingScreen({ navigate, params }) {
         </div>
 
         {/* Schedule */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Tanggal</p>
+        <div className="glass rounded-[20px] p-4">
+          <p className="text-sm font-semibold text-ink-soft mb-3">Tanggal</p>
           <div className="flex gap-2 overflow-x-auto pb-1">
             {days.map((d) => {
               const selected = d.iso === activeDate
@@ -244,7 +244,7 @@ export default function BookingScreen({ navigate, params }) {
             })}
           </div>
 
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-4 mb-3">Jam Mulai (Waktu Saudi)</p>
+          <p className="text-sm font-semibold text-ink-soft mt-4 mb-3">Jam Mulai (Waktu Saudi)</p>
           <div className="grid grid-cols-3 gap-2">
             {TIMES.map((t) => {
               const selected = t === time
@@ -263,7 +263,7 @@ export default function BookingScreen({ navigate, params }) {
             })}
           </div>
 
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-4 mb-3">Durasi</p>
+          <p className="text-sm font-semibold text-ink-soft mt-4 mb-3">Durasi</p>
           <div className="flex gap-2">
             {DURATIONS.map((d) => {
               const selected = d === durationHours
@@ -291,42 +291,42 @@ export default function BookingScreen({ navigate, params }) {
         </div>
 
         {/* Meeting point */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Lokasi Pertemuan</p>
+        <div className="glass rounded-[20px] p-4">
+          <p className="text-sm font-semibold text-ink-soft mb-2">Lokasi Pertemuan</p>
           <div className="flex items-start gap-2">
             <MapPin size={18} color="#1B5E35" strokeWidth={1.8} className="mt-2 flex-shrink-0" />
             <input
               value={meetingPoint}
               onChange={(e) => setMeetingPoint(e.target.value)}
               placeholder="Contoh: Pintu King Fahd, Masjidil Haram"
-              className="flex-1 text-sm text-gray-800 py-2 border-b border-gray-200 focus:outline-none focus:border-green-700"
+              className="flex-1 text-sm text-ink py-2 border-b border-gray-200 focus:outline-none focus:border-green-700"
             />
           </div>
 
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-4 mb-2">Catatan untuk Mutawif</p>
+          <p className="text-sm font-semibold text-ink-soft mt-4 mb-2">Catatan untuk Mutawif</p>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
             placeholder="Contoh: jamaah lansia, memakai kursi roda"
-            className="w-full text-sm text-gray-800 p-2 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:border-green-700 resize-none"
+            className="w-full text-sm text-ink p-2 rounded-xl bg-stone border border-gray-200 focus:outline-none focus:border-green-700 resize-none"
           />
         </div>
 
         {/* Price */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Rincian Biaya</p>
+        <div className="glass rounded-[20px] p-4">
+          <p className="text-sm font-semibold text-ink-soft mb-3">Rincian Biaya</p>
           <div className="flex justify-between">
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-ink-soft">
               {SERVICE_LABELS[activeService] ?? '—'} ({durationHours} jam)
             </span>
-            <span className="text-sm text-gray-700">{formatRupiah(total)}</span>
+            <span className="text-sm text-ink">{formatRupiah(total)}</span>
           </div>
           <div className="border-t border-gray-100 pt-2 mt-2 flex justify-between">
-            <span className="text-sm font-bold text-gray-800">Total</span>
+            <span className="text-sm font-semibold text-ink">Total</span>
             <span className="text-sm font-bold" style={{ color: '#1B5E35' }}>{formatRupiah(total)}</span>
           </div>
-          <p className="text-xs text-gray-400 mt-2">
+          <p className="text-xs text-ink-faint mt-2">
             Pembayaran diselesaikan langsung dengan mutawif. Belum ada pembayaran dalam aplikasi.
           </p>
         </div>
@@ -339,16 +339,19 @@ export default function BookingScreen({ navigate, params }) {
       </div>
 
       {/* CTA */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-white border-t border-gray-100 px-5 py-4 shadow-lg">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] glass-bar px-5 py-4">
         <button
           onClick={submit}
           disabled={submitting || startsInPast || !rate || !activeDate || meetingPoint.trim().length < 3}
-          className="w-full py-4 rounded-2xl text-white font-bold text-base disabled:opacity-40"
-          style={{ background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)' }}
+          className="w-full py-4 rounded-[16px] text-white font-semibold text-base disabled:opacity-40"
+          style={{
+            background: 'linear-gradient(150deg, #1B5E35, #2D7A4F)',
+            boxShadow: 'inset 0 1px 0 rgba(255,255,255,.28), 0 10px 24px -14px rgba(15,61,34,.8)',
+          }}
         >
           {submitting ? 'Mengirim permintaan…' : 'Konfirmasi Pemesanan'}
         </button>
-        <p className="text-center text-xs text-gray-400 mt-2">
+        <p className="text-center text-xs text-ink-faint mt-2">
           Mutawif punya waktu 15 menit untuk menerima permintaanmu
         </p>
       </div>

@@ -29,7 +29,7 @@ export default function ChecklistScreen({ navigate }) {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-full bg-gray-50 pt-24">
+      <div className="min-h-full bg-stone pt-24">
         <Loading label="Memuat checklist…" />
       </div>
     )
@@ -37,7 +37,7 @@ export default function ChecklistScreen({ navigate }) {
 
   if (status === 'error') {
     return (
-      <div className="min-h-full bg-gray-50 pt-24">
+      <div className="min-h-full bg-stone pt-24">
         <ErrorState message={error} onRetry={reload} />
       </div>
     )
@@ -51,16 +51,16 @@ export default function ChecklistScreen({ navigate }) {
   const percent = items.length === 0 ? 0 : Math.round((completed / items.length) * 100)
 
   return (
-    <div className="flex flex-col min-h-full bg-gray-50">
-      <div className="px-5 pt-14 pb-6" style={{ background: 'linear-gradient(150deg, #0f3d22 0%, #1B5E35 50%, #2D7A4F 100%)' }}>
+    <div className="flex flex-col min-h-full bg-stone">
+      <div className="canopy px-5 pt-14 pb-6">
         <div className="flex items-center gap-3 mb-5">
-          <button onClick={() => navigate('guidance')} className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+          <button onClick={() => navigate('guidance')} className="glass-control w-9 h-9 rounded-full flex items-center justify-center">
             <ArrowLeft size={16} color="white" />
           </button>
           <h2 className="text-white font-bold text-lg">Checklist Persiapan</h2>
         </div>
 
-        <div className="rounded-2xl p-4" style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)' }}>
+        <div className="glass-canopy rounded-[20px] p-4">
           <p className="text-white font-semibold">{completed} dari {items.length} selesai</p>
           <div className="mt-3 bg-white/20 rounded-full h-1.5">
             <div
@@ -68,13 +68,13 @@ export default function ChecklistScreen({ navigate }) {
               style={{ width: `${percent}%`, background: 'linear-gradient(90deg, #B8944A, #D4A855)' }}
             />
           </div>
-          <p className="text-green-200 text-xs mt-1.5">Tersimpan otomatis di akunmu</p>
+          <p className="text-canopy-100/85 text-xs mt-1.5">Tersimpan otomatis di akunmu</p>
         </div>
       </div>
 
       <div className="px-5 py-5 space-y-2 mb-10">
         {saveError && (
-          <div className="rounded-xl p-3 text-xs text-red-600 mb-1" style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}>
+          <div className="rounded-[14px] p-3.5 text-sm mb-1" style={{ background: '#FDF0EF', border: '1px solid #F3D2CE', color: '#A8332B' }}>
             {saveError}
           </div>
         )}
@@ -82,25 +82,25 @@ export default function ChecklistScreen({ navigate }) {
           <button
             key={item.id}
             onClick={() => toggle(item)}
-            className="w-full flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm border text-left"
+            className="w-full flex items-start gap-3 glass rounded-[20px] p-4 text-left"
             style={{ borderColor: item.completed ? '#C3DFC9' : '#F3F4F6' }}
           >
             <div
-              className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5 border-2"
+              className="w-[22px] h-[22px] rounded-[7px] flex items-center justify-center flex-shrink-0 mt-0.5 border-2"
               style={item.completed
                 ? { background: '#1B5E35', borderColor: '#1B5E35' }
-                : { borderColor: '#D1D5DB' }}
+                : { borderColor: '#B9C6bf', background: 'rgba(255,255,255,.7)' }}
             >
               {item.completed && <Check size={13} color="white" strokeWidth={3} />}
             </div>
             <div className="flex-1 min-w-0">
               <p
-                className="text-sm font-medium"
+                className="text-[15px] font-medium"
                 style={{ color: item.completed ? '#9CA3AF' : '#374151', textDecoration: item.completed ? 'line-through' : 'none' }}
               >
                 {item.title}
               </p>
-              {item.description && <p className="text-xs text-gray-400 mt-0.5">{item.description}</p>}
+              {item.description && <p className="text-xs text-ink-faint mt-0.5">{item.description}</p>}
             </div>
           </button>
         ))}

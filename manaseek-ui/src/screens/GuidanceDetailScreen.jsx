@@ -22,7 +22,7 @@ export default function GuidanceDetailScreen({ navigate, params }) {
 
   if (status === 'loading') {
     return (
-      <div className="min-h-full bg-gray-50 pt-24">
+      <div className="min-h-full bg-stone pt-24">
         <Loading label="Memuat panduan…" />
       </div>
     )
@@ -30,7 +30,7 @@ export default function GuidanceDetailScreen({ navigate, params }) {
 
   if (status === 'error') {
     return (
-      <div className="min-h-full bg-gray-50 pt-20">
+      <div className="min-h-full bg-stone pt-20">
         <ErrorState message={error} onRetry={reload} />
         <div className="px-5">
           <button onClick={() => navigate('guidance')} className="w-full py-3 rounded-xl text-sm font-semibold" style={{ background: '#E8F3EC', color: '#1B5E35' }}>
@@ -42,14 +42,14 @@ export default function GuidanceDetailScreen({ navigate, params }) {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-gray-50">
+    <div className="flex flex-col min-h-full bg-stone">
       {/* Hero */}
-      <div className="relative pt-14 pb-8 px-5" style={{ background: 'linear-gradient(150deg, #0f3d22 0%, #1B5E35 50%, #2D7A4F 100%)' }}>
+      <div className="canopy relative pt-14 pb-8 px-5">
         <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => navigate('guidance')} className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+          <button onClick={() => navigate('guidance')} className="glass-control w-9 h-9 rounded-full flex items-center justify-center">
             <ArrowLeft size={16} color="white" />
           </button>
-          <span className="text-green-200 text-sm flex-1">Guidance Mandiri</span>
+          <span className="text-canopy-100/85 text-sm flex-1">Guidance Mandiri</span>
         </div>
 
         <div className="flex items-center gap-4">
@@ -66,17 +66,17 @@ export default function GuidanceDetailScreen({ navigate, params }) {
               </span>
             )}
             <h2 className="text-white text-xl font-bold mt-1">{topic.title}</h2>
-            <p className="text-green-200 text-xs mt-0.5">{topic.summary}</p>
-            <p className="text-green-200/70 text-xs mt-1">{topic.readingMinutes} menit baca</p>
+            <p className="text-canopy-100/85 text-xs mt-0.5">{topic.summary}</p>
+            <p className="text-canopy-100/70 text-xs mt-1">{topic.readingMinutes} menit baca</p>
           </div>
         </div>
       </div>
 
       <div className="px-5 pt-5 space-y-5 mb-10">
         {topic.status !== 'PUBLISHED' && (
-          <div className="rounded-xl p-3 flex items-start gap-2" style={{ background: '#EEF2FF' }}>
-            <Info size={15} color="#4F46E5" className="flex-shrink-0 mt-0.5" />
-            <p className="text-xs leading-relaxed" style={{ color: '#4338CA' }}>
+          <div className="glass rounded-[16px] p-3.5 flex items-start gap-2.5">
+            <Info size={15} color="var(--color-ink-soft)" className="flex-shrink-0 mt-0.5" />
+            <p className="text-sm leading-relaxed text-ink-soft">
               Draf, menunggu tinjauan pembimbing. Untuk pertanyaan hukum ibadah,
               rujuk kepada mutawif atau pembimbing rombongan.
             </p>
@@ -86,7 +86,7 @@ export default function GuidanceDetailScreen({ navigate, params }) {
         {/* Steps */}
         {topic.steps.length > 0 && (
           <div>
-            <p className="text-sm font-bold text-gray-800 mb-3">Tata Cara</p>
+            <p className="text-sm font-semibold text-ink mb-3">Tata Cara</p>
             <div className="space-y-3">
               {topic.steps.map((step, i) => (
                 <div key={step.id} className="flex gap-3">
@@ -96,7 +96,7 @@ export default function GuidanceDetailScreen({ navigate, params }) {
                   >
                     {i + 1}
                   </div>
-                  <p className="text-sm text-gray-600 leading-relaxed">{step.text}</p>
+                  <p className="text-sm text-ink-soft leading-relaxed">{step.text}</p>
                 </div>
               ))}
             </div>
@@ -106,17 +106,17 @@ export default function GuidanceDetailScreen({ navigate, params }) {
         {/* Prayers */}
         {topic.prayers.length > 0 && (
           <div>
-            <p className="text-sm font-bold text-gray-800 mb-3">Bacaan</p>
+            <p className="text-sm font-semibold text-ink mb-3">Bacaan</p>
             <div className="space-y-3">
               {topic.prayers.map((prayer) => (
-                <div key={prayer.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-                  <p className="text-xs font-semibold text-gray-700 mb-2">{prayer.title}</p>
+                <div key={prayer.id} className="glass rounded-[20px] p-4">
+                  <p className="text-xs font-semibold text-ink mb-2">{prayer.title}</p>
                   <p className="text-right text-xl leading-loose mb-2" style={{ color: '#1B5E35', fontFamily: 'serif' }} dir="rtl" lang="ar">
                     {prayer.arabic}
                   </p>
-                  <p className="text-xs text-gray-500 italic mb-1">{prayer.transliteration}</p>
-                  <p className="text-xs text-gray-700 font-medium">{prayer.translation}</p>
-                  {prayer.context && <p className="text-xs text-gray-400 mt-2">{prayer.context}</p>}
+                  <p className="text-xs text-ink-soft italic mb-1">{prayer.transliteration}</p>
+                  <p className="text-xs text-ink font-medium">{prayer.translation}</p>
+                  {prayer.context && <p className="text-xs text-ink-faint mt-2">{prayer.context}</p>}
                 </div>
               ))}
             </div>

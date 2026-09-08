@@ -57,11 +57,11 @@ export default function GuidanceScreen({ navigate }) {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-gray-50">
+    <div className="flex flex-col min-h-full bg-stone">
       {/* Header */}
-      <div className="px-5 pt-14 pb-5" style={{ background: 'linear-gradient(150deg, #0f3d22 0%, #1B5E35 50%, #2D7A4F 100%)' }}>
+      <div className="canopy px-5 pt-14 pb-5">
         <div className="flex items-center gap-3 mb-5">
-          <button onClick={() => navigate('home')} className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+          <button onClick={() => navigate('home')} className="glass-control w-9 h-9 rounded-full flex items-center justify-center">
             <ArrowLeft size={16} color="white" />
           </button>
           <h2 className="text-white font-bold text-lg">Guidance Mandiri</h2>
@@ -72,7 +72,7 @@ export default function GuidanceScreen({ navigate }) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari panduan ibadah..."
-            className="w-full pl-9 pr-4 py-3 rounded-xl bg-white text-sm text-gray-700 outline-none"
+            className="w-full pl-9 pr-4 py-3 rounded-xl bg-white text-sm text-ink outline-none"
           />
         </form>
       </div>
@@ -116,9 +116,9 @@ export default function GuidanceScreen({ navigate }) {
 
       {/* Review notice: nothing here is signed off yet. */}
       {meta && meta.publishedCount === 0 && (
-        <div className="mx-5 mb-4 rounded-xl p-3 flex items-start gap-2" style={{ background: '#EEF2FF' }}>
-          <Info size={15} color="#4F46E5" className="flex-shrink-0 mt-0.5" />
-          <p className="text-xs leading-relaxed" style={{ color: '#4338CA' }}>
+        <div className="glass mx-5 mb-4 rounded-[16px] p-3.5 flex items-start gap-2.5">
+          <Info size={15} color="var(--color-ink-soft)" className="flex-shrink-0 mt-0.5" />
+          <p className="text-sm leading-relaxed text-ink-soft">
             Konten panduan masih berstatus draf dan menunggu tinjauan pembimbing.
             Untuk pertanyaan hukum ibadah, hubungi mutawif atau pembimbing rombongan.
           </p>
@@ -127,7 +127,7 @@ export default function GuidanceScreen({ navigate }) {
 
       {/* Topics */}
       <div className="px-5 space-y-3 mb-24">
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Rangkaian Ibadah</p>
+        <h3 className="font-semibold text-ink">Rangkaian ibadah</h3>
 
         {status === 'loading' && <Loading label="Memuat panduan…" />}
         {status === 'error' && <ErrorState message={error} onRetry={reload} />}
@@ -149,7 +149,7 @@ export default function GuidanceScreen({ navigate }) {
               <button
                 key={topic.slug}
                 onClick={() => navigate('guidance-detail', { slug: topic.slug })}
-                className="w-full flex items-center gap-4 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-left"
+                className="w-full flex items-start gap-3.5 glass rounded-[20px] p-4 text-left"
               >
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
@@ -158,17 +158,19 @@ export default function GuidanceScreen({ navigate }) {
                   <Icon size={22} color="#1B5E35" strokeWidth={1.8} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-800">{topic.title}</p>
-                  <p className="text-xs text-gray-400 mt-0.5 truncate">{topic.summary}</p>
-                  <p className="text-xs text-gray-300 mt-0.5">{topic.readingMinutes} menit baca</p>
-                </div>
-                <div className="flex flex-col items-end gap-2">
-                  {tag && (
-                    <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: style.bg, color: style.color }}>
-                      {tag}
-                    </span>
-                  )}
-                  <ChevronRight size={14} color="#D1D5DB" />
+                  <div className="flex items-start gap-2">
+                    <p className="text-[15px] font-semibold text-ink flex-1">{topic.title}</p>
+                    {tag && (
+                      <span
+                        className="text-xs px-2.5 py-1 rounded-full font-medium flex-shrink-0"
+                        style={{ background: style.bg, color: style.color }}
+                      >
+                        {tag}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-ink-soft mt-1 leading-snug line-clamp-2">{topic.summary}</p>
+                  <p className="text-xs text-ink-faint mt-1.5">{topic.readingMinutes} menit baca</p>
                 </div>
               </button>
             )

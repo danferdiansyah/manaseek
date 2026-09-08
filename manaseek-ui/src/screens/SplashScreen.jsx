@@ -28,14 +28,13 @@ export default function SplashScreen({ navigate }) {
     <div className="flex flex-col min-h-full bg-white">
       {/* Green hero */}
       <div
-        className="flex flex-col items-center justify-center flex-1 px-8 pt-20 pb-10"
-        style={{ background: 'linear-gradient(150deg, #0f3d22 0%, #1B5E35 45%, #2D7A4F 100%)' }}
+        className="canopy flex flex-col items-center justify-center flex-1 px-8 pt-20 pb-10"
       >
         <div className="bg-white rounded-3xl p-5 mb-6 shadow-2xl">
           <img src="/logo.png" alt="Manaseek" className="w-28 h-28 object-contain" />
         </div>
         <h1 className="text-white text-3xl font-bold tracking-tight mb-2">Manaseek</h1>
-        <p className="text-green-100 text-sm text-center leading-relaxed px-4">
+        <p className="text-canopy-100/85 text-sm text-center leading-relaxed px-4">
           Pendamping ibadah haji &amp; umrah<br />berbasis AI untuk jamaah Indonesia
         </p>
 
@@ -70,14 +69,14 @@ export default function SplashScreen({ navigate }) {
         </div>
 
         {busy ? (
-          <p className="text-center text-sm text-gray-500 py-3">Menyiapkan akun…</p>
+          <p className="text-center text-sm text-ink-soft py-3">Menyiapkan akun…</p>
         ) : (
           <GoogleSignInButton onCredential={handleCredential} onError={setError} />
         )}
 
         {error && <p className="text-center text-xs text-red-500 mt-3">{error}</p>}
 
-        <p className="text-center text-xs text-gray-400 mt-5">
+        <p className="text-center text-xs text-ink-faint mt-5">
           Masuk dengan akun Google. Dengan melanjutkan, kamu menyetujui{' '}
           <span style={{ color: '#B8944A' }}>Syarat &amp; Ketentuan</span> kami
         </p>

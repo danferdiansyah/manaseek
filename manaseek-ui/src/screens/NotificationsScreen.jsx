@@ -24,10 +24,10 @@ export default function NotificationsScreen({ navigate }) {
   const items = data?.items ?? []
 
   return (
-    <div className="flex flex-col min-h-full bg-gray-50">
-      <div className="px-5 pt-14 pb-6" style={{ background: 'linear-gradient(150deg, #0f3d22 0%, #1B5E35 50%, #2D7A4F 100%)' }}>
+    <div className="flex flex-col min-h-full bg-stone">
+      <div className="canopy px-5 pt-14 pb-6">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('home')} className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center">
+          <button onClick={() => navigate('home')} className="glass-control w-9 h-9 rounded-full flex items-center justify-center">
             <ArrowLeft size={16} color="white" />
           </button>
           <h2 className="text-white font-bold text-lg">Notifikasi</h2>
@@ -54,15 +54,15 @@ export default function NotificationsScreen({ navigate }) {
               key={item.id}
               onClick={() => bookingId && navigate('booking-success', { bookingId })}
               disabled={!bookingId}
-              className="w-full flex items-start gap-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-left disabled:cursor-default"
+              className="w-full flex items-start gap-3 glass rounded-[20px] p-4 text-left disabled:cursor-default"
             >
               <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: tone.bg }}>
                 <tone.Icon size={16} color={tone.fg} strokeWidth={1.8} />
               </div>
               <div className="flex-1 min-w-0">
-                {item.title && <p className="text-sm font-semibold text-gray-800">{item.title}</p>}
-                <p className="text-xs text-gray-500 leading-relaxed mt-0.5">{item.body}</p>
-                <p className="text-xs text-gray-300 mt-1">{formatWhen(item.createdAt)}</p>
+                {item.title && <p className="text-sm font-semibold text-ink">{item.title}</p>}
+                <p className="text-xs text-ink-soft leading-relaxed mt-0.5">{item.body}</p>
+                <p className="text-xs text-ink-faint mt-1">{formatWhen(item.createdAt)}</p>
               </div>
             </button>
           )

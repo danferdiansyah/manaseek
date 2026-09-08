@@ -4,7 +4,7 @@ export function Loading({ label = 'Memuat…' }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 gap-2">
       <Loader2 size={22} className="animate-spin" color="#1B5E35" />
-      <p className="text-xs text-gray-400">{label}</p>
+      <p className="text-xs text-ink-faint">{label}</p>
     </div>
   )
 }
@@ -13,8 +13,8 @@ export function ErrorState({ message, onRetry }) {
   return (
     <div className="flex flex-col items-center justify-center py-10 px-6 gap-2 text-center">
       <AlertCircle size={22} color="#DC2626" />
-      <p className="text-sm font-semibold text-gray-700">Gagal memuat</p>
-      <p className="text-xs text-gray-500 leading-relaxed">{message}</p>
+      <p className="text-sm font-semibold text-ink">Gagal memuat</p>
+      <p className="text-xs text-ink-soft leading-relaxed">{message}</p>
       {onRetry && (
         <button
           onClick={onRetry}
@@ -31,8 +31,8 @@ export function ErrorState({ message, onRetry }) {
 export function EmptyState({ title, description }) {
   return (
     <div className="flex flex-col items-center justify-center py-10 px-6 gap-1 text-center">
-      <p className="text-sm font-semibold text-gray-700">{title}</p>
-      {description && <p className="text-xs text-gray-400 leading-relaxed">{description}</p>}
+      <p className="text-sm font-semibold text-ink">{title}</p>
+      {description && <p className="text-xs text-ink-faint leading-relaxed">{description}</p>}
     </div>
   )
 }

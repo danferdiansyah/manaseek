@@ -27,9 +27,9 @@ export default function ProfileScreen({ navigate }) {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-gray-50">
+    <div className="flex flex-col min-h-full bg-stone">
       {/* Header */}
-      <div className="px-5 pt-14 pb-8" style={{ background: 'linear-gradient(150deg, #0f3d22 0%, #1B5E35 50%, #2D7A4F 100%)' }}>
+      <div className="canopy px-5 pt-14 pb-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-white font-bold text-lg">Profil Saya</h2>
         </div>
@@ -46,44 +46,44 @@ export default function ProfileScreen({ navigate }) {
           )}
           <div className="min-w-0">
             <p className="text-white font-bold text-base truncate">{user?.name ?? 'Jamaah Manaseek'}</p>
-            <p className="text-green-200 text-xs mt-0.5 truncate">{user?.email}</p>
-            {user?.phone && <p className="text-green-200 text-xs mt-0.5">{user.phone}</p>}
+            <p className="text-canopy-100/85 text-xs mt-0.5 truncate">{user?.email}</p>
+            {user?.phone && <p className="text-canopy-100/85 text-xs mt-0.5">{user.phone}</p>}
           </div>
         </div>
       </div>
 
       {/* Trip */}
-      <div className="mx-5 -mt-4 bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-        <p className="text-sm font-bold text-gray-800 mb-3">Rencana Ibadah</p>
+      <div className="mx-5 mt-5 glass rounded-[20px] p-4">
+        <p className="text-sm font-semibold text-ink mb-3">Rencana Ibadah</p>
         {trip ? (
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #E8F3EC, #C3DFC9)' }}>
               <Landmark size={20} color="#1B5E35" strokeWidth={1.8} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-gray-800 truncate">
+              <p className="text-sm font-semibold text-ink truncate">
                 {trip.packageName ?? (trip.type === 'HAJJ' ? 'Haji' : 'Umrah')}
               </p>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-ink-faint mt-0.5">
                 Berangkat {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(trip.departureDate))}
                 {trip.agencyName ? ` • ${trip.agencyName}` : ''}
               </p>
             </div>
           </div>
         ) : (
-          <p className="text-xs text-gray-400">Belum ada rencana perjalanan yang terdaftar.</p>
+          <p className="text-xs text-ink-faint">Belum ada rencana perjalanan yang terdaftar.</p>
         )}
       </div>
 
       {/* Booking history */}
-      <div className="mx-5 mt-4 bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+      <div className="mx-5 mt-4 glass rounded-[20px] p-4">
         <div className="flex items-center gap-2 mb-3">
           <ClipboardList size={16} color="#1B5E35" />
-          <p className="text-sm font-bold text-gray-800">Riwayat Pemesanan</p>
+          <p className="text-sm font-semibold text-ink">Riwayat Pemesanan</p>
         </div>
 
         {bookings.length === 0 ? (
-          <p className="text-xs text-gray-400">Belum ada pemesanan mutawif.</p>
+          <p className="text-xs text-ink-faint">Belum ada pemesanan mutawif.</p>
         ) : (
           <div className="space-y-2.5">
             {bookings.map((b) => (
@@ -96,10 +96,10 @@ export default function ProfileScreen({ navigate }) {
                   <Star size={15} color="#1B5E35" strokeWidth={1.8} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-700 truncate">
+                  <p className="text-sm font-medium text-ink truncate">
                     {b.mutawif?.user?.name ?? 'Mutawif'}
                   </p>
-                  <p className="text-xs text-gray-400 truncate">
+                  <p className="text-xs text-ink-faint truncate">
                     {SERVICE_LABELS[b.serviceType] ?? b.serviceType} • {formatSchedule(b.scheduledStartAt)}
                   </p>
                 </div>
@@ -113,7 +113,7 @@ export default function ProfileScreen({ navigate }) {
       </div>
 
       {/* Menu: only entries that actually go somewhere */}
-      <div className="mx-5 mt-4 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="mx-5 mt-4 glass rounded-[20px] overflow-hidden">
         {[
           {
             Icon: CheckSquare,
@@ -141,8 +141,8 @@ export default function ProfileScreen({ navigate }) {
               <Icon size={15} color="#1B5E35" strokeWidth={1.8} />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-gray-700">{label}</p>
-              <p className="text-xs text-gray-400 mt-0.5">{sub}</p>
+              <p className="text-sm font-medium text-ink">{label}</p>
+              <p className="text-xs text-ink-faint mt-0.5">{sub}</p>
             </div>
             <ChevronRight size={15} color="#D1D5DB" />
           </button>

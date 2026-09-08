@@ -81,10 +81,10 @@ export default function BookingSuccessScreen({ navigate, params }) {
           {pending ? <Clock size={44} color="white" strokeWidth={1.8} /> : <CheckCircle size={44} color="white" strokeWidth={1.8} />}
         </div>
 
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+        <h2 className="text-2xl font-semibold text-ink mb-2">
           {pending ? 'Permintaan Terkirim' : BOOKING_STATUS_LABELS[booking.status]}
         </h2>
-        <p className="text-gray-500 text-sm leading-relaxed">
+        <p className="text-ink-soft text-sm leading-relaxed">
           {pending
             ? `Menunggu ${mutawifName} menerima permintaanmu. Kamu akan diberi tahu begitu dikonfirmasi.`
             : `Pesanan bersama ${mutawifName}.`}
@@ -98,11 +98,11 @@ export default function BookingSuccessScreen({ navigate, params }) {
         </span>
 
         <div className="mt-6 w-full rounded-2xl p-5 text-left" style={{ background: 'linear-gradient(135deg, #E8F3EC, #D1EBD8)' }}>
-          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Detail Pesanan</p>
+          <p className="text-sm font-semibold text-ink-soft mb-3">Detail pesanan</p>
           {rows.map((r) => (
             <div key={r.label} className="flex justify-between gap-3 py-1.5 border-b border-green-100 last:border-0">
-              <span className="text-xs text-gray-500 flex-shrink-0">{r.label}</span>
-              <span className="text-xs font-semibold text-gray-700 text-right">{r.val}</span>
+              <span className="text-xs text-ink-soft flex-shrink-0">{r.label}</span>
+              <span className="text-xs font-semibold text-ink text-right">{r.val}</span>
             </div>
           ))}
         </div>
@@ -117,7 +117,7 @@ export default function BookingSuccessScreen({ navigate, params }) {
           </button>
         )}
 
-        <p className="text-xs text-gray-400 mt-4 leading-relaxed">
+        <p className="text-xs text-ink-faint mt-4 leading-relaxed">
           Pembayaran diselesaikan langsung dengan mutawif. Belum ada pembayaran dalam aplikasi.
         </p>
       </div>

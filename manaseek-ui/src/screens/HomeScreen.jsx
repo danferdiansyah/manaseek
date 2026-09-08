@@ -19,20 +19,31 @@ const NAV_TABS = [
 
 export function BottomNav({ active, navigate }) {
   return (
-    <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-white border-t border-gray-100 flex shadow-lg z-50">
+    <div className="glass-bar fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] flex z-50 pb-[env(safe-area-inset-bottom)]">
       {NAV_TABS.map(({ id, label, Icon }) => {
         const isActive = active === id
         return (
           <button
             key={id}
             onClick={() => navigate(id)}
-            className="flex-1 flex flex-col items-center py-3 gap-0.5"
+            className="flex-1 flex flex-col items-center pt-2.5 pb-2 gap-1"
           >
-            <Icon size={20} color={isActive ? '#1B5E35' : '#9ca3af'} strokeWidth={isActive ? 2.2 : 1.8} />
-            <span className="text-[10px] font-medium" style={{ color: isActive ? '#1B5E35' : '#9ca3af' }}>
+            <span
+              className="w-11 h-7 rounded-full flex items-center justify-center transition-colors"
+              style={isActive ? { background: 'var(--color-canopy-100)' } : undefined}
+            >
+              <Icon
+                size={19}
+                color={isActive ? 'var(--color-canopy-700)' : 'var(--color-ink-faint)'}
+                strokeWidth={isActive ? 2.2 : 1.8}
+              />
+            </span>
+            <span
+              className="text-[11px] font-medium"
+              style={{ color: isActive ? 'var(--color-canopy-700)' : 'var(--color-ink-faint)' }}
+            >
               {label}
             </span>
-            {isActive && <div className="w-1 h-1 rounded-full" style={{ background: '#1B5E35' }} />}
           </button>
         )
       })}
@@ -45,6 +56,13 @@ const ICONS = {
   BookOpen, Scissors, Sunrise, Moon, Target, Heart, RotateCcw, ArrowRightLeft,
   Layers, ClipboardList,
 }
+
+// The one saturated element on the screen. Everything else stays quiet glass.
+const PILLARS = [
+  { label: 'Guidance\nMandiri', Icon: BookOpen, screen: 'guidance', grad: 'linear-gradient(150deg, #1B5E35 0%, #2D7A4F 100%)' },
+  { label: 'Chatbot\nAI', Icon: MessageCircle, screen: 'chatbot', grad: 'linear-gradient(150deg, #B8944A 0%, #D4A855 100%)' },
+  { label: 'Mutawif\nOn-Demand', Icon: UserCheck, screen: 'mutawif', grad: 'linear-gradient(150deg, #0F3D22 0%, #1B5E35 100%)' },
+]
 
 export default function HomeScreen({ navigate }) {
   const { user } = useAuth()
@@ -78,24 +96,27 @@ export default function HomeScreen({ navigate }) {
   const displayName = user?.name ?? user?.email ?? 'Jamaah'
 
   return (
-    <div className="flex flex-col min-h-full bg-gray-50">
-      {/* Header */}
-      <div className="px-5 pt-14 pb-6" style={{ background: 'linear-gradient(150deg, #0f3d22 0%, #1B5E35 50%, #2D7A4F 100%)' }}>
+    <div className="flex flex-col min-h-full bg-stone">
+      {/* Canopy */}
+      <div className="canopy px-5 pt-14 pb-6">
         <div className="flex items-center justify-between mb-5">
-          <div>
-            <p className="text-green-200 text-xs mb-0.5">Assalamu'alaikum</p>
-            <h2 className="text-white text-xl font-bold truncate max-w-[200px]">{displayName}</h2>
+          <div className="min-w-0">
+            <p className="text-canopy-100/80 text-sm">Assalamu'alaikum</p>
+            <h2 className="text-white text-2xl font-semibold tracking-tight truncate max-w-[210px]">
+              {displayName}
+            </h2>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <button
               onClick={() => navigate('notifications')}
-              className="relative w-9 h-9 rounded-full bg-white/15 flex items-center justify-center"
+              aria-label="Notifikasi"
+              className="glass-control relative w-10 h-10 rounded-full flex items-center justify-center"
             >
               <Bell size={18} color="white" strokeWidth={1.8} />
               {notificationCount > 0 && (
                 <span
-                  className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold flex items-center justify-center text-white"
-                  style={{ background: '#B8944A' }}
+                  className="absolute -top-1 -right-1 min-w-[19px] h-[19px] px-1 rounded-full text-[11px] font-semibold flex items-center justify-center text-white"
+                  style={{ background: 'var(--color-brass)', border: '1.5px solid rgba(255,255,255,.35)' }}
                 >
                   {notificationCount > 9 ? '9+' : notificationCount}
                 </span>
@@ -103,123 +124,139 @@ export default function HomeScreen({ navigate }) {
             </button>
             <button
               onClick={() => navigate('profile')}
-              className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden"
-              style={{ background: 'linear-gradient(135deg, #B8944A 0%, #D4A855 100%)', color: 'white' }}
+              aria-label="Profil"
+              className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-sm overflow-hidden text-white"
+              style={{
+                background: 'linear-gradient(150deg, #B8944A 0%, #D4A855 100%)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,.4)',
+              }}
             >
               {user?.avatarUrl
-                ? <img src={user.avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                ? <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
                 : initialsOf(displayName)}
             </button>
           </div>
         </div>
 
-        {/* Active booking, or a nudge to make one */}
+        {/* Sits fully inside the canopy, clear of its edge. */}
         {activeBooking ? (
           <button
             onClick={() => navigate('booking-success', { bookingId: activeBooking.id })}
-            className="w-full rounded-2xl p-4 text-left backdrop-blur-sm"
-            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)' }}
+            className="glass-canopy w-full rounded-[20px] p-4 text-left"
           >
-            <p className="text-green-100 text-xs mb-1">Pesanan Aktif</p>
+            <p className="text-canopy-100/80 text-xs mb-1">Pesanan aktif</p>
             <p className="text-white font-semibold truncate">
-              {activeBooking.mutawif?.user?.name ?? 'Mutawif'} — {BOOKING_STATUS_LABELS[activeBooking.status]}
+              {activeBooking.mutawif?.user?.name ?? 'Mutawif'}
             </p>
-            <p className="text-green-200 text-xs mt-1.5">
-              {formatSchedule(activeBooking.scheduledStartAt)} WAS • {activeBooking.meetingPointLabel}
+            <p className="text-canopy-100/90 text-sm mt-0.5">
+              {BOOKING_STATUS_LABELS[activeBooking.status]}
+            </p>
+            <p className="text-canopy-100/85 text-xs mt-2">
+              {formatSchedule(activeBooking.scheduledStartAt)} WAS · {activeBooking.meetingPointLabel}
             </p>
           </button>
         ) : (
           <button
             onClick={() => navigate('mutawif')}
-            className="w-full rounded-2xl p-4 text-left backdrop-blur-sm"
-            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)' }}
+            className="glass-canopy w-full rounded-[20px] p-4 text-left"
           >
-            <p className="text-green-100 text-xs mb-1">Belum ada pesanan aktif</p>
+            <p className="text-canopy-100/80 text-xs mb-1">Belum ada pesanan aktif</p>
             <p className="text-white font-semibold">Cari mutawif di sekitarmu</p>
-            <p className="text-green-200 text-xs mt-1.5">Pendampingan ibadah, bantuan lansia, atau darurat</p>
+            <p className="text-canopy-100/85 text-xs mt-1.5">
+              Pendampingan ibadah, bantuan lansia, atau darurat
+            </p>
           </button>
         )}
       </div>
 
-      {/* Main features */}
-      <div className="px-5 -mt-3 z-10 relative">
+      {/* Content starts below the canopy, not across it. */}
+      <div className="px-5 pt-6 pb-28 space-y-7">
         <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: 'Guidance\nMandiri', Icon: BookOpen, screen: 'guidance', grad: 'linear-gradient(135deg, #1B5E35 0%, #2D7A4F 100%)' },
-            { label: 'Chatbot\nAI', Icon: MessageCircle, screen: 'chatbot', grad: 'linear-gradient(135deg, #B8944A 0%, #D4A855 100%)' },
-            { label: 'Mutawif\nOn-Demand', Icon: UserCheck, screen: 'mutawif', grad: 'linear-gradient(135deg, #0f3d22 0%, #1B5E35 100%)' },
-          ].map((f) => (
+          {PILLARS.map((pillar) => (
             <button
-              key={f.label}
-              onClick={() => navigate(f.screen)}
-              className="flex flex-col items-center justify-center py-5 px-2 rounded-2xl shadow-md text-white"
-              style={{ background: f.grad }}
+              key={pillar.label}
+              onClick={() => navigate(pillar.screen)}
+              className="flex flex-col items-center justify-center py-5 px-2 rounded-[20px] text-white"
+              style={{
+                background: pillar.grad,
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,.28), 0 10px 24px -16px rgba(15,61,34,.7)',
+              }}
             >
-              <f.Icon size={26} color="white" strokeWidth={1.8} className="mb-2" />
-              <span className="text-xs font-semibold text-center leading-tight whitespace-pre-line opacity-95">
-                {f.label}
+              <pillar.Icon size={25} color="white" strokeWidth={1.8} className="mb-2" />
+              <span className="text-xs font-semibold text-center leading-tight whitespace-pre-line">
+                {pillar.label}
               </span>
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Quick phases */}
-      <div className="px-5 mt-5">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-gray-800 text-sm">Panduan Ibadah</h3>
-          <button onClick={() => navigate('guidance')} className="text-xs font-medium flex items-center gap-0.5" style={{ color: '#1B5E35' }}>
-            Lihat semua <ChevronRight size={13} />
-          </button>
-        </div>
-        <div className="grid grid-cols-4 gap-2">
-          {topics.slice(0, 4).map((topic) => {
-            const Icon = ICONS[topic.icon] ?? BookOpen
-            return (
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-ink">Panduan ibadah</h3>
+            <button
+              onClick={() => navigate('guidance')}
+              className="text-sm font-medium flex items-center gap-0.5 text-canopy-700"
+            >
+              Lihat semua <ChevronRight size={14} />
+            </button>
+          </div>
+          <div className="grid grid-cols-4 gap-2.5">
+            {topics.slice(0, 4).map((topic) => {
+              const Icon = ICONS[topic.icon] ?? BookOpen
+              return (
+                <button
+                  key={topic.slug}
+                  onClick={() => navigate('guidance-detail', { slug: topic.slug })}
+                  className="glass flex flex-col items-center justify-start py-3.5 rounded-[16px] min-h-[86px]"
+                >
+                  <span
+                    className="w-9 h-9 rounded-[11px] flex items-center justify-center mb-1.5"
+                    style={{ background: 'var(--color-canopy-100)' }}
+                  >
+                    <Icon size={17} color="var(--color-canopy-700)" strokeWidth={1.8} />
+                  </span>
+                  <span className="text-[11px] text-ink-soft font-medium text-center leading-tight px-1 line-clamp-2">
+                    {topic.title}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
+        <section>
+          <h3 className="font-semibold text-ink mb-3">Bacaan lanjutan</h3>
+          <div className="space-y-2.5">
+            {topics.slice(4, 6).map((topic) => (
               <button
                 key={topic.slug}
                 onClick={() => navigate('guidance-detail', { slug: topic.slug })}
-                className="flex flex-col items-center py-3 rounded-xl bg-white shadow-sm border border-gray-100"
+                className="glass w-full flex items-center gap-3 rounded-[20px] p-4 text-left"
               >
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-1" style={{ background: '#E8F3EC' }}>
-                  <Icon size={17} color="#1B5E35" strokeWidth={1.8} />
-                </div>
-                <span className="text-xs text-gray-600 font-medium text-center leading-tight px-1 truncate w-full">
-                  {topic.title}
+                <span
+                  className="w-10 h-10 rounded-[13px] flex items-center justify-center flex-shrink-0"
+                  style={{ background: 'var(--color-canopy-100)' }}
+                >
+                  <FileText size={18} color="var(--color-canopy-700)" strokeWidth={1.8} />
                 </span>
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[15px] font-medium text-ink truncate">{topic.title}</span>
+                  <span className="block text-xs text-ink-faint mt-0.5">
+                    {topic.readingMinutes} menit baca
+                  </span>
+                </span>
+                {topic.obligation && (
+                  <span
+                    className="text-xs px-2.5 py-1 rounded-full font-medium flex-shrink-0"
+                    style={{ background: 'var(--color-brass-bg)', color: 'var(--color-brass)' }}
+                  >
+                    {topic.obligation}
+                  </span>
+                )}
               </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Tips */}
-      <div className="px-5 mt-5 mb-24">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-gray-800 text-sm">Tips &amp; Informasi</h3>
-        </div>
-        <div className="space-y-3">
-          {topics.slice(4, 6).map((topic) => (
-            <button
-              key={topic.slug}
-              onClick={() => navigate('guidance-detail', { slug: topic.slug })}
-              className="w-full flex items-center gap-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-left"
-            >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #E8F3EC, #C3DFC9)' }}>
-                <FileText size={18} color="#1B5E35" strokeWidth={1.8} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-800 truncate">{topic.title}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{topic.readingMinutes} menit baca</p>
-              </div>
-              {topic.obligation && (
-                <span className="text-xs px-2 py-1 rounded-full font-medium flex-shrink-0" style={{ background: '#F5EDD8', color: '#B8944A' }}>
-                  {topic.obligation}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+            ))}
+          </div>
+        </section>
       </div>
 
       <BottomNav active="home" navigate={navigate} />
