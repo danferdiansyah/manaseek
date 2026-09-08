@@ -79,8 +79,11 @@ function Shell() {
   }
 
   return (
-    <div className="min-h-screen w-full flex justify-center" style={{ background: '#e5e7eb' }}>
-      <div className="relative w-full max-w-[420px] min-h-screen bg-gray-50 shadow-xl overflow-x-hidden">
+    <div className="min-h-screen w-full flex justify-center">
+      <div
+        className="relative w-full max-w-[420px] min-h-screen bg-stone overflow-x-hidden"
+        style={{ boxShadow: '0 0 60px -20px rgba(15,61,34,.35)' }}
+      >
         <ActiveScreen navigate={navigate} params={routeParams} />
       </div>
     </div>
