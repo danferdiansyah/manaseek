@@ -17,6 +17,7 @@ import {
   UserRole,
   VerificationStatus,
 } from '@prisma/client';
+import { seedContent } from './content';
 
 const prisma = new PrismaClient();
 
@@ -264,6 +265,8 @@ async function main(): Promise<void> {
   for (const seed of MUTAWIF_SEEDS) {
     mutawifIds.push(await seedMutawif(seed, adminId));
   }
+
+  await seedContent(prisma);
 
   const jamaahId = await seedJamaah();
   await seedBooking(jamaahId, mutawifIds[0]);

@@ -55,16 +55,17 @@ model User {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  jamaahProfile   JamaahProfile?
-  mutawifProfile  MutawifProfile?
-  refreshTokens   RefreshToken[]
-  travelDocuments TravelDocument[]
-  trips           Trip[]
-  deviceTokens    DeviceToken[]
-  notifications   Notification[]
-  auditLogs       AuditLog[]
-  jamaahBookings  Booking[]        @relation("JamaahBookings")
-  reviewsWritten  Review[]         @relation("ReviewAuthor")
+  jamaahProfile       JamaahProfile?
+  mutawifProfile      MutawifProfile?
+  refreshTokens       RefreshToken[]
+  travelDocuments     TravelDocument[]
+  trips               Trip[]
+  deviceTokens        DeviceToken[]
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+  jamaahBookings      Booking[]           @relation("JamaahBookings")
+  reviewsWritten      Review[]            @relation("ReviewAuthor")
+  checklistProgresses ChecklistProgress[]
 
   @@index([role, status])
   @@index([organizationId])
@@ -477,4 +478,144 @@ model AuditLog {
   @@index([entity, entityId])
   @@index([actorId, createdAt])
   @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Guidance content
+//
+// Ownership note: this section belongs to the content track. Everything seeded
+// so far is DRAFT and must be reviewed by a qualified pembimbing before it is
+// published to jamaah.
+// ---------------------------------------------------------------------------
+
+enum RitualPhase {
+  PREPARATION
+  IHRAM
+  TAWAF
+  SAI
+  TAHALLUL
+  WUKUF
+  MABIT
+  JUMRAH
+  GENERAL
+}
+
+enum ContentCategory {
+  UMRAH
+  HAJJ
+  DOA
+  PERSIAPAN
+}
+
+enum ContentStatus {
+  DRAFT
+  IN_REVIEW
+  PUBLISHED
+}
+
+model GuidanceTopic {
+  id      String @id @default(uuid()) @db.Uuid
+  slug    String @unique
+  title   String
+  summary String
+
+  phase      RitualPhase
+  categories ContentCategory[] @default([])
+  /// Fiqh classification shown as a badge: Rukun, Wajib, Sunnah.
+  obligation String?
+
+  readingMinutes Int     @default(3)
+  orderIndex     Int     @default(0)
+  /// Lucide icon name the client maps to a component.
+  icon           String?
+  audioUrl       String?
+
+  status     ContentStatus @default(DRAFT)
+  reviewedBy String?
+  reviewedAt DateTime?
+  version    Int           @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  steps        GuidanceStep[]
+  prayers      Prayer[]
+  prohibitions Prohibition[]
+
+  @@index([status, phase, orderIndex])
+  @@map("guidance_topics")
+}
+
+model GuidanceStep {
+  id         String @id @default(uuid()) @db.Uuid
+  topicId    String @db.Uuid
+  orderIndex Int
+  text       String
+
+  topic GuidanceTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, orderIndex])
+  @@map("guidance_steps")
+}
+
+model Prayer {
+  id              String  @id @default(uuid()) @db.Uuid
+  slug            String  @unique
+  title           String
+  arabic          String
+  transliteration String
+  translation     String
+  /// Where the prayer is read, e.g. "Saat memasuki Masjidil Haram".
+  context         String?
+  orderIndex      Int     @default(0)
+
+  topicId String?        @db.Uuid
+  topic   GuidanceTopic? @relation(fields: [topicId], references: [id], onDelete: SetNull)
+
+  @@index([topicId, orderIndex])
+  @@map("prayers")
+}
+
+model Prohibition {
+  id          String  @id @default(uuid()) @db.Uuid
+  topicId     String  @db.Uuid
+  orderIndex  Int
+  text        String
+  /// The fiqh consequence, e.g. "Wajib membayar dam".
+  consequence String?
+
+  topic GuidanceTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, orderIndex])
+  @@map("prohibitions")
+}
+
+model ChecklistItem {
+  id          String          @id @default(uuid()) @db.Uuid
+  slug        String          @unique
+  title       String
+  description String?
+  category    ContentCategory @default(PERSIAPAN)
+  orderIndex  Int             @default(0)
+  status      ContentStatus   @default(DRAFT)
+
+  progress ChecklistProgress[]
+
+  @@index([status, orderIndex])
+  @@map("checklist_items")
+}
+
+/// One row per item a jamaah has ticked off. Absence means not done.
+model ChecklistProgress {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @db.Uuid
+  itemId      String   @db.Uuid
+  completedAt DateTime @default(now())
+
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  item ChecklistItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId])
+  @@index([userId])
+  @@map("checklist_progress")
 }
