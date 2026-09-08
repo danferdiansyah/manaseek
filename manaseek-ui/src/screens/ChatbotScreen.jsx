@@ -192,10 +192,19 @@ export default function ChatbotScreen({ navigate }) {
 
         {error && (
           <div
-            className="rounded-[14px] px-4 py-3 text-sm"
-            style={{ background: '#FDF0EF', border: '1px solid #F3D2CE', color: '#A8332B' }}
+            className="rounded-[16px] px-4 py-3.5"
+            style={{ background: '#FDF0EF', border: '1px solid #F3D2CE' }}
           >
-            {error}
+            <p className="text-sm leading-relaxed" style={{ color: '#A8332B' }}>{error}</p>
+            {/* A dead end is not an answer: always leave the human route open. */}
+            <button
+              onClick={() => navigate('mutawif')}
+              className="mt-2.5 flex items-center gap-2 rounded-[12px] px-3.5 py-2.5 w-full"
+              style={{ background: 'var(--color-canopy-100)' }}
+            >
+              <UserCheck size={15} color="var(--color-canopy-700)" strokeWidth={1.9} />
+              <span className="text-sm font-medium text-canopy-700">Tanya mutawif langsung</span>
+            </button>
           </div>
         )}
 

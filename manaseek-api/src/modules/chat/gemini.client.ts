@@ -39,6 +39,16 @@ export interface GeminiResult {
   object: GeminiAnswer;
   promptTokens: number | null;
   completionTokens: number | null;
+  /** Which model actually produced the answer, after any fallback. */
+  model: string;
+}
+
+/** Every candidate model returned 429. The caller turns this into a 429. */
+export class GeminiQuotaError extends Error {
+  constructor(readonly models: string[]) {
+    super(`Gemini quota exhausted for: ${models.join(', ')}`);
+    this.name = 'GeminiQuotaError';
+  }
 }
 
 /**
@@ -49,10 +59,48 @@ export interface GeminiResult {
  * first-class Gemini feature anyway, so the REST call costs nothing in
  * capability and removes two dependencies.
  */
+/** Internal signal that one model is out of quota; never leaves this file. */
+class QuotaExceeded extends Error {
+  constructor(readonly model: string) {
+    super(`quota exhausted: ${model}`);
+  }
+}
+
 export class GeminiClient {
   private static readonly logger = new Logger(GeminiClient.name);
 
+  /**
+   * Tries each model in turn and moves on when one is out of quota.
+   *
+   * The free tier allows 20 requests per day per model, which a single demo
+   * can burn through. Falling back to another model keeps the assistant alive
+   * on its own daily allowance rather than taking the feature down.
+   */
   static async generateAnswer(options: {
+    apiKey: string;
+    models: string[];
+    system: string;
+    turns: GeminiTurn[];
+  }): Promise<GeminiResult> {
+    const exhausted: string[] = [];
+
+    for (const model of options.models) {
+      try {
+        return await this.callModel({ ...options, model });
+      } catch (error) {
+        if (error instanceof QuotaExceeded) {
+          this.logger.warn(`${model} is out of quota, trying the next model`);
+          exhausted.push(model);
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    throw new GeminiQuotaError(exhausted);
+  }
+
+  private static async callModel(options: {
     apiKey: string;
     model: string;
     system: string;
@@ -84,6 +132,10 @@ export class GeminiClient {
         },
       );
 
+      if (response.status === 429) {
+        throw new QuotaExceeded(options.model);
+      }
+
       if (!response.ok) {
         const detail = await response.text();
         throw new Error(`Gemini responded ${response.status}: ${detail.slice(0, 300)}`);
@@ -103,6 +155,7 @@ export class GeminiClient {
         object: this.parse(text),
         promptTokens: payload.usageMetadata?.promptTokenCount ?? null,
         completionTokens: payload.usageMetadata?.candidatesTokenCount ?? null,
+        model: options.model,
       };
     } finally {
       clearTimeout(timer);

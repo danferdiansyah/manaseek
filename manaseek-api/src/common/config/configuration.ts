@@ -33,6 +33,11 @@ export const envSchema = z.object({
   // "not configured" error instead of failing somewhere deeper.
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
+  // Tried in order when the primary model is out of its daily free-tier quota.
+  GEMINI_FALLBACK_MODELS: z
+    .string()
+    .default('gemini-2.5-flash-lite')
+    .transform((value) => value.split(',').map((m) => m.trim()).filter(Boolean)),
 
   PUSH_PROVIDER: z.enum(['noop', 'fcm']).default('noop'),
   FCM_PROJECT_ID: z.string().optional(),

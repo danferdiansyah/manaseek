@@ -4,7 +4,7 @@ import { AppConfigService } from '@/common/config/config.service';
 import { AppError, ErrorCode } from '@/common/errors/app-error';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { SYSTEM_PROMPT, renderContext, type TopicContext } from './chat.prompt';
-import { GeminiClient } from './gemini.client';
+import { GeminiClient, GeminiQuotaError } from './gemini.client';
 import type { SendMessageDto } from './dto/chat.dto';
 
 /** How much of the conversation is replayed to the model. */
@@ -79,13 +79,13 @@ export class ChatService {
     });
 
     const context = await this.guidanceContext();
-    const model = this.config.get('GEMINI_MODEL');
+    const models = [this.config.get('GEMINI_MODEL'), ...this.config.get('GEMINI_FALLBACK_MODELS')];
 
     let result;
     try {
       result = await GeminiClient.generateAnswer({
         apiKey,
-        model,
+        models,
         system: `${SYSTEM_PROMPT}\n\n${context.text}`,
         turns: history.reverse().map((m) => ({
           role: m.role === ChatRole.USER ? ('user' as const) : ('model' as const),
@@ -93,6 +93,17 @@ export class ChatService {
         })),
       });
     } catch (error) {
+      if (error instanceof GeminiQuotaError) {
+        this.logger.warn(error.message);
+        // Say what actually happened. "Try again shortly" would be a lie: the
+        // free-tier allowance is daily.
+        throw new AppError(
+          ErrorCode.AI_QUOTA_EXCEEDED,
+          'Kuota harian asisten AI sudah habis. Coba lagi besok, atau tanyakan langsung ke mutawif.',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+
       this.logger.error(`Gemini call failed: ${(error as Error).message}`);
       throw new AppError(
         ErrorCode.INTERNAL_ERROR,
@@ -114,7 +125,7 @@ export class ChatService {
         escalated: result.object.needsHuman,
         promptTokens: result.promptTokens,
         completionTokens: result.completionTokens,
-        model,
+        model: result.model,
       },
     });
 
@@ -124,7 +135,7 @@ export class ChatService {
     });
 
     this.logger.log(
-      `chat ${session.id} model=${model} in=${result.promptTokens ?? '?'} out=${result.completionTokens ?? '?'}`,
+      `chat ${session.id} model=${result.model} in=${result.promptTokens ?? '?'} out=${result.completionTokens ?? '?'}`,
     );
 
     return {

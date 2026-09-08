@@ -130,6 +130,14 @@ enforced rather than hoped for:
 Set `GEMINI_API_KEY` from https://aistudio.google.com/apikey. Without it the
 endpoint answers 503 with a clear message instead of failing deeper in.
 
+**The free tier allows 20 requests per day, per model.** A single demo session
+can exhaust it. `GEMINI_FALLBACK_MODELS` is tried in order when the primary
+model returns 429, so one exhausted model does not take the assistant down;
+each model carries its own daily allowance. When every model is spent the API
+answers `429 AI_QUOTA_EXCEEDED` and says so plainly, and the client still
+offers the route to a human mutawif. Enabling billing on the Google Cloud
+project lifts the cap.
+
 **Boundary rule:** a module never queries another module's tables. Cross-module
 access goes through the owning module's exported service.
 
