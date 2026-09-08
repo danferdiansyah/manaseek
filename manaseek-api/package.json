@@ -23,7 +23,6 @@
     "seed": "tsx --env-file=.env prisma/seed.ts"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.64",
     "@nestjs/common": "^11.1.6",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.1.6",
@@ -33,7 +32,6 @@
     "@nestjs/swagger": "^11.2.0",
     "@nestjs/throttler": "^6.4.0",
     "@prisma/client": "^6.16.2",
-    "ai": "^7.0.93",
     "jsonwebtoken": "^9.0.2",
     "nestjs-pino": "^4.4.0",
     "pino": "^9.9.0",

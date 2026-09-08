@@ -1,45 +1,15 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ChatRole } from '@prisma/client';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { generateObject, jsonSchema } from 'ai';
 import { AppConfigService } from '@/common/config/config.service';
 import { AppError, ErrorCode } from '@/common/errors/app-error';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { SYSTEM_PROMPT, renderContext, type TopicContext } from './chat.prompt';
+import { GeminiClient } from './gemini.client';
 import type { SendMessageDto } from './dto/chat.dto';
 
 /** How much of the conversation is replayed to the model. */
 const HISTORY_TURNS = 8;
 const CONTEXT_TTL_MS = 5 * 60 * 1000;
-
-interface Answer {
-  answer: string;
-  citedSlugs: string[];
-  needsHuman: boolean;
-}
-
-// Declared as JSON Schema rather than Zod: the AI SDK's Zod generics recurse
-// deep enough here that the compiler gives up (TS2589).
-const answerSchema = jsonSchema<Answer>({
-  type: 'object',
-  properties: {
-    answer: {
-      type: 'string',
-      description: 'Jawaban untuk jamaah, bahasa Indonesia, ringkas, maksimal empat kalimat.',
-    },
-    citedSlugs: {
-      type: 'array',
-      items: { type: 'string' },
-      description: 'Slug panduan yang benar-benar dipakai untuk menyusun jawaban.',
-    },
-    needsHuman: {
-      type: 'boolean',
-      description: 'True bila pertanyaan ini harus ditangani mutawif manusia.',
-    },
-  },
-  required: ['answer', 'citedSlugs', 'needsHuman'],
-  additionalProperties: false,
-});
 
 @Injectable()
 export class ChatService {
@@ -113,17 +83,14 @@ export class ChatService {
 
     let result;
     try {
-      const google = createGoogleGenerativeAI({ apiKey });
-      result = await generateObject({
-        model: google(model),
-        schema: answerSchema,
+      result = await GeminiClient.generateAnswer({
+        apiKey,
+        model,
         system: `${SYSTEM_PROMPT}\n\n${context.text}`,
-        messages: history
-          .reverse()
-          .map((m) => ({
-            role: m.role === ChatRole.USER ? ('user' as const) : ('assistant' as const),
-            content: m.content,
-          })),
+        turns: history.reverse().map((m) => ({
+          role: m.role === ChatRole.USER ? ('user' as const) : ('model' as const),
+          text: m.content,
+        })),
       });
     } catch (error) {
       this.logger.error(`Gemini call failed: ${(error as Error).message}`);
@@ -145,8 +112,8 @@ export class ChatService {
         content: result.object.answer,
         citedSlugs,
         escalated: result.object.needsHuman,
-        promptTokens: result.usage?.inputTokens ?? null,
-        completionTokens: result.usage?.outputTokens ?? null,
+        promptTokens: result.promptTokens,
+        completionTokens: result.completionTokens,
         model,
       },
     });
@@ -157,7 +124,7 @@ export class ChatService {
     });
 
     this.logger.log(
-      `chat ${session.id} model=${model} in=${result.usage?.inputTokens ?? '?'} out=${result.usage?.outputTokens ?? '?'}`,
+      `chat ${session.id} model=${model} in=${result.promptTokens ?? '?'} out=${result.completionTokens ?? '?'}`,
     );
 
     return {
