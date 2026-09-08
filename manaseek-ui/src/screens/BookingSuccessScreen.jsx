@@ -1,68 +1,141 @@
-import { CheckCircle, Navigation, MessageCircle, Home } from 'lucide-react'
+import { useCallback, useEffect } from 'react'
+import { CheckCircle, Clock, Home, RefreshCw, UserCheck } from 'lucide-react'
+import { api } from '../lib/api'
+import { BOOKING_STATUS_LABELS, formatRupiah, formatSchedule, SERVICE_LABELS } from '../lib/format'
+import { ErrorState, Loading } from '../lib/ui'
+import { useResource } from '../lib/useResource'
 
-const orderDetails = [
-  { label: 'ID Pesanan',   val: '#MNS-20250313' },
-  { label: 'Mutawif',      val: 'Ustadz Hasan Al-Makki' },
-  { label: 'Layanan',      val: 'Pendampingan Ibadah' },
-  { label: 'Waktu',        val: 'Selasa, 13 Mar • 10:00 WAS' },
-  { label: 'Lokasi',       val: 'Pintu King Fahd, Masjidil Haram' },
-  { label: 'Total Bayar',  val: 'Rp 735.000' },
-]
+const STATUS_TONE = {
+  REQUESTED: { bg: '#FEF3C7', fg: '#B45309' },
+  ACCEPTED: { bg: '#E8F3EC', fg: '#1B5E35' },
+  ONGOING: { bg: '#E8F3EC', fg: '#1B5E35' },
+  COMPLETED: { bg: '#E8F3EC', fg: '#1B5E35' },
+  REJECTED: { bg: '#FEE2E2', fg: '#B91C1C' },
+  CANCELLED: { bg: '#FEE2E2', fg: '#B91C1C' },
+  EXPIRED: { bg: '#F3F4F6', fg: '#6B7280' },
+}
 
-export default function BookingSuccessScreen({ navigate }) {
+export default function BookingSuccessScreen({ navigate, params }) {
+  const bookingId = params?.bookingId
+  const fetchBooking = useCallback(() => {
+    if (!bookingId) return Promise.reject(new Error('Pesanan tidak ditemukan.'))
+    return api.get(`/bookings/${bookingId}`)
+  }, [bookingId])
+
+  const { status, data: booking, error, reload } = useResource(fetchBooking)
+
+  // A request sits in REQUESTED until the mutawif answers, so poll while it does.
+  useEffect(() => {
+    if (booking?.status !== 'REQUESTED') return
+
+    const timer = setInterval(reload, 10000)
+    return () => clearInterval(timer)
+  }, [booking?.status, reload])
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-full bg-white pt-24">
+        <Loading label="Memuat pesanan…" />
+      </div>
+    )
+  }
+
+  if (status === 'error') {
+    return (
+      <div className="min-h-full bg-white pt-24">
+        <ErrorState message={error} onRetry={reload} />
+        <div className="px-6">
+          <button onClick={() => navigate('home')} className="w-full py-3 rounded-xl text-sm font-semibold" style={{ background: '#E8F3EC', color: '#1B5E35' }}>
+            Kembali ke beranda
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  const pending = booking.status === 'REQUESTED'
+  const tone = STATUS_TONE[booking.status] ?? STATUS_TONE.EXPIRED
+  const mutawifName = booking.mutawif?.user?.name ?? 'Mutawif'
+
+  const rows = [
+    { label: 'Kode Pesanan', val: booking.code },
+    { label: 'Mutawif', val: mutawifName },
+    { label: 'Layanan', val: SERVICE_LABELS[booking.serviceType] ?? booking.serviceType },
+    { label: 'Waktu', val: `${formatSchedule(booking.scheduledStartAt)} WAS` },
+    { label: 'Durasi', val: `${booking.durationHours} jam` },
+    { label: 'Lokasi', val: booking.meetingPointLabel },
+    { label: 'Total', val: formatRupiah(booking.totalAmount) },
+  ]
+
   return (
     <div className="flex flex-col min-h-full bg-white items-center justify-between px-6 py-12">
       <div />
 
       <div className="flex flex-col items-center text-center w-full">
-        {/* Success icon */}
-        <div className="w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-xl"
-          style={{ background: 'linear-gradient(135deg, #1B5E35 0%, #2D7A4F 100%)' }}>
-          <CheckCircle size={44} color="white" strokeWidth={1.8} />
+        <div
+          className="w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-xl"
+          style={{ background: pending
+            ? 'linear-gradient(135deg, #B8944A 0%, #D4A855 100%)'
+            : 'linear-gradient(135deg, #1B5E35 0%, #2D7A4F 100%)' }}
+        >
+          {pending ? <Clock size={44} color="white" strokeWidth={1.8} /> : <CheckCircle size={44} color="white" strokeWidth={1.8} />}
         </div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Pemesanan Berhasil!</h2>
+
+        <h2 className="text-2xl font-bold text-gray-800 mb-2">
+          {pending ? 'Permintaan Terkirim' : BOOKING_STATUS_LABELS[booking.status]}
+        </h2>
         <p className="text-gray-500 text-sm leading-relaxed">
-          Ustadz Hasan Al-Makki telah menerima pesananmu dan akan segera menuju lokasi.
+          {pending
+            ? `Menunggu ${mutawifName} menerima permintaanmu. Kamu akan diberi tahu begitu dikonfirmasi.`
+            : `Pesanan bersama ${mutawifName}.`}
         </p>
 
-        {/* Order card */}
-        <div className="mt-8 w-full rounded-2xl p-5 text-left" style={{ background: 'linear-gradient(135deg, #E8F3EC, #D1EBD8)' }}>
+        <span
+          className="mt-4 text-xs px-3 py-1.5 rounded-full font-semibold"
+          style={{ background: tone.bg, color: tone.fg }}
+        >
+          {BOOKING_STATUS_LABELS[booking.status] ?? booking.status}
+        </span>
+
+        <div className="mt-6 w-full rounded-2xl p-5 text-left" style={{ background: 'linear-gradient(135deg, #E8F3EC, #D1EBD8)' }}>
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Detail Pesanan</p>
-          {orderDetails.map((r) => (
-            <div key={r.label} className="flex justify-between py-1.5 border-b border-green-100 last:border-0">
-              <span className="text-xs text-gray-500">{r.label}</span>
-              <span className="text-xs font-semibold text-gray-700">{r.val}</span>
+          {rows.map((r) => (
+            <div key={r.label} className="flex justify-between gap-3 py-1.5 border-b border-green-100 last:border-0">
+              <span className="text-xs text-gray-500 flex-shrink-0">{r.label}</span>
+              <span className="text-xs font-semibold text-gray-700 text-right">{r.val}</span>
             </div>
           ))}
         </div>
 
-        {/* Tracking */}
-        <div className="mt-4 w-full bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-400">Status Mutawif</p>
-              <p className="text-sm font-bold" style={{ color: '#1B5E35' }}>Sedang menuju lokasimu</p>
-            </div>
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #E8F3EC, #C3DFC9)' }}>
-              <Navigation size={18} color="#1B5E35" strokeWidth={1.8} />
-            </div>
-          </div>
-          <div className="mt-3 bg-gray-100 rounded-full h-1.5">
-            <div className="h-1.5 rounded-full w-1/3" style={{ background: 'linear-gradient(90deg, #1B5E35, #2D7A4F)' }} />
-          </div>
-          <p className="text-xs text-gray-400 mt-1.5">Estimasi tiba: 8 menit</p>
-        </div>
+        {pending && (
+          <button
+            onClick={reload}
+            className="mt-4 text-xs font-semibold flex items-center gap-1.5"
+            style={{ color: '#1B5E35' }}
+          >
+            <RefreshCw size={13} /> Perbarui status
+          </button>
+        )}
+
+        <p className="text-xs text-gray-400 mt-4 leading-relaxed">
+          Pembayaran diselesaikan langsung dengan mutawif. Belum ada pembayaran dalam aplikasi.
+        </p>
       </div>
 
-      {/* Actions */}
-      <div className="w-full space-y-3">
-        <button onClick={() => navigate('home')} className="w-full py-4 rounded-2xl text-white font-bold flex items-center justify-center gap-2"
-          style={{ background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)' }}>
+      <div className="w-full space-y-3 mt-8">
+        <button
+          onClick={() => navigate('home')}
+          className="w-full py-4 rounded-2xl text-white font-bold flex items-center justify-center gap-2"
+          style={{ background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)' }}
+        >
           <Home size={18} /> Kembali ke Beranda
         </button>
-        <button onClick={() => navigate('chatbot')} className="w-full py-4 rounded-2xl font-semibold border-2 text-sm flex items-center justify-center gap-2"
-          style={{ borderColor: '#1B5E35', color: '#1B5E35' }}>
-          <MessageCircle size={16} /> Chat dengan Mutawif
+        <button
+          onClick={() => navigate('mutawif')}
+          className="w-full py-4 rounded-2xl font-semibold border-2 text-sm flex items-center justify-center gap-2"
+          style={{ borderColor: '#1B5E35', color: '#1B5E35' }}
+        >
+          <UserCheck size={16} /> Cari Mutawif Lain
         </button>
       </div>
     </div>
