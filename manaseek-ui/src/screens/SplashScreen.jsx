@@ -1,6 +1,29 @@
+import { useCallback, useState } from 'react'
 import { BookOpen, MessageCircle, UserCheck } from 'lucide-react'
+import GoogleSignInButton from '../lib/GoogleSignInButton'
+import { useAuth } from '../lib/auth-context'
 
 export default function SplashScreen({ navigate }) {
+  const { signInWithGoogle } = useAuth()
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState(null)
+
+  const handleCredential = useCallback(
+    async (idToken) => {
+      setBusy(true)
+      setError(null)
+      try {
+        await signInWithGoogle(idToken)
+        navigate('home')
+      } catch (err) {
+        setError(err.message ?? 'Gagal masuk. Coba lagi.')
+      } finally {
+        setBusy(false)
+      }
+    },
+    [signInWithGoogle, navigate],
+  )
+
   return (
     <div className="flex flex-col min-h-full bg-white">
       {/* Green hero */}
@@ -27,7 +50,7 @@ export default function SplashScreen({ navigate }) {
         </div>
       </div>
 
-      {/* Feature pills */}
+      {/* Feature pills + sign in */}
       <div className="px-6 pt-6 pb-8 bg-white">
         <div className="flex gap-2 justify-center mb-6">
           {[
@@ -46,23 +69,16 @@ export default function SplashScreen({ navigate }) {
           ))}
         </div>
 
-        <button
-          onClick={() => navigate('home')}
-          className="w-full py-4 rounded-2xl text-white font-semibold text-base mb-3 shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #1B5E35 0%, #2D7A4F 100%)' }}
-        >
-          Masuk ke Akun
-        </button>
-        <button
-          onClick={() => navigate('home')}
-          className="w-full py-4 rounded-2xl font-semibold text-base border-2"
-          style={{ borderColor: '#1B5E35', color: '#1B5E35' }}
-        >
-          Daftar Sekarang
-        </button>
+        {busy ? (
+          <p className="text-center text-sm text-gray-500 py-3">Menyiapkan akun…</p>
+        ) : (
+          <GoogleSignInButton onCredential={handleCredential} onError={setError} />
+        )}
+
+        {error && <p className="text-center text-xs text-red-500 mt-3">{error}</p>}
 
         <p className="text-center text-xs text-gray-400 mt-5">
-          Dengan mendaftar, kamu menyetujui{' '}
+          Masuk dengan akun Google. Dengan melanjutkan, kamu menyetujui{' '}
           <span style={{ color: '#B8944A' }}>Syarat &amp; Ketentuan</span> kami
         </p>
       </div>

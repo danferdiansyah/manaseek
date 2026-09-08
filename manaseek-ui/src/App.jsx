@@ -1,4 +1,7 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
+import { AuthProvider } from './lib/auth'
+import { useAuth } from './lib/auth-context'
+import { Loading } from './lib/ui'
 import SplashScreen from './screens/SplashScreen'
 import HomeScreen from './screens/HomeScreen'
 import GuidanceScreen from './screens/GuidanceScreen'
@@ -25,35 +28,67 @@ const screens = {
   esim: EsimScreen,
 }
 
-export default function App() {
+/** Screens reachable without a session. */
+const PUBLIC_SCREENS = new Set(['splash'])
+
+function SessionLoadingScreen() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Loading label="Menyiapkan sesi…" />
+    </div>
+  )
+}
+
+function Shell() {
+  const { status } = useAuth()
   const params = new URLSearchParams(window.location.search)
   const urlScreen = params.get('screen')
   const isCapture = params.get('capture') === '1'
 
   const [current, setCurrent] = useState(urlScreen || 'splash')
+  // Route parameters, e.g. which mutawif a booking is for.
+  const [routeParams, setRouteParams] = useState({})
 
-  const navigate = (screen) => {
+  const navigate = useCallback((screen, nextParams = {}) => {
     setCurrent(screen)
+    setRouteParams(nextParams)
     window.scrollTo({ top: 0, behavior: 'instant' })
-  }
+  }, [])
 
-  const ActiveScreen = screens[current] ?? HomeScreen
-
-  // Screenshot mode: bare screen, no chrome (used by screenshot.mjs)
+  // Screenshot mode keeps the old behaviour: render any screen with no auth.
   if (isCapture) {
+    const CaptureScreen = screens[current] ?? HomeScreen
     return (
       <div style={{ width: 390, minHeight: 844, background: '#f9fafb', overflow: 'hidden' }}>
-        <ActiveScreen navigate={navigate} />
+        <CaptureScreen navigate={navigate} params={routeParams} />
       </div>
     )
   }
 
-  // Real web app: mobile-width canvas, centered on larger viewports.
+  let ActiveScreen = screens[current] ?? HomeScreen
+
+  if (status === 'loading') {
+    ActiveScreen = SessionLoadingScreen
+  } else if (status === 'signedOut' && !PUBLIC_SCREENS.has(current)) {
+    // Any screen behind the gate falls back to the entry screen.
+    ActiveScreen = SplashScreen
+  } else if (status === 'signedIn' && current === 'splash') {
+    ActiveScreen = HomeScreen
+  }
+
   return (
     <div className="min-h-screen w-full flex justify-center" style={{ background: '#e5e7eb' }}>
       <div className="relative w-full max-w-[420px] min-h-screen bg-gray-50 shadow-xl overflow-x-hidden">
-        <ActiveScreen navigate={navigate} />
+        <ActiveScreen navigate={navigate} params={routeParams} />
       </div>
     </div>
+  )
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Shell />
+    </AuthProvider>
   )
 }
