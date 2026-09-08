@@ -1,10 +1,14 @@
 import puppeteer from 'puppeteer'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { mkdir } from 'fs/promises'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const htmlPath = path.join(__dirname, '..', 'product-summary.html')
-const outPath  = path.join(__dirname, '..', 'out', 'product-summary.png')
+const docsDir  = path.join(__dirname, '..', 'docs', 'product-summary')
+const htmlPath = path.join(docsDir, 'index.html')
+const outPath  = path.join(docsDir, 'out', 'product-summary.png')
+
+await mkdir(path.dirname(outPath), { recursive: true })
 
 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] })
 const page    = await browser.newPage()

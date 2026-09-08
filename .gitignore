@@ -21,4 +21,8 @@ pnpm-debug.log*
 
 # Vercel
 .vercel
-.env*
+
+# Secrets. The example files are the exception and stay tracked.
+.env
+.env.*
+!.env.example
