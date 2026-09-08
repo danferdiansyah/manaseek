@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { ArrowLeft, AlertTriangle, ChevronRight, Layers, Info } from 'lucide-react'
+import { ArrowLeft, AlertTriangle, ChevronRight, Layers, Info, BookMarked } from 'lucide-react'
 import { api } from '../lib/api'
 import { ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
@@ -117,6 +117,32 @@ export default function GuidanceDetailScreen({ navigate, params }) {
                   <p className="text-xs text-ink-soft italic mb-1">{prayer.transliteration}</p>
                   <p className="text-xs text-ink font-medium">{prayer.translation}</p>
                   {prayer.context && <p className="text-xs text-ink-faint mt-2">{prayer.context}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Dalil */}
+        {topic.references?.length > 0 && (
+          <div>
+            <p className="text-sm font-bold text-ink mb-3">Dalil</p>
+            <div className="space-y-2">
+              {topic.references.map((ref) => (
+                <div key={ref.id} className="glass rounded-[16px] p-4 flex items-start gap-3">
+                  <span
+                    className="w-8 h-8 rounded-[11px] flex items-center justify-center flex-shrink-0"
+                    style={{ background: 'var(--color-canopy-100)' }}
+                  >
+                    <BookMarked size={15} color="var(--color-canopy-700)" strokeWidth={1.8} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[15px] font-medium text-ink">{ref.citation}</p>
+                    {ref.gloss && <p className="text-sm text-ink-soft mt-0.5 leading-snug">{ref.gloss}</p>}
+                    {!ref.verifiedAt && (
+                      <p className="text-xs text-ink-faint mt-1.5">Menunggu verifikasi pembimbing</p>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

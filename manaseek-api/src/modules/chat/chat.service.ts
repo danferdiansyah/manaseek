@@ -184,6 +184,7 @@ export class ChatService {
         steps: { orderBy: { orderIndex: 'asc' } },
         prohibitions: { orderBy: { orderIndex: 'asc' } },
         prayers: { orderBy: { orderIndex: 'asc' } },
+        references: { orderBy: { orderIndex: 'asc' } },
       },
     });
 
@@ -197,6 +198,7 @@ export class ChatService {
         p.consequence ? `${p.text} (${p.consequence})` : p.text,
       ),
       prayers: topic.prayers.map((p) => ({ title: p.title, translation: p.translation })),
+      references: topic.references.map((r) => ({ citation: r.citation, gloss: r.gloss })),
     }));
 
     this.contextCache = {

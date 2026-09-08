@@ -542,6 +542,7 @@ model GuidanceTopic {
   steps        GuidanceStep[]
   prayers      Prayer[]
   prohibitions Prohibition[]
+  references   Reference[]
 
   @@index([status, phase, orderIndex])
   @@map("guidance_topics")
@@ -589,6 +590,33 @@ model Prohibition {
 
   @@unique([topicId, orderIndex])
   @@map("prohibitions")
+}
+
+enum ReferenceKind {
+  QURAN
+  HADITH
+  OTHER
+}
+
+/// Dalil for a topic. Curated, never generated: the assistant may quote what is
+/// here and must refuse to invent anything that is not.
+model Reference {
+  id         String        @id @default(uuid()) @db.Uuid
+  topicId    String        @db.Uuid
+  orderIndex Int
+  kind       ReferenceKind
+  /// The reference itself, e.g. "QS. Al-Baqarah: 158".
+  citation   String
+  /// Short Indonesian gloss of what the reference says.
+  gloss      String?
+  /// Cleared by a reviewer once the wording and attribution are checked.
+  verifiedAt DateTime?
+
+  topic GuidanceTopic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, orderIndex])
+  // "references" is a reserved word in Postgres; prefix it to keep raw SQL sane.
+  @@map("guidance_references")
 }
 
 model ChecklistItem {

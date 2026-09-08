@@ -63,6 +63,7 @@ export class ContentService {
         steps: { orderBy: { orderIndex: 'asc' } },
         prayers: { orderBy: { orderIndex: 'asc' } },
         prohibitions: { orderBy: { orderIndex: 'asc' } },
+        references: { orderBy: { orderIndex: 'asc' } },
       },
     });
 

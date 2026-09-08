@@ -6,7 +6,13 @@
  * PUBLISHED until a reviewer signs it off. The client reads that status and
  * tells the jamaah the library is still under review.
  */
-import { ContentCategory, ContentStatus, PrismaClient, RitualPhase } from '@prisma/client';
+import {
+  ContentCategory,
+  ContentStatus,
+  PrismaClient,
+  ReferenceKind,
+  RitualPhase,
+} from '@prisma/client';
 
 interface TopicSeed {
   slug: string;
@@ -19,6 +25,13 @@ interface TopicSeed {
   icon: string;
   steps: string[];
   prohibitions?: Array<{ text: string; consequence?: string }>;
+  /**
+   * Dalil. Deliberately limited to the most widely cited references, recorded
+   * as citations rather than transcribed Arabic, so a reviewer verifies
+   * attribution rather than proofreading a transcription. None is verified
+   * until a pembimbing clears it.
+   */
+  references?: Array<{ kind: ReferenceKind; citation: string; gloss?: string }>;
   prayers?: Array<{
     slug: string;
     title: string;
@@ -71,6 +84,18 @@ const TOPICS: TopicSeed[] = [
       { text: 'Melakukan akad nikah, menikahkan, atau meminang' },
       { text: 'Berhubungan suami istri dan segala pengantarnya', consequence: 'Membatalkan ibadah bila dilakukan sebelum tahalul' },
     ],
+    references: [
+      {
+        kind: ReferenceKind.QURAN,
+        citation: 'QS. Ali Imran: 97',
+        gloss: 'Kewajiban haji bagi yang mampu menempuh perjalanan ke Baitullah.',
+      },
+      {
+        kind: ReferenceKind.HADITH,
+        citation: 'HR. Bukhari dan Muslim, bab miqat haji',
+        gloss: 'Penetapan miqat, yaitu batas tempat memulai ihram bagi jamaah dari tiap arah.',
+      },
+    ],
     prayers: [
       {
         slug: 'talbiyah',
@@ -102,6 +127,13 @@ const TOPICS: TopicSeed[] = [
       'Setelah tujuh putaran, shalat sunnah dua rakaat di belakang Maqam Ibrahim bila memungkinkan',
       'Minum air zamzam dan berdoa sesuai hajat',
     ],
+    references: [
+      {
+        kind: ReferenceKind.QURAN,
+        citation: 'QS. Al-Hajj: 29',
+        gloss: 'Perintah melakukan thawaf di Baitullah.',
+      },
+    ],
     prayers: [
       {
         slug: 'doa-rukun-yamani-hajar-aswad',
@@ -132,6 +164,13 @@ const TOPICS: TopicSeed[] = [
       'Perjalanan Shafa ke Marwah dihitung satu kali, demikian sebaliknya, hingga genap tujuh kali',
       "Sa'i berakhir di Marwah pada hitungan ketujuh",
     ],
+    references: [
+      {
+        kind: ReferenceKind.QURAN,
+        citation: 'QS. Al-Baqarah: 158',
+        gloss: 'Shafa dan Marwah termasuk syiar Allah.',
+      },
+    ],
     prayers: [
       {
         slug: 'doa-shafa-marwah',
@@ -158,6 +197,13 @@ const TOPICS: TopicSeed[] = [
       'Perempuan memotong ujung rambut sepanjang kira-kira satu ruas jari',
       'Setelah tahalul, seluruh larangan ihram kembali dibolehkan',
     ],
+    references: [
+      {
+        kind: ReferenceKind.QURAN,
+        citation: 'QS. Al-Fath: 27',
+        gloss: 'Penyebutan mencukur rambut dan memendekkannya seusai ibadah.',
+      },
+    ],
   },
   {
     slug: 'wukuf-di-arafah',
@@ -174,6 +220,13 @@ const TOPICS: TopicSeed[] = [
       'Dengarkan khutbah wukuf dan laksanakan shalat jamak qashar Zuhur dan Ashar',
       'Jaga kondisi tubuh: cukup minum dan hindari terpapar matahari terlalu lama',
       'Wukuf adalah rukun haji; meninggalkannya membuat haji tidak sah',
+    ],
+    references: [
+      {
+        kind: ReferenceKind.HADITH,
+        citation: 'HR. Abu Dawud, Tirmidzi, Nasai, dan Ibnu Majah',
+        gloss: 'Sabda Nabi bahwa haji adalah Arafah, menegaskan wukuf sebagai rukun.',
+      },
     ],
   },
   {
@@ -257,6 +310,19 @@ export async function seedContent(prisma: PrismaClient): Promise<void> {
       data: topic.steps.map((text, orderIndex) => ({ topicId: record.id, orderIndex, text })),
     });
 
+    await prisma.reference.deleteMany({ where: { topicId: record.id } });
+    if (topic.references?.length) {
+      await prisma.reference.createMany({
+        data: topic.references.map((r, orderIndex) => ({
+          topicId: record.id,
+          orderIndex,
+          kind: r.kind,
+          citation: r.citation,
+          gloss: r.gloss ?? null,
+        })),
+      });
+    }
+
     await prisma.prohibition.deleteMany({ where: { topicId: record.id } });
     if (topic.prohibitions?.length) {
       await prisma.prohibition.createMany({
@@ -286,5 +352,9 @@ export async function seedContent(prisma: PrismaClient): Promise<void> {
     });
   }
 
-  console.log(`content: ${TOPICS.length} panduan, ${CHECKLIST.length} checklist (semua DRAFT)`);
+  const references = TOPICS.reduce((sum, t) => sum + (t.references?.length ?? 0), 0);
+  console.log(
+    `content: ${TOPICS.length} panduan, ${references} dalil, ${CHECKLIST.length} checklist ` +
+      '(semua DRAFT, dalil belum diverifikasi pembimbing)',
+  );
 }
