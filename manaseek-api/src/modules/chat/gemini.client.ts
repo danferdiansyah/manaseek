@@ -1,7 +1,15 @@
 import { Logger } from '@nestjs/common';
 
 const ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models';
-const TIMEOUT_MS = 45_000;
+/**
+ * One budget for the whole attempt chain, not per call. Six sequential calls
+ * at 45s each would blow past the function's own 60s ceiling and leave the
+ * jamaah watching a spinner.
+ */
+const TOTAL_BUDGET_MS = 25_000;
+/** A healthy answer lands in 2-4s. Anything past this is a model to abandon. */
+const PER_CALL_MS = 10_000;
+const RETRY_DELAY_MS = 700;
 
 /** Gemini's response schema uses the OpenAPI subset, with uppercase types. */
 export const ANSWER_SCHEMA = {
@@ -43,11 +51,20 @@ export interface GeminiResult {
   model: string;
 }
 
-/** Every candidate model returned 429. The caller turns this into a 429. */
-export class GeminiQuotaError extends Error {
-  constructor(readonly models: string[]) {
-    super(`Gemini quota exhausted for: ${models.join(', ')}`);
-    this.name = 'GeminiQuotaError';
+export type FailureReason = 'quota' | 'unavailable';
+
+/** No candidate model could answer. `reasons` says why, per model. */
+export class GeminiUnavailableError extends Error {
+  constructor(readonly reasons: Array<{ model: string; reason: FailureReason }>) {
+    super(
+      `No Gemini model could answer: ${reasons.map((r) => `${r.model}=${r.reason}`).join(', ')}`,
+    );
+    this.name = 'GeminiUnavailableError';
+  }
+
+  /** True when every model was simply out of its daily allowance. */
+  get allQuota(): boolean {
+    return this.reasons.length > 0 && this.reasons.every((r) => r.reason === 'quota');
   }
 }
 
@@ -59,22 +76,29 @@ export class GeminiQuotaError extends Error {
  * first-class Gemini feature anyway, so the REST call costs nothing in
  * capability and removes two dependencies.
  */
-/** Internal signal that one model is out of quota; never leaves this file. */
-class QuotaExceeded extends Error {
-  constructor(readonly model: string) {
-    super(`quota exhausted: ${model}`);
+/** Internal signal to move on; never leaves this file. */
+class ModelUnavailable extends Error {
+  constructor(
+    readonly model: string,
+    readonly reason: FailureReason,
+  ) {
+    super(`${model}: ${reason}`);
   }
 }
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export class GeminiClient {
   private static readonly logger = new Logger(GeminiClient.name);
 
   /**
-   * Tries each model in turn and moves on when one is out of quota.
+   * Tries each model in turn, and moves on when one cannot serve.
    *
-   * The free tier allows 20 requests per day per model, which a single demo
-   * can burn through. Falling back to another model keeps the assistant alive
-   * on its own daily allowance rather than taking the feature down.
+   * Two failures are expected in normal operation and neither should take the
+   * assistant down. A 429 means that model's daily free-tier allowance of 20
+   * requests is spent, so move on immediately. A 503 means Gemini is briefly
+   * overloaded, which usually clears within a second, so retry that model once
+   * before moving on.
    */
   static async generateAnswer(options: {
     apiKey: string;
@@ -82,22 +106,49 @@ export class GeminiClient {
     system: string;
     turns: GeminiTurn[];
   }): Promise<GeminiResult> {
-    const exhausted: string[] = [];
+    const failures: Array<{ model: string; reason: FailureReason }> = [];
+    const deadline = Date.now() + TOTAL_BUDGET_MS;
 
-    for (const model of options.models) {
-      try {
-        return await this.callModel({ ...options, model });
-      } catch (error) {
-        if (error instanceof QuotaExceeded) {
-          this.logger.warn(`${model} is out of quota, trying the next model`);
-          exhausted.push(model);
-          continue;
+    for (const [index, model] of options.models.entries()) {
+      const isLastModel = index === options.models.length - 1;
+
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        const remaining = deadline - Date.now();
+        if (remaining <= 1_000) {
+          this.logger.warn('Out of time budget before trying ' + model);
+          failures.push({ model, reason: 'unavailable' });
+          return this.giveUp(failures);
         }
-        throw error;
+
+        try {
+          return await this.callModel({
+            ...options,
+            model,
+            timeoutMs: Math.min(PER_CALL_MS, remaining),
+          });
+        } catch (error) {
+          if (!(error instanceof ModelUnavailable)) throw error;
+
+          // Another candidate is cheaper than waiting on this one.
+          const worthRetrying = error.reason === 'unavailable' && isLastModel && attempt === 0;
+          if (worthRetrying) {
+            this.logger.warn(`${model} is busy and is the last option, retrying once`);
+            await sleep(RETRY_DELAY_MS);
+            continue;
+          }
+
+          this.logger.warn(`${model} unusable (${error.reason}), trying the next model`);
+          failures.push({ model, reason: error.reason });
+          break;
+        }
       }
     }
 
-    throw new GeminiQuotaError(exhausted);
+    return this.giveUp(failures);
+  }
+
+  private static giveUp(failures: Array<{ model: string; reason: FailureReason }>): never {
+    throw new GeminiUnavailableError(failures);
   }
 
   private static async callModel(options: {
@@ -105,9 +156,10 @@ export class GeminiClient {
     model: string;
     system: string;
     turns: GeminiTurn[];
+    timeoutMs: number;
   }): Promise<GeminiResult> {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    const timer = setTimeout(() => controller.abort(), options.timeoutMs);
 
     try {
       const response = await fetch(
@@ -133,7 +185,12 @@ export class GeminiClient {
       );
 
       if (response.status === 429) {
-        throw new QuotaExceeded(options.model);
+        throw new ModelUnavailable(options.model, 'quota');
+      }
+
+      // 500 and 503 are Gemini being briefly overloaded, not our request.
+      if (response.status === 503 || response.status === 500) {
+        throw new ModelUnavailable(options.model, 'unavailable');
       }
 
       if (!response.ok) {
@@ -157,6 +214,15 @@ export class GeminiClient {
         completionTokens: payload.usageMetadata?.candidatesTokenCount ?? null,
         model: options.model,
       };
+    } catch (error) {
+      if (error instanceof ModelUnavailable) throw error;
+
+      // A hung request is just another reason to move on.
+      if (controller.signal.aborted) {
+        throw new ModelUnavailable(options.model, 'unavailable');
+      }
+
+      throw error;
     } finally {
       clearTimeout(timer);
     }

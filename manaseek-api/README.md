@@ -131,12 +131,24 @@ Set `GEMINI_API_KEY` from https://aistudio.google.com/apikey. Without it the
 endpoint answers 503 with a clear message instead of failing deeper in.
 
 **The free tier allows 20 requests per day, per model.** A single demo session
-can exhaust it. `GEMINI_FALLBACK_MODELS` is tried in order when the primary
-model returns 429, so one exhausted model does not take the assistant down;
-each model carries its own daily allowance. When every model is spent the API
-answers `429 AI_QUOTA_EXCEEDED` and says so plainly, and the client still
-offers the route to a human mutawif. Enabling billing on the Google Cloud
-project lifts the cap.
+can exhaust it, and Gemini also returns 503 when a model is briefly overloaded.
+`GEMINI_FALLBACK_MODELS` is tried in order for both cases, so neither takes the
+assistant down; each model carries its own daily allowance.
+
+The whole chain runs against one 25-second budget rather than a timeout per
+call, because six sequential calls at 45s each would outlast the function's own
+60s ceiling. A model that hangs is abandoned at 10s and treated like any other
+unavailable model.
+
+Keep model aliases such as `gemini-flash-latest` out of the list. During
+testing that alias answered correctly but took 164 seconds, which consumed the
+entire budget and starved the healthy models behind it.
+
+When every model is spent the API answers `429 AI_QUOTA_EXCEEDED`; when they
+are merely busy it answers `503 AI_UNAVAILABLE`. The two say different things
+to the jamaah, because "try again shortly" is a lie when the allowance is
+daily. Either way the client still offers the route to a human mutawif.
+Enabling billing on the Google Cloud project lifts the daily cap.
 
 **Boundary rule:** a module never queries another module's tables. Cross-module
 access goes through the owning module's exported service.

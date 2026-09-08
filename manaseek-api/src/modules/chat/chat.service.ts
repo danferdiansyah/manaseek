@@ -4,7 +4,7 @@ import { AppConfigService } from '@/common/config/config.service';
 import { AppError, ErrorCode } from '@/common/errors/app-error';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { SYSTEM_PROMPT, renderContext, type TopicContext } from './chat.prompt';
-import { GeminiClient, GeminiQuotaError } from './gemini.client';
+import { GeminiClient, GeminiUnavailableError } from './gemini.client';
 import type { SendMessageDto } from './dto/chat.dto';
 
 /** How much of the conversation is replayed to the model. */
@@ -93,14 +93,23 @@ export class ChatService {
         })),
       });
     } catch (error) {
-      if (error instanceof GeminiQuotaError) {
+      if (error instanceof GeminiUnavailableError) {
         this.logger.warn(error.message);
-        // Say what actually happened. "Try again shortly" would be a lie: the
-        // free-tier allowance is daily.
+
+        // Two different failures, two different truths. Telling a jamaah to
+        // "try again shortly" when the daily allowance is spent is a lie.
+        if (error.allQuota) {
+          throw new AppError(
+            ErrorCode.AI_QUOTA_EXCEEDED,
+            'Kuota harian asisten AI sudah habis. Coba lagi besok, atau tanyakan langsung ke mutawif.',
+            HttpStatus.TOO_MANY_REQUESTS,
+          );
+        }
+
         throw new AppError(
-          ErrorCode.AI_QUOTA_EXCEEDED,
-          'Kuota harian asisten AI sudah habis. Coba lagi besok, atau tanyakan langsung ke mutawif.',
-          HttpStatus.TOO_MANY_REQUESTS,
+          ErrorCode.AI_UNAVAILABLE,
+          'Asisten sedang ramai dipakai. Coba kirim ulang sebentar lagi, atau tanyakan langsung ke mutawif.',
+          HttpStatus.SERVICE_UNAVAILABLE,
         );
       }
 
