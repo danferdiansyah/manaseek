@@ -68,6 +68,9 @@ export const envSchema = z.object({
   BOOKING_REQUEST_TTL_MINUTES: z.coerce.number().int().positive().default(15),
   NEARBY_DEFAULT_RADIUS_KM: z.coerce.number().positive().default(10),
   NEARBY_MAX_RADIUS_KM: z.coerce.number().positive().default(50),
+  // A mutawif marked online but sitting on an old fix sends jamaah to a place
+  // they have already left. Widen this only for demos on seeded data.
+  NEARBY_LOCATION_FRESHNESS_MINUTES: z.coerce.number().positive().default(45),
 
   SWAGGER_ENABLED: booleanish,
 });

@@ -4,6 +4,7 @@ import {
   Clock3,
   LogOut,
   MapPin,
+  Navigation,
   Power,
   RefreshCw,
   UserCheck,
@@ -14,6 +15,7 @@ import { useAuth } from '../lib/auth-context'
 import { BOOKING_STATUS_LABELS, formatRupiah, formatSchedule, SERVICE_LABELS } from '../lib/format'
 import { EmptyState, ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
+import { usePublishLocation } from '../lib/usePublishLocation'
 
 const ACTIVE_STATUSES = new Set(['ACCEPTED', 'ONGOING'])
 
@@ -153,6 +155,11 @@ export default function MutawifDashboardScreen() {
 
   const { status, data, error, reload } = useResource(fetchDashboard)
 
+  // Jamaah can only find a mutawif whose position is current, so the fix is
+  // published while online and left alone the rest of the time.
+  const online = data?.profile?.availabilityStatus === 'ONLINE'
+  const publishing = usePublishLocation({ enabled: online })
+
   useEffect(() => {
     if (!data) return undefined
 
@@ -246,6 +253,18 @@ export default function MutawifDashboardScreen() {
                     ? 'Jamaah dapat mengirim permintaan kepadamu.'
                     : 'Aktifkan status untuk menerima permintaan baru.'}
               </p>
+              {isOnline && (
+                <p className="text-canopy-100/80 text-xs mt-1.5 flex items-center gap-1.5">
+                  <Navigation size={11} />
+                  {publishing.status === 'sent'
+                    ? `Lokasi terkirim · akurasi ${publishing.accuracy} m`
+                    : publishing.status === 'denied'
+                      ? 'Izin lokasi ditolak, jamaah tidak bisa menemukanmu'
+                      : publishing.status === 'failed'
+                        ? 'Lokasi gagal terkirim, mencoba lagi'
+                        : 'Mencari lokasimu…'}
+                </p>
+              )}
             </div>
             <button
               type="button"

@@ -58,6 +58,8 @@ export const updateAvailabilitySchema = z.object({
 export const updateLocationSchema = z.object({
   latitude: z.number().min(-90).max(90),
   longitude: z.number().min(-180).max(180),
+  /** Radius of the fix in metres, as the browser reports it. */
+  accuracy: z.number().positive().max(100_000).optional(),
 });
 
 export const reviewApplicationSchema = z.object({

@@ -223,6 +223,9 @@ model MutawifProfile {
   availabilityStatus AvailabilityStatus @default(OFFLINE)
   latitude           Float?
   longitude          Float?
+  /// Radius of the reported fix in metres, so the jamaah-facing distance can
+  /// be qualified rather than stated as fact.
+  locationAccuracy   Float?
   locationUpdatedAt  DateTime?
 
   ratingAverage     Float @default(0)

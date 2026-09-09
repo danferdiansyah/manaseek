@@ -39,11 +39,16 @@ export interface NearbyMutawif {
   completedBookings: number;
   distanceKm: number;
   hourlyRate: number | null;
+  /** Metres, when the device reported it. Lets the client qualify the distance. */
+  locationAccuracy: number | null;
+  locationUpdatedAt: Date;
 }
 
-interface NearbyRow extends Omit<NearbyMutawif, 'distanceKm' | 'hourlyRate'> {
+interface NearbyRow
+  extends Omit<NearbyMutawif, 'distanceKm' | 'hourlyRate' | 'locationAccuracy'> {
   distance_km: number;
   hourly_rate: Prisma.Decimal | null;
+  location_accuracy: number | null;
 }
 
 @Injectable()
@@ -252,8 +257,19 @@ export class MutawifService {
 
     return this.prisma.mutawifProfile.update({
       where: { id: profile.id },
-      data: { ...dto, locationUpdatedAt: new Date() },
-      select: { id: true, latitude: true, longitude: true, locationUpdatedAt: true },
+      data: {
+        latitude: dto.latitude,
+        longitude: dto.longitude,
+        locationAccuracy: dto.accuracy ?? null,
+        locationUpdatedAt: new Date(),
+      },
+      select: {
+        id: true,
+        latitude: true,
+        longitude: true,
+        locationAccuracy: true,
+        locationUpdatedAt: true,
+      },
     });
   }
 
@@ -274,6 +290,9 @@ export class MutawifService {
     const maxRadius = this.config.get('NEARBY_MAX_RADIUS_KM');
     const radiusKm = Math.min(dto.radiusKm ?? this.config.get('NEARBY_DEFAULT_RADIUS_KM'), maxRadius);
     const box = boundingBox({ latitude: dto.latitude, longitude: dto.longitude }, radiusKm);
+    // A mutawif marked online but sitting on an old fix sends a jamaah to a
+    // place they have already left.
+    const freshnessMinutes = this.config.get('NEARBY_LOCATION_FRESHNESS_MINUTES');
     const verificationRequired = this.verificationRequired;
 
     const rows = await this.prisma.$queryRaw<NearbyRow[]>`
@@ -288,6 +307,8 @@ export class MutawifService {
         m."ratingAverage",
         m."ratingCount",
         m."completedBookings",
+        m."locationUpdatedAt",
+        m."locationAccuracy" AS location_accuracy,
         rate."hourlyRate" AS hourly_rate,
         (6371 * 2 * asin(sqrt(
           power(sin(radians(m.latitude - ${dto.latitude}::double precision) / 2), 2)
@@ -308,6 +329,7 @@ export class MutawifService {
       WHERE (${verificationRequired} = false OR m."verificationStatus" = 'APPROVED')
         AND m."availabilityStatus" = 'ONLINE'
         AND u.status = 'ACTIVE'
+        AND m."locationUpdatedAt" > NOW() - (${freshnessMinutes} * INTERVAL '1 minute')
         AND m.latitude BETWEEN ${box.minLat} AND ${box.maxLat}
         AND m.longitude BETWEEN ${box.minLng} AND ${box.maxLng}
         AND (${dto.serviceType ?? null}::"ServiceType" IS NULL OR rate."hourlyRate" IS NOT NULL)
@@ -330,6 +352,8 @@ export class MutawifService {
         completedBookings: row.completedBookings,
         distanceKm: Math.round(row.distance_km * 100) / 100,
         hourlyRate: row.hourly_rate ? Number(row.hourly_rate) : null,
+        locationAccuracy: row.location_accuracy,
+        locationUpdatedAt: row.locationUpdatedAt,
       }));
   }
 
