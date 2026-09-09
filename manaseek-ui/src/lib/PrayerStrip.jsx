@@ -10,7 +10,7 @@ import {
   prayerTimes,
   timezoneLooksWrong,
 } from './prayer-times'
-import { useDeviceLocation } from './useDeviceLocation'
+import { formatAccuracy, useDeviceLocation } from './useDeviceLocation'
 
 /**
  * Next prayer, the day's five times, and the qibla, in one card.
@@ -111,7 +111,14 @@ export default function PrayerStrip({ navigate }) {
       </button>
 
       <p className="px-4 pb-3 text-xs text-ink-faint">
-        {schedule.method.label} · {position.precise ? 'lokasi kamu' : 'Masjidil Haram'}
+        {schedule.method.label} ·{' '}
+        {position.precise
+          ? position.accuracy
+            ? formatAccuracy(position.accuracy)
+            : 'lokasi kamu'
+          : position.status === 'locating'
+            ? 'mencari lokasi…'
+            : 'Masjidil Haram'}
         {zone ? ` · waktu ${zone}` : ''}
       </p>
 

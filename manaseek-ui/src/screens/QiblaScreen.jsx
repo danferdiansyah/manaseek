@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
-import { ArrowLeft, Compass, Info, MapPin } from 'lucide-react'
+import { ArrowLeft, Compass, Info, Loader2, LocateFixed, MapPin } from 'lucide-react'
 import KaabaIcon from '../lib/KaabaIcon'
 import { AT_KAABA_RADIUS_KM, compassPoint, distanceToKaabaKm, qiblaBearing } from '../lib/qibla'
 import { useCompassHeading } from '../lib/useCompassHeading'
-import { useDeviceLocation } from '../lib/useDeviceLocation'
+import { formatAccuracy, useDeviceLocation } from '../lib/useDeviceLocation'
 
 const DIAL = 264
 const RADIUS = DIAL / 2 - 26
@@ -57,14 +57,24 @@ export default function QiblaScreen({ navigate }) {
 
         <div className="glass-canopy rounded-[20px] p-4 mt-5 flex items-center gap-2.5">
           <MapPin size={15} color="#86EFAC" className="flex-shrink-0" />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-white text-sm font-medium truncate">{position.label}</p>
             <p className="text-canopy-100/85 text-xs mt-0.5">
               {atKaaba
                 ? 'Kamu sudah berada di Masjidil Haram'
                 : `${Math.round(distance).toLocaleString('id-ID')} km ke Ka'bah`}
+              {position.accuracy ? ` · ${formatAccuracy(position.accuracy)}` : ''}
             </p>
           </div>
+          <button
+            onClick={position.refresh}
+            aria-label="Cari ulang lokasi"
+            className="glass-control w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+          >
+            {position.status === 'locating'
+              ? <Loader2 size={14} color="white" className="animate-spin" />
+              : <LocateFixed size={14} color="white" />}
+          </button>
         </div>
       </div>
 
@@ -178,8 +188,9 @@ export default function QiblaScreen({ navigate }) {
 
         {!position.precise && (
           <p className="text-xs text-ink-faint text-center mt-5 leading-relaxed">
-            Arah dihitung dari Masjidil Haram karena lokasimu belum diizinkan.
-            Aktifkan izin lokasi agar arahnya sesuai posisimu.
+            {position.status === 'locating'
+              ? 'Sedang mencari lokasimu. Sementara ini arah dihitung dari Masjidil Haram.'
+              : 'Arah dihitung dari Masjidil Haram karena lokasimu belum diizinkan. Aktifkan izin lokasi agar arahnya sesuai posisimu.'}
           </p>
         )}
       </div>

@@ -86,6 +86,13 @@ Config validator menolak start bila flag ini menyala di produksi.
 | Pembayaran | di luar cakupan; booking diselesaikan di luar aplikasi |
 | Mitra B2B travel dan KBIHU | ditunda |
 
+Lokasi diambil dua tahap: satu fix kasar seketika supaya layar punya jawaban,
+lalu pengamatan akurasi tinggi yang hanya menggantikannya bila benar-benar
+lebih rapat. Pengamatan berhenti setelah akurasi cukup atau anggaran waktu
+habis, karena GPS yang dibiarkan menyala adalah baterai yang masih dibutuhkan
+jamaah seharian. Mutawif yang sedang online mengirim posisinya saat bergerak,
+bukan menurut timer, dan pencarian mengabaikan posisi yang sudah basi.
+
 Waktu shalat dan arah kiblat dihitung di perangkat, bukan diambil dari API.
 Jamaah kehilangan sinyal terus-menerus di Makkah dan Mina, dan waktu shalat
 yang butuh data bukanlah waktu shalat. Perhitungannya diadu dengan layanan

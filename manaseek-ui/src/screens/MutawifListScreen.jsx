@@ -1,14 +1,12 @@
-import { useCallback, useEffect, useState } from 'react'
-import { ArrowLeft, MapPin, Star, CheckCircle } from 'lucide-react'
+import { useCallback, useState } from 'react'
+import { ArrowLeft, MapPin, Star, CheckCircle, LocateFixed, Loader2 } from 'lucide-react'
 import { BottomNav } from './HomeScreen'
 import { api } from '../lib/api'
 import Avatar from '../lib/Avatar'
 import { formatDistance, formatRupiah } from '../lib/format'
 import { EmptyState, ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
-
-/** Masjidil Haram. Used until the browser hands us a real position. */
-const FALLBACK = { latitude: 21.4225, longitude: 39.8262, label: 'Masjidil Haram, Makkah' }
+import { formatAccuracy, useDeviceLocation } from '../lib/useDeviceLocation'
 
 const FILTERS = [
   { id: 'all', label: 'Semua', serviceType: null },
@@ -18,35 +16,25 @@ const FILTERS = [
 ]
 
 export default function MutawifListScreen({ navigate }) {
-  const [position, setPosition] = useState(FALLBACK)
+  const position = useDeviceLocation()
   const [filter, setFilter] = useState(FILTERS[0])
 
-  // Geolocation is a nicety: the list still works from the fallback point.
-  useEffect(() => {
-    if (!navigator.geolocation) return
-
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) =>
-        setPosition({
-          latitude: coords.latitude,
-          longitude: coords.longitude,
-          label: 'Lokasi kamu saat ini',
-        }),
-      () => {},
-      { timeout: 8000 },
-    )
-  }, [])
+  // Quantised to roughly eleven metres. GPS jitter of a few metres must not
+  // fire a fresh search every time the watch reports, or a jamaah standing
+  // still would keep the radio and the API busy for nothing.
+  const searchLat = position.latitude.toFixed(4)
+  const searchLng = position.longitude.toFixed(4)
 
   const fetchNearby = useCallback(() => {
     const query = new URLSearchParams({
-      latitude: String(position.latitude),
-      longitude: String(position.longitude),
+      latitude: searchLat,
+      longitude: searchLng,
       radiusKm: '25',
     })
     if (filter.serviceType) query.set('serviceType', filter.serviceType)
 
     return api.get(`/mutawif/nearby?${query}`)
-  }, [position, filter])
+  }, [searchLat, searchLng, filter])
 
   const { status, data, error, reload } = useResource(fetchNearby)
   const items = data ?? []
@@ -66,10 +54,22 @@ export default function MutawifListScreen({ navigate }) {
         </div>
         <div className="glass-canopy flex items-center gap-2.5 rounded-[16px] px-3.5 py-3">
           <MapPin size={15} color="#86EFAC" />
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <p className="text-white text-xs font-semibold">Lokasi Kamu</p>
-            <p className="text-canopy-100/85 text-xs">{position.label}</p>
+            <p className="text-canopy-100/85 text-xs truncate">
+              {position.label}
+              {position.accuracy ? ` · ${formatAccuracy(position.accuracy)}` : ''}
+            </p>
           </div>
+          <button
+            onClick={position.refresh}
+            aria-label="Cari ulang lokasi"
+            className="glass-control w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+          >
+            {position.status === 'locating'
+              ? <Loader2 size={14} color="white" className="animate-spin" />
+              : <LocateFixed size={14} color="white" />}
+          </button>
         </div>
       </div>
 
