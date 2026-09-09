@@ -78,11 +78,23 @@ Config validator menolak start bila flag ini menyala di produksi.
 | Panduan ibadah, doa, larangan | jalan, konten masih draf |
 | Checklist persiapan | jalan |
 | Riwayat notifikasi | jalan |
+| Waktu shalat di beranda | jalan, dihitung di perangkat |
+| Arah kiblat | jalan, kompas dengan cadangan manual |
 | Chatbot AI | jalan, menjawab dari pustaka panduan dengan sitasi |
 | Push notification (FCM) | belum, menunggu kredensial Firebase |
 | Upload dokumen verifikasi mutawif | belum, API baru menerima URL |
 | Pembayaran | di luar cakupan; booking diselesaikan di luar aplikasi |
 | Mitra B2B travel dan KBIHU | ditunda |
+
+Waktu shalat dan arah kiblat dihitung di perangkat, bukan diambil dari API.
+Jamaah kehilangan sinyal terus-menerus di Makkah dan Mina, dan waktu shalat
+yang butuh data bukanlah waktu shalat. Perhitungannya diadu dengan layanan
+Aladhan untuk Makkah, Madinah, Jakarta, dan Makassar: selisih maksimum dua
+menit. Arah kiblat cocok dengan nilai terbitan sampai 0,2 derajat.
+
+Metode mengikuti lokasi, bukan pengaturan yang harus dipahami jamaah: Umm
+al-Qura di dalam Arab Saudi, Kemenag RI di luar itu. Bila zona waktu ponsel
+tidak cocok dengan lokasinya, aplikasi memperingatkan alih-alih diam.
 
 Chatbot menjawab **hanya** dari pustaka panduan yang dikurasi dan mencantumkan
 panduan yang dipakai. Ia mengalihkan ke mutawif hanya untuk tiga hal: kondisi

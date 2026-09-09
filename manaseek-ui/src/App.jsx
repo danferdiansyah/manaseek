@@ -14,6 +14,7 @@ import BookingSuccessScreen from './screens/BookingSuccessScreen'
 import ProfileScreen from './screens/ProfileScreen'
 import ChecklistScreen from './screens/ChecklistScreen'
 import NotificationsScreen from './screens/NotificationsScreen'
+import QiblaScreen from './screens/QiblaScreen'
 import MutawifDashboardScreen from './screens/MutawifDashboardScreen'
 import OnboardingScreen from './screens/OnboardingScreen'
 
@@ -30,6 +31,7 @@ const screens = {
   profile: ProfileScreen,
   checklist: ChecklistScreen,
   notifications: NotificationsScreen,
+  qibla: QiblaScreen,
   'mutawif-dashboard': MutawifDashboardScreen,
   onboarding: OnboardingScreen,
 }

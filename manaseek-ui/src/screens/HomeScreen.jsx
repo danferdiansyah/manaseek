@@ -9,6 +9,7 @@ import { api } from '../lib/api'
 import Avatar from '../lib/Avatar'
 import { useAuth } from '../lib/auth-context'
 import { BOOKING_STATUS_LABELS, formatSchedule } from '../lib/format'
+import PrayerStrip from '../lib/PrayerStrip'
 
 const NAV_TABS = [
   { id: 'home', label: 'Beranda', Icon: Home },
@@ -179,6 +180,8 @@ export default function HomeScreen({ navigate }) {
 
       {/* Content starts below the canopy, not across it. */}
       <div className="px-5 pt-6 pb-28 space-y-7">
+        <PrayerStrip navigate={navigate} />
+
         <div className="grid grid-cols-3 gap-3">
           {PILLARS.map((pillar) => (
             <button
