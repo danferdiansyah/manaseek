@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ArrowLeft, Star, CheckCircle, MapPin, Accessibility, ShieldAlert, Info } from 'lucide-react'
 import { api } from '../lib/api'
-import { formatRupiah, initialsOf, SERVICE_LABELS } from '../lib/format'
+import Avatar from '../lib/Avatar'
+import { formatRupiah, SERVICE_LABELS } from '../lib/format'
 import { ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
 
@@ -95,9 +96,12 @@ export default function BookingScreen({ navigate, params }) {
   const { status, data: profile, error, reload } = useResource(fetchProfile)
 
   const days = now ? nextDays(now.date, 5) : []
+  const firstAvailableDay = days.find((day) =>
+    day.iso > now?.date || (day.iso === now?.date && toMinutes(time) > now.minutes),
+  )
   // Derived rather than synced: the first option stands until one is picked.
   const activeService = serviceType ?? profile?.rates[0]?.serviceType ?? null
-  const activeDate = dateIso ?? days[0]?.iso ?? null
+  const activeDate = dateIso ?? firstAvailableDay?.iso ?? days[0]?.iso ?? null
 
   const rate = profile?.rates.find((r) => r.serviceType === activeService)
   const total = rate ? Number(rate.hourlyRate) * durationHours : 0
@@ -168,13 +172,14 @@ export default function BookingScreen({ navigate, params }) {
         <div className="glass rounded-[20px] p-4">
           <p className="text-sm font-semibold text-ink-soft mb-3">Mutawif Dipilih</p>
           <div className="flex items-center gap-3">
-            {profile.user.avatarUrl ? (
-              <img src={profile.user.avatarUrl} alt={profile.user.name} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
-            ) : (
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0" style={{ background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)' }}>
-                {initialsOf(profile.user.name)}
-              </div>
-            )}
+            <Avatar
+              src={profile.user.avatarUrl}
+              name={profile.user.name}
+              alt={profile.user.name}
+              imageClassName="w-12 h-12 rounded-xl object-cover flex-shrink-0"
+              fallbackClassName="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0"
+              fallbackStyle={{ background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)' }}
+            />
             <div>
               <p className="font-semibold text-ink text-sm">{profile.user.name}</p>
               <div className="flex items-center gap-1 mt-0.5">

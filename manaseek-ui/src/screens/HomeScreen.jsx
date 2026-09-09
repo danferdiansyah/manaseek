@@ -6,8 +6,9 @@ import {
   Heart, ClipboardList,
 } from 'lucide-react'
 import { api } from '../lib/api'
+import Avatar from '../lib/Avatar'
 import { useAuth } from '../lib/auth-context'
-import { BOOKING_STATUS_LABELS, formatSchedule, initialsOf } from '../lib/format'
+import { BOOKING_STATUS_LABELS, formatSchedule } from '../lib/format'
 
 const NAV_TABS = [
   { id: 'home', label: 'Beranda', Icon: Home },
@@ -71,26 +72,30 @@ export default function HomeScreen({ navigate }) {
   const [notificationCount, setNotificationCount] = useState(0)
 
   useEffect(() => {
-    // Surface whatever booking still needs the jamaah's attention.
-    api
-      .get('/bookings?limit=5')
-      .then((page) => {
-        const live = page.items.find((b) =>
+    let mounted = true
+
+    const loadHome = async () => {
+      // Surface whatever booking still needs the jamaah's attention. These
+      // calls are intentionally sequential for the small demo database pool.
+      const bookings = await api.get('/bookings?limit=5').catch(() => null)
+      if (mounted && bookings) {
+        const live = bookings.items.find((b) =>
           ['REQUESTED', 'ACCEPTED', 'ONGOING'].includes(b.status),
         )
         setActiveBooking(live ?? null)
-      })
-      .catch(() => {})
+      }
 
-    api
-      .get('/content/topics')
-      .then((page) => setTopics(page.items))
-      .catch(() => {})
+      const content = await api.get('/content/topics').catch(() => null)
+      if (mounted && content) setTopics(content.items)
 
-    api
-      .get('/notifications?limit=1')
-      .then((page) => setNotificationCount(page.meta.total))
-      .catch(() => {})
+      const notifications = await api.get('/notifications?limit=1').catch(() => null)
+      if (mounted && notifications) setNotificationCount(notifications.meta.total)
+    }
+
+    loadHome()
+    return () => {
+      mounted = false
+    }
   }, [])
 
   const displayName = user?.name ?? user?.email ?? 'Jamaah'
@@ -131,9 +136,12 @@ export default function HomeScreen({ navigate }) {
                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,.4)',
               }}
             >
-              {user?.avatarUrl
-                ? <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
-                : initialsOf(displayName)}
+              <Avatar
+                src={user?.avatarUrl}
+                name={displayName}
+                imageClassName="w-full h-full object-cover"
+                fallbackClassName="flex items-center justify-center w-full h-full"
+              />
             </button>
           </div>
         </div>

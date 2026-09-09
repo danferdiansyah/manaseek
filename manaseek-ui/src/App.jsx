@@ -14,6 +14,8 @@ import BookingSuccessScreen from './screens/BookingSuccessScreen'
 import ProfileScreen from './screens/ProfileScreen'
 import ChecklistScreen from './screens/ChecklistScreen'
 import NotificationsScreen from './screens/NotificationsScreen'
+import MutawifDashboardScreen from './screens/MutawifDashboardScreen'
+import OnboardingScreen from './screens/OnboardingScreen'
 
 const screens = {
   splash: SplashScreen,
@@ -28,6 +30,8 @@ const screens = {
   profile: ProfileScreen,
   checklist: ChecklistScreen,
   notifications: NotificationsScreen,
+  'mutawif-dashboard': MutawifDashboardScreen,
+  onboarding: OnboardingScreen,
 }
 
 /** Screens reachable without a session. */
@@ -42,7 +46,7 @@ function SessionLoadingScreen() {
 }
 
 function Shell() {
-  const { status } = useAuth()
+  const { status, user } = useAuth()
   const params = new URLSearchParams(window.location.search)
   const urlScreen = params.get('screen')
   const isCapture = params.get('capture') === '1'
@@ -75,7 +79,13 @@ function Shell() {
     // Any screen behind the gate falls back to the entry screen.
     ActiveScreen = SplashScreen
   } else if (status === 'signedIn' && current === 'splash') {
-    ActiveScreen = HomeScreen
+    ActiveScreen = user?.needsOnboarding
+      ? OnboardingScreen
+      : user?.role === 'MUTAWIF'
+        ? MutawifDashboardScreen
+        : HomeScreen
+  } else if (status === 'signedIn' && current === 'onboarding' && !user?.needsOnboarding) {
+    ActiveScreen = user?.role === 'MUTAWIF' ? MutawifDashboardScreen : HomeScreen
   }
 
   return (

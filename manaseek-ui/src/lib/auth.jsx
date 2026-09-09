@@ -48,20 +48,38 @@ export function AuthProvider({ children }) {
     }
   }, [status, signOutLocally])
 
+  const signInWithSession = useCallback(async (session) => {
+    saveTokens(session)
+    const me = await api.get('/auth/me')
+    const nextUser = {
+      ...me,
+      isNewUser: session.user?.isNewUser ?? false,
+      needsOnboarding: me.needsOnboarding ?? session.user?.needsOnboarding ?? false,
+    }
+    setUser(nextUser)
+    setStatus('signedIn')
+    return nextUser
+  }, [])
+
   const signInWithGoogle = useCallback(async (idToken) => {
     setError(null)
     try {
-      const session = await loginWithGoogleToken(idToken)
-      saveTokens(session)
-      const me = await api.get('/auth/me')
-      setUser(me)
-      setStatus('signedIn')
-      return me
+      return await signInWithSession(await loginWithGoogleToken(idToken))
     } catch (err) {
       setError(err.message ?? 'Gagal masuk')
       throw err
     }
-  }, [])
+  }, [signInWithSession])
+
+  const completeOnboarding = useCallback(async (details) => {
+    setError(null)
+    try {
+      return await signInWithSession(await api.post('/auth/onboarding', details))
+    } catch (err) {
+      setError(err.message ?? 'Gagal menyimpan data pendaftaran')
+      throw err
+    }
+  }, [signInWithSession])
 
   const signOut = useCallback(async () => {
     const { refreshToken } = getTokens()
@@ -73,8 +91,8 @@ export function AuthProvider({ children }) {
   }, [signOutLocally])
 
   const value = useMemo(
-    () => ({ user, status, error, signInWithGoogle, signOut }),
-    [user, status, error, signInWithGoogle, signOut],
+    () => ({ user, status, error, signInWithGoogle, completeOnboarding, signOut }),
+    [user, status, error, signInWithGoogle, completeOnboarding, signOut],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

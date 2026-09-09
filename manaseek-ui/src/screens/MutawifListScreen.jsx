@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { ArrowLeft, MapPin, Star, CheckCircle } from 'lucide-react'
 import { BottomNav } from './HomeScreen'
 import { api } from '../lib/api'
-import { formatDistance, formatRupiah, initialsOf } from '../lib/format'
+import Avatar from '../lib/Avatar'
+import { formatDistance, formatRupiah } from '../lib/format'
 import { EmptyState, ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
 
@@ -127,16 +128,15 @@ export default function MutawifListScreen({ navigate }) {
               >
                 <div className="flex items-start gap-3">
                   <div className="relative flex-shrink-0">
-                    {m.avatarUrl ? (
-                      <img src={m.avatarUrl} alt={m.name} className="rounded-xl object-cover" style={{ width: 52, height: 52 }} />
-                    ) : (
-                      <div
-                        className="rounded-xl flex items-center justify-center font-bold text-white"
-                        style={{ width: 52, height: 52, background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)' }}
-                      >
-                        {initialsOf(m.name)}
-                      </div>
-                    )}
+                    <Avatar
+                      src={m.avatarUrl}
+                      name={m.name}
+                      alt={m.name}
+                      imageClassName="rounded-xl object-cover"
+                      imageStyle={{ width: 52, height: 52 }}
+                      fallbackClassName="rounded-xl flex items-center justify-center font-bold text-white"
+                      fallbackStyle={{ width: 52, height: 52, background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)' }}
+                    />
                     <span
                       className="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full"
                       style={{ background: '#3FBF6F', border: '2.5px solid var(--color-stone)' }}

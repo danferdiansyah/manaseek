@@ -24,9 +24,9 @@ export default function BookingSuccessScreen({ navigate, params }) {
 
   const { status, data: booking, error, reload } = useResource(fetchBooking)
 
-  // A request sits in REQUESTED until the mutawif answers, so poll while it does.
+  // Keep the booking card in sync while the order is waiting or in progress.
   useEffect(() => {
-    if (booking?.status !== 'REQUESTED') return
+    if (!['REQUESTED', 'ACCEPTED', 'ONGOING'].includes(booking?.status)) return
 
     const timer = setInterval(reload, 10000)
     return () => clearInterval(timer)

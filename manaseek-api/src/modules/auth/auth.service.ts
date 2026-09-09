@@ -1,10 +1,18 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { UserStatus, type User, type UserRole } from '@prisma/client';
+import {
+  Prisma,
+  ServiceType,
+  UserStatus,
+  VerificationStatus,
+  type User,
+  type UserRole,
+} from '@prisma/client';
 import { AppConfigService } from '@/common/config/config.service';
 import { AppError, ErrorCode } from '@/common/errors/app-error';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { normalizePhone } from '@/common/utils/phone.util';
 import { AuditService } from '@/modules/audit/audit.service';
-import type { DevLoginDto, GoogleLoginDto } from './dto/auth.dto';
+import type { DevLoginDto, GoogleLoginDto, OnboardingDto } from './dto/auth.dto';
 import { GoogleAuthService, type GoogleProfile } from './google-auth.service';
 import { TokenService, type SessionContext, type TokenPair } from './token.service';
 
@@ -16,6 +24,7 @@ export interface AuthSession extends TokenPair {
     avatarUrl: string | null;
     role: UserRole;
     isNewUser: boolean;
+    needsOnboarding: boolean;
   };
 }
 
@@ -72,6 +81,111 @@ export class AuthService {
     });
   }
 
+  async completeOnboarding(
+    userId: string,
+    dto: OnboardingDto,
+    context: SessionContext,
+  ): Promise<AuthSession> {
+    const current = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        role: true,
+        status: true,
+        phone: true,
+        jamaahProfile: { select: { id: true, city: true } },
+        mutawifProfile: { select: { id: true } },
+      },
+    });
+
+    if (!current) throw AppError.notFound('User', userId);
+    if (current.status === UserStatus.SUSPENDED) {
+      throw new AppError(ErrorCode.ACCOUNT_SUSPENDED, 'This account is suspended', 403);
+    }
+    if (current.role === 'ADMIN' || current.mutawifProfile || current.jamaahProfile?.city) {
+      throw AppError.conflict(ErrorCode.CONFLICT, 'This account has already completed onboarding');
+    }
+
+    const phone = dto.phone ? normalizePhone(dto.phone) : null;
+    const languages = dto.languages?.filter(Boolean);
+    const verificationRequired = this.config.get('MUTAWIF_VERIFICATION_REQUIRED') !== false;
+
+    const user = await this.prisma.$transaction(async (tx) => {
+      const updated = await tx.user.update({
+        where: { id: userId },
+        data: {
+          name: dto.name,
+          phone,
+          role: dto.role,
+        },
+      });
+
+      if (dto.role === 'JAMAAH') {
+        await tx.jamaahProfile.upsert({
+          where: { userId },
+          create: { userId, city: dto.city },
+          update: { city: dto.city },
+        });
+      } else {
+        const mutawifProfile = await tx.mutawifProfile.create({
+          data: {
+            userId,
+            bio: dto.bio || null,
+            languages: languages?.length ? languages : ['id'],
+            yearsExperience: dto.yearsExperience ?? 0,
+            city: dto.city,
+            ...(verificationRequired
+              ? {}
+              : {
+                  verificationStatus: VerificationStatus.APPROVED,
+                  // The MVP uses the Haram as the shared demo search point
+                  // until mutawif location editing is added to the UI.
+                  latitude: 21.4225,
+                  longitude: 39.8262,
+                }),
+          },
+        });
+
+        if (!verificationRequired) {
+          await tx.mutawifServiceRate.create({
+            data: {
+              mutawifId: mutawifProfile.id,
+              serviceType: ServiceType.IBADAH_GUIDANCE,
+              hourlyRate: new Prisma.Decimal(300_000),
+              active: true,
+            },
+          });
+        }
+      }
+
+      return updated;
+    });
+
+    const tokens = await this.tokens.issue(user, context);
+
+    await this.audit.record({
+      actorId: user.id,
+      action: 'auth.onboarding_completed',
+      entity: 'User',
+      entityId: user.id,
+      metadata: { role: dto.role },
+      ipAddress: context.ipAddress,
+    });
+
+    return {
+      ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        avatarUrl: user.avatarUrl,
+        role: user.role,
+        isNewUser: false,
+        needsOnboarding: false,
+      },
+    };
+  }
+
   async refresh(refreshToken: string, context: SessionContext): Promise<TokenPair> {
     return this.tokens.rotate(refreshToken, context);
   }
@@ -111,6 +225,9 @@ export class AuthService {
         organizationId: true,
         emailVerifiedAt: true,
         createdAt: true,
+        jamaahProfile: {
+          select: { id: true, city: true },
+        },
         mutawifProfile: {
           select: { id: true, verificationStatus: true, availabilityStatus: true },
         },
@@ -121,7 +238,10 @@ export class AuthService {
       throw AppError.notFound('User', userId);
     }
 
-    return user;
+    return {
+      ...user,
+      needsOnboarding: !user.mutawifProfile && !user.jamaahProfile?.city,
+    };
   }
 
   /**
@@ -176,7 +296,6 @@ export class AuthService {
             role: profile.role,
             emailVerifiedAt: profile.emailVerifiedAt,
             lastLoginAt: now,
-            jamaahProfile: { create: {} },
           },
         });
 
@@ -199,6 +318,7 @@ export class AuthService {
         avatarUrl: user.avatarUrl,
         role: user.role,
         isNewUser: !existing,
+        needsOnboarding: !existing,
       },
     };
   }

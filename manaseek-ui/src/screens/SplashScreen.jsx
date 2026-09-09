@@ -8,20 +8,29 @@ export default function SplashScreen({ navigate }) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
 
+  const goToNextScreen = useCallback((me) => {
+    if (me?.needsOnboarding || me?.isNewUser) {
+      navigate('onboarding')
+      return
+    }
+
+    navigate(me?.role === 'MUTAWIF' ? 'mutawif-dashboard' : 'home')
+  }, [navigate])
+
   const handleCredential = useCallback(
     async (idToken) => {
       setBusy(true)
       setError(null)
       try {
-        await signInWithGoogle(idToken)
-        navigate('home')
+        const me = await signInWithGoogle(idToken)
+        goToNextScreen(me)
       } catch (err) {
         setError(err.message ?? 'Gagal masuk. Coba lagi.')
       } finally {
         setBusy(false)
       }
     },
-    [signInWithGoogle, navigate],
+    [signInWithGoogle, goToNextScreen],
   )
 
   return (

@@ -5,6 +5,16 @@ const booleanish = z
   .optional()
   .transform((value) => value === 'true' || value === '1');
 
+// Keep the demo convenient by default. Turn this back on after the demo with
+// MUTAWIF_VERIFICATION_REQUIRED=true.
+const verificationRequired = z
+  .string()
+  .optional()
+  .transform((value) => {
+    if (value === undefined) return undefined;
+    return value === 'true' || value === '1';
+  });
+
 export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
@@ -28,6 +38,10 @@ export const envSchema = z.object({
     .transform((value) => value.split(',').map((id) => id.trim()).filter(Boolean)),
   // Lets a developer mint a session without real Google credentials.
   AUTH_DEV_LOGIN: booleanish,
+
+  // The MVP demo can skip admin review for mutawif profiles. Set this to true
+  // when the real verification workflow is ready.
+  MUTAWIF_VERIFICATION_REQUIRED: verificationRequired,
 
   // Google AI Studio key. Without it the chatbot endpoints answer with a clear
   // "not configured" error instead of failing somewhere deeper.
@@ -72,14 +86,19 @@ export function validateEnv(raw: Record<string, unknown>): Env {
 
   const env = parsed.data;
 
-  if (env.NODE_ENV === 'production') {
-    if (env.AUTH_DEV_LOGIN) {
+  const normalized = {
+    ...env,
+    MUTAWIF_VERIFICATION_REQUIRED: env.MUTAWIF_VERIFICATION_REQUIRED ?? false,
+  };
+
+  if (normalized.NODE_ENV === 'production') {
+    if (normalized.AUTH_DEV_LOGIN) {
       throw new Error('AUTH_DEV_LOGIN must not be enabled in production');
     }
-    if (env.GOOGLE_CLIENT_IDS.length === 0) {
+    if (normalized.GOOGLE_CLIENT_IDS.length === 0) {
       throw new Error('GOOGLE_CLIENT_IDS is required in production');
     }
   }
 
-  return env;
+  return normalized;
 }

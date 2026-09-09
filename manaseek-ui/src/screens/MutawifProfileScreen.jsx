@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
 import { ArrowLeft, Star, CheckCircle, MapPin, Accessibility, ShieldAlert } from 'lucide-react'
 import { api } from '../lib/api'
-import { formatRupiah, initialsOf, SERVICE_LABELS } from '../lib/format'
+import Avatar from '../lib/Avatar'
+import { formatRupiah, SERVICE_LABELS } from '../lib/format'
 import { ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
 
@@ -21,11 +22,10 @@ export default function MutawifProfileScreen({ navigate, params }) {
   const fetchProfile = useCallback(async () => {
     if (!mutawifId) throw new Error('Mutawif belum dipilih.')
 
-    // Reviews are a separate resource; a failure there must not hide the profile.
-    const [profile, reviews] = await Promise.all([
-      api.get(`/mutawif/${mutawifId}`),
-      api.get(`/reviews?mutawifId=${mutawifId}&limit=5`).catch(() => ({ items: [] })),
-    ])
+    // Reviews are a separate resource; a failure there must not hide the
+    // profile. Keep the reads sequential for the small demo database pool.
+    const profile = await api.get(`/mutawif/${mutawifId}`)
+    const reviews = await api.get(`/reviews?mutawifId=${mutawifId}&limit=5`).catch(() => ({ items: [] }))
 
     return { profile, reviews: reviews.items }
   }, [mutawifId])
@@ -70,21 +70,15 @@ export default function MutawifProfileScreen({ navigate, params }) {
         </div>
 
         <div className="flex items-center gap-4">
-          {profile.user.avatarUrl ? (
-            <img
-              src={profile.user.avatarUrl}
-              alt={profile.user.name}
-              className="w-20 h-20 rounded-2xl object-cover flex-shrink-0"
-              style={{ border: '2px solid rgba(255,255,255,0.35)' }}
-            />
-          ) : (
-            <div
-              className="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0"
-              style={{ background: 'rgba(255,255,255,0.18)', border: '2px solid rgba(255,255,255,0.35)' }}
-            >
-              {initialsOf(profile.user.name)}
-            </div>
-          )}
+          <Avatar
+            src={profile.user.avatarUrl}
+            name={profile.user.name}
+            alt={profile.user.name}
+            imageClassName="w-20 h-20 rounded-2xl object-cover flex-shrink-0"
+            imageStyle={{ border: '2px solid rgba(255,255,255,0.35)' }}
+            fallbackClassName="w-20 h-20 rounded-2xl flex items-center justify-center text-white text-2xl font-bold flex-shrink-0"
+            fallbackStyle={{ background: 'rgba(255,255,255,0.18)', border: '2px solid rgba(255,255,255,0.35)' }}
+          />
           <div>
             <h2 className="text-white text-lg font-bold">{profile.user.name ?? 'Mutawif'}</h2>
             <p className="text-canopy-100/85 text-xs mt-0.5 flex items-center gap-1">

@@ -4,8 +4,9 @@ import {
 } from 'lucide-react'
 import { BottomNav } from './HomeScreen'
 import { api } from '../lib/api'
+import Avatar from '../lib/Avatar'
 import { useAuth } from '../lib/auth-context'
-import { BOOKING_STATUS_LABELS, formatSchedule, initialsOf, SERVICE_LABELS } from '../lib/format'
+import { BOOKING_STATUS_LABELS, formatSchedule, SERVICE_LABELS } from '../lib/format'
 
 export default function ProfileScreen({ navigate }) {
   const { user, signOut } = useAuth()
@@ -15,10 +16,26 @@ export default function ProfileScreen({ navigate }) {
   const [notificationCount, setNotificationCount] = useState(null)
 
   useEffect(() => {
-    api.get('/bookings?limit=5').then((page) => setBookings(page.items)).catch(() => {})
-    api.get('/users/me/trips').then((trips) => setTrip(trips[0] ?? null)).catch(() => {})
-    api.get('/content/checklist').then((page) => setChecklist(page.meta)).catch(() => {})
-    api.get('/notifications?limit=1').then((page) => setNotificationCount(page.meta.total)).catch(() => {})
+    let mounted = true
+
+    const loadProfile = async () => {
+      const bookings = await api.get('/bookings?limit=5').catch(() => null)
+      if (mounted && bookings) setBookings(bookings.items)
+
+      const trips = await api.get('/users/me/trips').catch(() => null)
+      if (mounted && trips) setTrip(trips[0] ?? null)
+
+      const checklist = await api.get('/content/checklist').catch(() => null)
+      if (mounted && checklist) setChecklist(checklist.meta)
+
+      const notifications = await api.get('/notifications?limit=1').catch(() => null)
+      if (mounted && notifications) setNotificationCount(notifications.meta.total)
+    }
+
+    loadProfile()
+    return () => {
+      mounted = false
+    }
   }, [])
 
   const handleSignOut = async () => {
@@ -34,16 +51,14 @@ export default function ProfileScreen({ navigate }) {
           <h2 className="text-white font-bold text-lg">Profil Saya</h2>
         </div>
         <div className="flex items-center gap-4">
-          {user?.avatarUrl ? (
-            <img src={user.avatarUrl} alt={user.name} className="w-16 h-16 rounded-2xl object-cover border-2 border-white/25" />
-          ) : (
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-white text-xl border-2 border-white/25"
-              style={{ background: 'linear-gradient(135deg, #B8944A, #D4A855)' }}
-            >
-              {initialsOf(user?.name ?? user?.email)}
-            </div>
-          )}
+          <Avatar
+            src={user?.avatarUrl}
+            name={user?.name ?? user?.email}
+            alt={user?.name}
+            imageClassName="w-16 h-16 rounded-2xl object-cover border-2 border-white/25"
+            fallbackClassName="w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-white text-xl border-2 border-white/25"
+            fallbackStyle={{ background: 'linear-gradient(135deg, #B8944A, #D4A855)' }}
+          />
           <div className="min-w-0">
             <p className="text-white font-bold text-base truncate">{user?.name ?? 'Jamaah Manaseek'}</p>
             <p className="text-canopy-100/85 text-xs mt-0.5 truncate">{user?.email}</p>

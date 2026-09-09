@@ -63,7 +63,34 @@ export class MutawifService {
       throw AppError.conflict(ErrorCode.CONFLICT, 'A mutawif application already exists');
     }
 
-    return this.prisma.mutawifProfile.create({ data: { userId, ...dto } });
+    return this.prisma.$transaction(async (tx) => {
+      const profile = await tx.mutawifProfile.create({
+        data: {
+          userId,
+          ...dto,
+          ...(this.verificationRequired
+            ? {}
+            : {
+                verificationStatus: VerificationStatus.APPROVED,
+                latitude: 21.4225,
+                longitude: 39.8262,
+              }),
+        },
+      });
+
+      if (!this.verificationRequired) {
+        await tx.mutawifServiceRate.create({
+          data: {
+            mutawifId: profile.id,
+            serviceType: ServiceType.IBADAH_GUIDANCE,
+            hourlyRate: new Prisma.Decimal(300_000),
+            active: true,
+          },
+        });
+      }
+
+      return profile;
+    });
   }
 
   async getOwn(userId: string) {
@@ -73,7 +100,7 @@ export class MutawifService {
     });
 
     if (!profile) throw AppError.notFound('MutawifProfile');
-    return profile;
+    return { ...profile, verificationRequired: this.verificationRequired };
   }
 
   async updateOwn(userId: string, dto: UpdateMutawifDto) {
@@ -81,7 +108,7 @@ export class MutawifService {
 
     // Approved mutawif edit freely; an application under review is frozen so a
     // reviewer never approves details that changed underneath them.
-    if (profile.verificationStatus === VerificationStatus.UNDER_REVIEW) {
+    if (this.verificationRequired && profile.verificationStatus === VerificationStatus.UNDER_REVIEW) {
       throw AppError.conflict(
         ErrorCode.CONFLICT,
         'Your application is under review and cannot be edited right now',
@@ -107,6 +134,18 @@ export class MutawifService {
 
   async submitForReview(userId: string) {
     const profile = await this.requireOwnProfile(userId);
+
+    if (!this.verificationRequired) {
+      return this.prisma.mutawifProfile.update({
+        where: { id: profile.id },
+        data: {
+          verificationStatus: VerificationStatus.APPROVED,
+          verificationNote: null,
+          verifiedAt: new Date(),
+          availabilityStatus: profile.availabilityStatus,
+        },
+      });
+    }
 
     if (
       profile.verificationStatus !== VerificationStatus.DRAFT &&
@@ -193,7 +232,7 @@ export class MutawifService {
   async updateAvailability(userId: string, dto: UpdateAvailabilityDto) {
     const profile = await this.requireOwnProfile(userId);
 
-    if (profile.verificationStatus !== VerificationStatus.APPROVED) {
+    if (this.verificationRequired && profile.verificationStatus !== VerificationStatus.APPROVED) {
       throw new AppError(
         ErrorCode.MUTAWIF_NOT_VERIFIED,
         'Only verified mutawif can go online',
@@ -235,6 +274,7 @@ export class MutawifService {
     const maxRadius = this.config.get('NEARBY_MAX_RADIUS_KM');
     const radiusKm = Math.min(dto.radiusKm ?? this.config.get('NEARBY_DEFAULT_RADIUS_KM'), maxRadius);
     const box = boundingBox({ latitude: dto.latitude, longitude: dto.longitude }, radiusKm);
+    const verificationRequired = this.verificationRequired;
 
     const rows = await this.prisma.$queryRaw<NearbyRow[]>`
       SELECT
@@ -265,7 +305,7 @@ export class MutawifService {
         ORDER BY r."hourlyRate" ASC
         LIMIT 1
       ) rate ON true
-      WHERE m."verificationStatus" = 'APPROVED'
+      WHERE (${verificationRequired} = false OR m."verificationStatus" = 'APPROVED')
         AND m."availabilityStatus" = 'ONLINE'
         AND u.status = 'ACTIVE'
         AND m.latitude BETWEEN ${box.minLat} AND ${box.maxLat}
@@ -319,7 +359,7 @@ export class MutawifService {
       },
     });
 
-    if (!profile || profile.verificationStatus !== VerificationStatus.APPROVED) {
+    if (!profile || (this.verificationRequired && profile.verificationStatus !== VerificationStatus.APPROVED)) {
       throw AppError.notFound('Mutawif', id);
     }
 
@@ -425,7 +465,10 @@ export class MutawifService {
 
     if (!profile) throw AppError.notFound('Mutawif', mutawifId);
 
-    if (profile.verificationStatus !== VerificationStatus.APPROVED || profile.user.status !== 'ACTIVE') {
+    if (
+      (this.verificationRequired && profile.verificationStatus !== VerificationStatus.APPROVED) ||
+      profile.user.status !== 'ACTIVE'
+    ) {
       throw new AppError(ErrorCode.MUTAWIF_NOT_VERIFIED, 'This mutawif is not available', 409);
     }
 
@@ -445,5 +488,9 @@ export class MutawifService {
     const profile = await this.prisma.mutawifProfile.findUnique({ where: { userId } });
     if (!profile) throw AppError.notFound('MutawifProfile');
     return profile;
+  }
+
+  private get verificationRequired(): boolean {
+    return this.config.get('MUTAWIF_VERIFICATION_REQUIRED') !== false;
   }
 }

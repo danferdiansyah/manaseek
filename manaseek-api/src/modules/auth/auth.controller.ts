@@ -10,12 +10,15 @@ import { AuthService } from './auth.service';
 import {
   DevLoginBody,
   GoogleLoginBody,
+  OnboardingBody,
   RefreshBody,
   devLoginSchema,
   googleLoginSchema,
+  onboardingSchema,
   refreshSchema,
   type DevLoginDto,
   type GoogleLoginDto,
+  type OnboardingDto,
   type RefreshDto,
 } from './dto/auth.dto';
 import type { SessionContext } from './token.service';
@@ -51,6 +54,19 @@ export class AuthController {
     @Req() req: Request,
   ) {
     return this.auth.devLogin(dto, this.sessionContext(req));
+  }
+
+  @ApiBearerAuth('access-token')
+  @Post('onboarding')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Choose a role and save the first-time profile details' })
+  @ApiBody({ type: OnboardingBody })
+  completeOnboarding(
+    @CurrentUser('id') userId: string,
+    @Body(new ZodValidationPipe(onboardingSchema)) dto: OnboardingDto,
+    @Req() req: Request,
+  ) {
+    return this.auth.completeOnboarding(userId, dto, this.sessionContext(req));
   }
 
   @Public()

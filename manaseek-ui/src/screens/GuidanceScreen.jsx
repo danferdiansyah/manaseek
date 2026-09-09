@@ -39,10 +39,10 @@ export default function GuidanceScreen({ navigate }) {
     if (filter.category) query.set('category', filter.category)
     if (term.length >= 2) query.set('search', term)
 
-    return Promise.all([
-      api.get(`/content/topics?${query}`),
-      api.get('/content/checklist').catch(() => null),
-    ]).then(([topics, checklist]) => ({ topics, checklist }))
+    return api.get(`/content/topics?${query}`).then(async (topics) => {
+      const checklist = await api.get('/content/checklist').catch(() => null)
+      return { topics, checklist }
+    })
   }, [filter, term])
 
   const { status, data, error, reload } = useResource(fetchTopics)
