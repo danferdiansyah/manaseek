@@ -17,6 +17,8 @@ const { AppModule } = require('../dist/app.module');
 const { AppConfigService } = require('../dist/common/config/config.service');
 
 const server = express();
+// Same reason as main.ts: the jamaah's address arrives in a forwarded header.
+server.set('trust proxy', 1);
 let bootstrapPromise = null;
 
 async function bootstrap() {

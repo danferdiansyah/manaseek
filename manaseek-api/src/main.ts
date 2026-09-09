@@ -29,6 +29,11 @@ async function bootstrap(): Promise<void> {
   const config = app.get(AppConfigService);
   const prefix = config.get('API_PREFIX');
 
+  // Behind the web app's rewrite the client address only survives in the
+  // forwarded header; without this every request looks like it came from the
+  // proxy.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   app.setGlobalPrefix(prefix);
   app.enableCors({ origin: config.corsOrigins, credentials: true });
   app.enableShutdownHooks();

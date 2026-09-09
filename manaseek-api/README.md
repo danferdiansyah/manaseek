@@ -113,6 +113,16 @@ The content and chat modules were originally the other track's; they now live
 here too. What remains unbuilt is media upload for mutawif verification
 documents and an admin console.
 
+## Rate limiting
+
+Requests are counted per account, not per IP. Behind the web app's `/api/*`
+rewrite the API only ever sees the proxy, so an IP-keyed limiter would put
+every jamaah in one bucket and let a handful of them lock everyone out. An IP
+is also spoofable through a forwarded header; a session is not.
+
+`trust proxy` is set on both entrypoints so `req.ip` still resolves to the
+caller on the anonymous auth routes.
+
 ## The assistant
 
 `POST /api/chat/messages` answers from the guidance library and nothing else.

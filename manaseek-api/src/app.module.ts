@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppConfigModule } from './common/config/config.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
+import { UserThrottlerGuard } from './common/guards/user-throttler.guard';
 import { LoggerModule } from './common/logger/logger.module';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { AuditModule } from './modules/audit/audit.module';
@@ -41,9 +42,10 @@ import { UsersModule } from './modules/users/users.module';
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
-    // Order matters: throttle, then authenticate, then authorise.
-    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    // Authenticate first so the throttler can key on the account rather than
+    // an IP that every jamaah shares behind the proxy.
     { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: UserThrottlerGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],
 })
