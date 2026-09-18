@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Bell, Home, BookOpen, MessageCircle, UserCheck, Settings,
-  ChevronRight, ArrowRight, Plane, Bot, Heart, ClipboardCheck, Sparkles,
+  ChevronRight, Heart, ClipboardCheck,
 } from 'lucide-react'
 import { api } from '../lib/api'
-import Avatar from '../lib/Avatar'
 import { useAuth } from '../lib/auth-context'
 import { BOOKING_STATUS_LABELS, formatSchedule } from '../lib/format'
 import { EmptyState, ErrorState, Loading } from '../lib/ui'
@@ -20,11 +19,11 @@ const NAV_TABS = [
 
 export function BottomNav({ active, navigate }) {
   return (
-    <nav className="bottom-nav glass-bar" aria-label="Navigasi utama">
+    <nav className="bottom-nav" aria-label="Navigasi utama">
       {NAV_TABS.map(({ id, label, Icon }) => (
         <button key={id} onClick={() => navigate(id)} className={active === id ? 'nav-item is-active' : 'nav-item'} aria-current={active === id ? 'page' : undefined}>
           <span className="nav-icon"><Icon size={23} strokeWidth={active === id ? 2.3 : 1.7} /></span>
-          <span>{label}</span><span className="nav-dot" />
+          <span>{label}</span>
         </button>
       ))}
     </nav>
@@ -32,10 +31,10 @@ export function BottomNav({ active, navigate }) {
 }
 
 const PILLARS = [
-  { label: 'Panduan Mandiri', description: 'Langkah ibadah Umrah & Haji', Icon: BookOpen, screen: 'guidance', style: 'emerald' },
-  { label: 'AI Chat', description: 'Teman bertanya seputar ibadah', Icon: Bot, screen: 'chatbot', style: 'ivory' },
-  { label: 'Mutawif On-Demand', description: 'Pendamping di setiap langkah', Icon: UserCheck, screen: 'mutawif', style: 'emerald' },
-  { label: 'Doa & Dzikir', description: 'Bacaan untuk menemani ibadah', Icon: Heart, screen: 'guidance', params: { search: 'doa' }, style: 'ivory' },
+  { label: 'Panduan ibadah', description: 'Tata cara Umrah & Haji', Icon: BookOpen, screen: 'guidance' },
+  { label: 'Tanya asisten', description: 'Jawaban seputar ibadah', Icon: MessageCircle, screen: 'chatbot' },
+  { label: 'Cari mutawif', description: 'Pendamping di Tanah Suci', Icon: UserCheck, screen: 'mutawif' },
+  { label: 'Doa & dzikir', description: 'Bacaan selama perjalanan', Icon: Heart, screen: 'guidance', params: { search: 'doa' } },
 ]
 
 export default function HomeScreen({ navigate }) {
@@ -71,58 +70,71 @@ export default function HomeScreen({ navigate }) {
 
   return (
     <div className="home-screen">
-      <header className="home-hero">
-        <div className="home-brand"><span className="brand-mark">M</span> MANASEEK <span className="brand-rule" /></div>
-        <div className="home-greeting">
-          <button onClick={() => navigate('profile')} aria-label="Buka profil" className="home-avatar">
-            <Avatar src={user?.avatarUrl} name={displayName} imageClassName="w-full h-full object-cover" fallbackClassName="flex items-center justify-center w-full h-full" />
-          </button>
-          <div className="greeting-copy"><p>Assalamu'alaikum</p><h1>{displayName}</h1></div>
-          <button onClick={() => navigate('notifications')} aria-label={`Notifikasi${notificationCount ? `, ${notificationCount} notifikasi` : ''}`} className="notification-button">
-            <Bell size={22} strokeWidth={1.8} />
-            {notificationCount > 0 && <span className="notification-badge">{notificationCount > 9 ? '9+' : notificationCount}</span>}
-          </button>
+      <header className="home-header">
+        <div className="greeting-copy">
+          <p>Assalamu'alaikum,</p>
+          <h1>{displayName}</h1>
         </div>
-        <p className="home-blessing">Semoga perjalanan ibadah Anda<br />selalu dalam lindungan-Nya.</p>
-        <button className="journey-pill" onClick={() => activeBooking ? navigate('booking-success', { bookingId: activeBooking.id }) : navigate('profile')}>
-          <Plane size={18} /><span>{activeBooking ? BOOKING_STATUS_LABELS[activeBooking.status] : 'Rencanakan perjalanan ibadah'}</span><ChevronRight size={17} />
+        <button
+          onClick={() => navigate('notifications')}
+          aria-label={`Notifikasi${notificationCount ? `, ${notificationCount} notifikasi` : ''}`}
+          className="notification-button"
+        >
+          <Bell size={22} strokeWidth={1.7} />
+          {notificationCount > 0 && <span className="notification-badge">{notificationCount > 9 ? '9+' : notificationCount}</span>}
         </button>
       </header>
 
       <main className="home-content">
         <PrayerStrip navigate={navigate} />
-        <section className="service-grid" aria-label="Layanan Manaseek">
-          {PILLARS.map(({ label, description, Icon, screen, params, style }) => (
-            <button key={label} onClick={() => navigate(screen, params)} className={`service-card ${style}`}>
-              <span className="service-art"><Icon size={36} strokeWidth={1.4} /></span>
-              <span className="service-title">{label}</span><span className="service-description">{description}</span>
-              <span className="service-arrow"><ArrowRight size={16} /></span>
-            </button>
-          ))}
-        </section>
-
         {activeBooking && (
-          <button onClick={() => navigate('booking-success', { bookingId: activeBooking.id })} className="active-booking glass">
-            <UserCheck size={25} /><span><span className="eyebrow">PENDAMPING IBADAH ANDA</span><strong>{activeBooking.mutawif?.user?.name ?? 'Mutawif'}</strong><small>{formatSchedule(activeBooking.scheduledStartAt)} WAS · {activeBooking.meetingPointLabel}</small></span><ChevronRight size={18} />
+          <button onClick={() => navigate('booking-success', { bookingId: activeBooking.id })} className="active-booking">
+            <UserCheck size={25} /><span><span className="eyebrow">PENDAMPING IBADAH ANDA</span><strong>{activeBooking.mutawif?.user?.name ?? 'Mutawif'}</strong><small>{BOOKING_STATUS_LABELS[activeBooking.status]}</small><small>{formatSchedule(activeBooking.scheduledStartAt)} WAS · {activeBooking.meetingPointLabel}</small></span><ChevronRight size={18} />
           </button>
         )}
 
-        <section className="home-guidance">
-          <div className="section-heading"><h2>Panduan Ibadah</h2><button onClick={() => navigate('guidance')}>Lihat semua <ChevronRight size={16} /></button></div>
-          {topicStatus === 'loading' && <Loading label="Menyiapkan panduan ibadah…" />}
-          {topicStatus === 'error' && <div className="glass rounded-[22px]"><ErrorState message="Panduan belum dapat dimuat. Periksa koneksi lalu coba lagi." onRetry={reload} /></div>}
-          {topicStatus === 'ready' && topics.length === 0 && <EmptyState title="Panduan segera hadir" description="Panduan ibadah akan ditampilkan di sini." />}
-          <div className="guide-carousel">
-            {topics.slice(0, 6).map((topic, index) => (
-              <button key={topic.slug} onClick={() => navigate('guidance-detail', { slug: topic.slug })} className="guide-card">
-                <div className={`guide-cover guide-cover-${index % 3}`}><span className="guide-category">{topic.category === 'HAJJ' ? 'HAJI' : topic.category === 'UMRAH' ? 'UMRAH' : 'PANDUAN'}</span></div>
-                <div className="guide-body"><span className="guide-medallion"><BookOpen size={21} /></span><div><h3>{topic.title}</h3><p>{topic.summary || `${topic.readingMinutes} menit baca`}</p></div><ChevronRight size={19} /></div>
+        <section className="home-services" aria-labelledby="services-heading">
+          <h2 id="services-heading" className="section-title">Untuk ibadah Anda</h2>
+          <div className="service-grid">
+            {PILLARS.map(({ label, description, Icon, screen, params }) => (
+              <button key={label} onClick={() => navigate(screen, params)} className="service-card">
+                <Icon size={24} strokeWidth={1.6} aria-hidden="true" />
+                <span className="service-title">{label}</span>
+                <span className="service-description">{description}</span>
               </button>
             ))}
           </div>
         </section>
-        <button className="preparation-card" onClick={() => navigate('checklist')}><span className="preparation-icon"><ClipboardCheck size={25} /></span><span><strong>Lebih siap, lebih tenang</strong><small>Lengkapi checklist persiapan ibadahmu</small></span><ChevronRight size={18} /></button>
-        <p className="home-signoff"><Sparkles size={13} /> Menemani setiap langkah ibadah Anda</p>
+
+        <section className="home-guidance" aria-labelledby="guidance-heading">
+          <div className="section-heading">
+            <h2 id="guidance-heading" className="section-title">Panduan ibadah</h2>
+            <button onClick={() => navigate('guidance')}>Lihat semua <ChevronRight size={16} /></button>
+          </div>
+          {topicStatus === 'loading' && <Loading label="Memuat panduan…" />}
+          {topicStatus === 'error' && <ErrorState message="Panduan belum dapat dimuat. Periksa koneksi lalu coba lagi." onRetry={reload} />}
+          {topicStatus === 'ready' && topics.length === 0 && <EmptyState title="Panduan segera hadir" description="Panduan ibadah akan ditampilkan di sini." />}
+          {topicStatus === 'ready' && topics.length > 0 && (
+            <div className="guide-list">
+              {topics.slice(0, 2).map((topic, index) => (
+                <button key={topic.slug} onClick={() => navigate('guidance-detail', { slug: topic.slug })} className="guide-row">
+                  <span className="guide-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                  <span className="guide-copy">
+                    <span className="guide-meta">{topic.category === 'HAJJ' ? 'Haji' : topic.category === 'UMRAH' ? 'Umrah' : 'Panduan'}{topic.readingMinutes ? ` · ${topic.readingMinutes} menit baca` : ''}</span>
+                    <strong>{topic.title}</strong>
+                    {topic.summary && <span className="guide-summary">{topic.summary}</span>}
+                  </span>
+                  <ChevronRight size={18} aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
+        <button className="preparation-link" onClick={() => navigate('checklist')}>
+          <ClipboardCheck size={22} strokeWidth={1.6} aria-hidden="true" />
+          <span>Checklist persiapan</span>
+          <ChevronRight size={18} aria-hidden="true" />
+        </button>
       </main>
       <BottomNav active="home" navigate={navigate} />
     </div>

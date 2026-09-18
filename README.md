@@ -24,22 +24,20 @@ web) dan `manaseek-api` (root directory `manaseek-api`). Aplikasi web
 mem-proxy `/api/*` ke backend, jadi browser hanya mengenal satu origin dan tidak
 ada CORS yang perlu diurus.
 
+## Menguji melalui deployment
+
+Project web Vercel menggunakan root repository, dengan perintah install dan
+build di `vercel.json` yang menargetkan `manaseek-ui`. Output build berada di
+`manaseek-ui/dist`. Root repository tidak memiliki package aplikasi sendiri.
+
+Uji login dan fitur dari URL deployment; `/api/*` diteruskan ke deployment
+`manaseek-api`. Untuk melihat layout beranda tanpa login, tambahkan
+`?screen=home&capture=1` pada URL. Mode ini hanya melewati layar login untuk
+preview UI, bukan otorisasi API; pengujian data tetap melalui sesi normal.
+
+Referensi desain berada di [`docs/ui/references/`](docs/ui/references/).
+
 ## Menjalankan secara lokal
-
-Frontend juga dapat dijalankan langsung dari root repo:
-
-```bash
-npm --prefix manaseek-ui install # hanya saat dependensi belum terpasang
-npm run dev                    # atau yarn dev
-```
-
-Script root meneruskan perintah ke `manaseek-ui`. Untuk preview beranda tanpa
-login, buka URL Vite dengan `?screen=home&capture=1`. Data API tetap membutuhkan
-backend dan sesi yang sesuai.
-
-Jika backend sudah dikonfigurasi, jalankan `npm run dev:api` dari root repo di
-terminal kedua. Frontend meneruskan `/api` ke `http://localhost:3000`; error
-proxy `ECONNREFUSED` berarti backend belum mendengarkan di alamat tersebut.
 
 Backend lebih dulu:
 
@@ -61,7 +59,9 @@ npm install
 npm run dev                   # http://localhost:5173
 ```
 
-Vite mem-proxy `/api` ke `localhost:3000`, sama seperti perilaku produksi.
+Vite mem-proxy `/api` ke `localhost:3000`. Kedua server perlu berjalan untuk
+menguji login dan data lokal; error proxy `ECONNREFUSED` berarti backend belum
+mendengarkan di alamat tersebut. Di deployment, proxy ditangani oleh Vercel.
 
 Detail lengkap backend — kontrak error, siklus booking, deployment, jebakan
 koneksi Supabase — ada di [`manaseek-api/README.md`](manaseek-api/README.md).

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AlertTriangle, ChevronRight, Sun, Sunrise, Sunset, Moon, MapPin } from 'lucide-react'
-import KaabaIcon from './KaabaIcon'
+import { AlertTriangle, ChevronRight, MapPin } from 'lucide-react'
 import { AT_KAABA_RADIUS_KM, compassPoint, distanceToKaabaKm, qiblaBearing } from './qibla'
 import {
   deviceTimezoneLabel,
@@ -38,29 +37,48 @@ export default function PrayerStrip({ navigate }) {
   const zoneSuspect = position.precise && timezoneLooksWrong(position, now)
   const dateLabel = new Intl.DateTimeFormat('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).format(now)
   const hijriLabel = new Intl.DateTimeFormat('id-ID-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' }).format(now)
-  const prayerIcons = { fajr: Sunrise, dhuhr: Sun, asr: Sun, maghrib: Sunset, isha: Moon }
-  const NextIcon = prayerIcons[next.id] ?? Sun
-
   return (
     <section className="prayer-section" aria-label="Waktu salat dan arah kiblat">
       <div className="prayer-card">
-        <div className="prayer-card-top"><span className="eyebrow">WAKTU SALAT</span><span className="prayer-date">{dateLabel}<br /><span>{hijriLabel}</span></span></div>
-        <div className="prayer-feature"><div><p className="prayer-next-label">Salat berikutnya</p><h2>{next.label}</h2><p className="prayer-countdown">{formatCountdown(next.at, now) || 'Waktu belum tersedia'}</p></div><span className="prayer-sun"><NextIcon size={39} strokeWidth={1.5} /></span></div>
-        <p className="prayer-reminder">Sejenak berhenti, mendekatkan diri.<br /><span>Jadikan salat penenang perjalanan Anda.</span></p>
-        <div className="prayer-schedule">
-          {daily.map((time) => {
-            const Icon = prayerIcons[time.id]
-            return <div key={time.id} className={`prayer-time${time.id === next.id ? ' is-next' : ''}`}><Icon size={22} strokeWidth={1.6} /><span>{time.label}</span><strong>{formatClock(time.at)}</strong><i /></div>
-          })}
+        <div className="prayer-date">
+          <span>{dateLabel}</span>
+          <span>{hijriLabel}</span>
         </div>
+        <p className="prayer-next-label">Salat berikutnya</p>
+        <div className="prayer-feature">
+          <h2>{next.label}</h2>
+          <span>{formatClock(next.at)}</span>
+        </div>
+        <p className="prayer-countdown">{formatCountdown(next.at, now) || 'Waktu belum tersedia'}</p>
+        <div className="prayer-schedule" aria-label="Jadwal salat hari ini">
+          {daily.map((time) => (
+            <div key={time.id} className={`prayer-time${time.id === next.id ? ' is-next' : ''}`}>
+              <span>{time.label}</span>
+              <strong>{formatClock(time.at)}</strong>
+              {time.id === next.id && <span className="sr-only">Salat berikutnya</span>}
+            </div>
+          ))}
+        </div>
+        <p className="prayer-method">{schedule.method.label}{zone ? ` · waktu ${zone}` : ''}</p>
       </div>
-      <button onClick={() => navigate('qibla')} className="qibla-card">
-        <span className="qibla-art"><KaabaIcon size={43} /></span>
-        <span className="qibla-copy"><span className="eyebrow">ARAH KIBLAT</span><strong>{!position.precise ? 'Lokasi acuan: Masjidil Haram' : atKaaba ? 'Kamu berada di Masjidil Haram' : `${Math.round(bearing)}° · ${compassPoint(bearing)}`}</strong><small>{schedule.method.label}{zone ? ` · waktu ${zone}` : ''}</small></span>
-        <span className="qibla-arrow"><ChevronRight size={20} /></span>
+      <button onClick={() => navigate('qibla')} className="qibla-link">
+        <span className="qibla-copy">
+          <strong>Arah kiblat</strong>
+          <span>{!position.precise ? 'Acuan Masjidil Haram' : atKaaba ? 'Anda berada di Masjidil Haram' : `${Math.round(bearing)}° · ${compassPoint(bearing)}`}</span>
+        </span>
+        <ChevronRight size={19} aria-hidden="true" />
       </button>
-      <p className="location-note"><MapPin size={12} />{position.precise ? (position.accuracy ? formatAccuracy(position.accuracy) : 'Menggunakan lokasi kamu') : position.status === 'locating' ? 'Mencari lokasi Anda…' : 'Lokasi belum tersedia. Jadwal memakai acuan Makkah.'}{!position.precise && position.status !== 'locating' && <button onClick={position.refresh}>Cari ulang</button>}</p>
-      {zoneSuspect && <div className="timezone-notice"><AlertTriangle size={17} /><p>Jam ponselmu masih {zone}, tidak cocok dengan lokasimu sekarang. Ubah zona waktu ponsel agar waktu salat ini benar.</p></div>}
+      <div className="location-note">
+        <MapPin size={14} aria-hidden="true" />
+        <p>{position.precise ? (position.accuracy ? formatAccuracy(position.accuracy) : 'Menggunakan lokasi Anda') : position.status === 'locating' ? 'Mencari lokasi Anda…' : 'Lokasi belum tersedia. Jadwal memakai acuan Makkah.'}</p>
+        {!position.precise && position.status !== 'locating' && <button onClick={position.refresh}>Cari ulang</button>}
+      </div>
+      {zoneSuspect && (
+        <div className="timezone-notice" role="status">
+          <AlertTriangle size={18} />
+          <p>Jam ponselmu masih {zone}, tidak cocok dengan lokasimu sekarang. Ubah zona waktu ponsel agar waktu salat ini benar.</p>
+        </div>
+      )}
     </section>
   )
 }
