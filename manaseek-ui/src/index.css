@@ -9,20 +9,20 @@
    neutral grey.
    --------------------------------------------------------------------------- */
 @theme {
-  --color-ink: #14261c;
-  --color-ink-soft: #55665c;
-  --color-ink-faint: #8b9a91;
+  --color-ink: #112e2a;
+  --color-ink-soft: #536b65;
+  --color-ink-faint: #687d76;
 
-  --color-canopy-900: #0f3d22;
-  --color-canopy-700: #1b5e35;
-  --color-canopy-500: #2d7a4f;
-  --color-canopy-100: #e8f3ec;
+  --color-canopy-900: #063f30;
+  --color-canopy-700: #07593f;
+  --color-canopy-500: #278164;
+  --color-canopy-100: #e2efe7;
 
-  --color-brass: #b8944a;
+  --color-brass: #a67d32;
   --color-brass-light: #d4a855;
   --color-brass-bg: #fbf4e6;
 
-  --color-stone: #e8edea;
+  --color-stone: #f0f4f0;
   --color-stone-deep: #dde4df;
 
   /* One radius per role, not one radius for everything. */
@@ -155,3 +155,630 @@ body {
   outline-offset: 2px;
   border-radius: 6px;
 }
+
+/* Emerald & ivory: shared surfaces and the reference-led home experience. */
+
+body {
+  background: radial-gradient(ellipse at 50% 0%, #e9eee7, #d7e3dc);
+}
+button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+button:disabled {
+  cursor: default;
+}
+button, a {
+  touch-action: manipulation;
+}
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  z-index: 50;
+  border-radius: 24px 24px 0 0;
+  padding: 8px 8px max(9px, env(safe-area-inset-bottom));
+}
+.nav-item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 3px;
+  color: #727c86;
+  font-size: 11px;
+  font-weight: 500;
+}
+.nav-icon {
+  height: 32px;
+  width: 55px;
+  border-radius: 30px;
+  display: grid;
+  place-items: center;
+  transition: background .2s;
+}
+.nav-item.is-active {
+  color: #07593f;
+}
+.is-active .nav-icon {
+  background: #e1efe6;
+}
+.nav-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: transparent;
+}
+.is-active .nav-dot {
+  background: #07593f;
+}
+.home-screen {
+  min-height: 100vh;
+  background: #eff4f1;
+}
+.home-hero {
+  position: relative;
+  padding: 24px 19px 71px;
+  color: white;
+  background: linear-gradient(90deg, #064a36e0 0%, #07523985 53%, transparent 100%), url('/images/kaaba-hero.png') 64% 50% / cover;
+}
+.home-hero::after {
+  content: '';
+  position: absolute;
+  height: 65px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, #eff4f1);
+  pointer-events: none;
+}
+.home-brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 9px;
+  letter-spacing: 2.8px;
+  font-weight: 650;
+  margin-bottom: 24px;
+  color: #f4ead0;
+}
+.brand-mark {
+  border: 1px solid #d9b76c80;
+  border-radius: 7px 7px 3px 3px;
+  font-family: Georgia, serif;
+  display: grid;
+  place-items: center;
+  width: 21px;
+  height: 23px;
+  font-size: 15px;
+  letter-spacing: 0;
+}
+.brand-rule {
+  width: 29px;
+  height: 1px;
+  background: #dbba70;
+  margin-left: 3px;
+}
+.home-greeting {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  position: relative;
+}
+.home-avatar {
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b19a84, #8c726b);
+  border: 1px solid #e1c79a50;
+  font-size: 24px;
+  overflow: hidden;
+}
+.greeting-copy {
+  min-width: 0;
+  flex: 1;
+}
+.greeting-copy p {
+  font-size: 13px;
+  color: #e1eee2;
+  margin-bottom: 2px;
+}
+.greeting-copy h1 {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -.5px;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+  text-shadow: 0 1px 12px #04382666;
+}
+.notification-button {
+  position: relative;
+  width: 39px;
+  height: 39px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #fffdf2ed;
+  color: #06563d;
+  border: 1px solid #fff4d2;
+  box-shadow: 0 3px 16px #06433220;
+  display: grid;
+  place-items: center;
+}
+.notification-badge {
+  position: absolute;
+  right: -3px;
+  top: -4px;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 20px;
+  background: #d0a450;
+  color: #173c2b;
+  font-size: 10px;
+  border: 1px solid #f9e1a7;
+}
+.home-blessing {
+  font-size: 12px;
+  color: #e1eee2;
+  line-height: 1.65;
+  margin: 12px 0 18px 54px;
+  text-shadow: 0 1px 6px #06432a;
+}
+.journey-pill {
+  display: inline-flex;
+  gap: 9px;
+  align-items: center;
+  background: #f0faf0eb;
+  color: #074932;
+  border: 1px solid white;
+  box-shadow: 0 4px 20px #043d2520;
+  border-radius: 30px;
+  padding: 10px 13px;
+  font-size: 12px;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+}
+.home-content {
+  position: relative;
+  margin-top: -48px;
+  padding: 0 15px 105px;
+}
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 1.8px;
+  font-weight: 650;
+  display: block;
+}
+.prayer-card {
+  border-radius: 24px;
+  padding: 18px 9px 9px;
+  color: white;
+  background: radial-gradient(ellipse at 100% 0%, #42896485, transparent 70%), repeating-conic-gradient(from 45deg at 87% 5%, #ffffff03 0deg 45deg, transparent 45deg 90deg) 0 0 / 65px 65px, linear-gradient(140deg, #05372c, #075239 70%, #0a6344);
+  border: 1px solid #9cc3a9;
+  box-shadow: inset 0 0 0 2px #ffffff09, 0 9px 21px -12px #174d3680;
+}
+.prayer-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0 9px;
+  gap: 8px;
+}
+.prayer-card-top .eyebrow {
+  margin-top: 2px;
+  color: #e3eee3;
+}
+.prayer-date {
+  font-size: 10px;
+  line-height: 1.8;
+  text-align: right;
+  color: #e9f4e9;
+}
+.prayer-date > span {
+  color: #cadfcd;
+}
+.prayer-feature {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 25px 0 9px;
+  margin-top: -3px;
+}
+.prayer-next-label {
+  color: #c0d7c9;
+  font-size: 10px;
+}
+.prayer-feature h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 43px;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  font-weight: 700;
+}
+.prayer-countdown {
+  font-size: 17px;
+  margin-top: 4px;
+}
+.prayer-sun {
+  height: 64px;
+  width: 64px;
+  border-radius: 50%;
+  border: 1px solid #e2c16b65;
+  background: linear-gradient(140deg, #e4c87e35, #e4c87e0c);
+  display: grid;
+  place-items: center;
+  color: #e1bc69;
+  box-shadow: inset 0 1px 2px #ffefb933;
+}
+.prayer-reminder {
+  font-size: 11px;
+  color: #e1ece1;
+  line-height: 1.65;
+  padding: 12px 9px 14px;
+}
+.prayer-reminder span {
+  color: #bdD6c7;
+}
+.prayer-schedule {
+  display: grid;
+  grid-template-columns: repeat(5,minmax(0,1fr));
+  border-radius: 17px;
+  background: #fbfcf9;
+  color: #173831;
+  padding: 5px;
+}
+.prayer-time {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 9px 0 5px;
+  border-radius: 12px;
+  gap: 5px;
+}
+.prayer-time > svg {
+  color: #b28d43;
+  margin-bottom: 2px;
+}
+.prayer-time > span {
+  font-size: 11px;
+  color: #50625e;
+}
+.prayer-time > strong {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.prayer-time > i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+.prayer-time.is-next {
+  background: linear-gradient(135deg, #e5f0e8, #dcebe3);
+}
+.prayer-time.is-next > svg, .prayer-time.is-next > span {
+  color: #07583e;
+}
+.prayer-time.is-next > i {
+  background: #07583e;
+}
+.qibla-card {
+  width: 100%;
+  border: 1px solid white;
+  background: linear-gradient(115deg,#f5f0e4,#fff 55%,#fcfcf8);
+  border-radius: 21px;
+  box-shadow: 0 8px 22px -15px #365d46;
+  margin-top: 16px;
+  padding: 15px 11px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+.qibla-art {
+  width: 64px;
+  height: 58px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, #efe1c1, #f9f4e7 65%, transparent 66%);
+  filter: drop-shadow(0 5px 3px #92784630);
+  transform: rotate(-7deg);
+}
+.qibla-copy {
+  flex: 1;
+  min-width: 0;
+}
+.qibla-copy .eyebrow {
+  color: #596d65;
+  font-size: 9px;
+}
+.qibla-copy strong {
+  display: block;
+  font-size: 13px;
+  margin: 5px 0 3px;
+  line-height: 1.4;
+}
+.qibla-copy small {
+  display: block;
+  font-size: 10px;
+  color: #66756d;
+}
+.qibla-arrow {
+  border-radius: 50%;
+  background: #f3efe3;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  color: #07593f;
+}
+.location-note {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 9px;
+  color: #607369;
+  padding: 8px 5px 0;
+}
+.location-note button {
+  font-weight: 650;
+  text-decoration: underline;
+  color: #07593f;
+  min-height: 28px;
+}
+.timezone-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  background: #fff4db;
+  color: #785b1d;
+  padding: 12px;
+  margin-top: 8px;
+  border-radius: 12px;
+}
+.timezone-notice svg {
+  flex-shrink: 0;
+}
+.service-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  gap: 7px;
+  margin: 15px 0 23px;
+}
+.service-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 20px;
+  padding: 12px 5px 10px;
+  min-width: 0;
+  border: 1px solid white;
+  box-shadow: 0 8px 15px -10px #315a47a0, inset 0 1px 0 #ffffff45;
+  transition: transform .2s, box-shadow .2s;
+}
+.service-card.emerald {
+  background: radial-gradient(ellipse at top left, #3b9676, transparent 75%), linear-gradient(145deg,#086345,#034330);
+  color: #fff;
+  border-color: #77a990;
+}
+.service-card.ivory {
+  background: linear-gradient(135deg, #fff, #f4f0e6);
+  color: #15342e;
+}
+.service-art {
+  display: grid;
+  place-items: center;
+  height: 51px;
+  width: 54px;
+  color: #e7c77e;
+  margin-bottom: 9px;
+  border-radius: 17px;
+  background: radial-gradient(#ffffff16, transparent 70%);
+  filter: drop-shadow(0 5px 3px #001e2729);
+}
+.ivory .service-art {
+  color: #947032;
+  background: radial-gradient(#e9dfc2aa, transparent 72%);
+}
+.service-title {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.35;
+  min-height: 31px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-wrap: balance;
+}
+.service-description {
+  font-size: 9px;
+  line-height: 1.5;
+  margin: 5px 0 10px;
+  color: #d1e3d6;
+  flex: 1;
+}
+.ivory .service-description {
+  color: #617169;
+}
+.service-arrow {
+  display: grid;
+  place-items: center;
+  width: 25px;
+  height: 25px;
+  background: linear-gradient(130deg, #eace87, #b88937);
+  border: 1px solid #e8cc85;
+  border-radius: 50%;
+  color: #174932;
+}
+.ivory .service-arrow {
+  background: #efe9d9;
+  border-color: #e5dac0;
+}
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.section-heading h2 {
+  font-size: 21px;
+  letter-spacing: -.6px;
+  font-weight: 700;
+}
+.section-heading button {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  color: #07593f;
+  font-size: 11px;
+  font-weight: 650;
+  min-height: 36px;
+}
+.guide-carousel {
+  display: flex;
+  overflow-x: auto;
+  gap: 12px;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: #c0d0c4 transparent;
+  padding: 0 2px 12px;
+}
+.guide-card {
+  flex: 0 0 78%;
+  background: #fff;
+  border: 1px solid white;
+  border-radius: 20px;
+  overflow: hidden;
+  text-align: left;
+  scroll-snap-align: start;
+  box-shadow: 0 5px 12px -9px #37564580;
+}
+.guide-cover {
+  height: 97px;
+  position: relative;
+  background: url('/images/kaaba-hero.png') 88% 61% / 150%;
+}
+.guide-cover-1 {
+  background-position: 68% 28%;
+  background-size: 200%;
+}
+.guide-cover-2 {
+  background-position: 92% 75%;
+  background-size: 185%;
+}
+.guide-category {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #fff9e8;
+  background: #123e32d9;
+  border: 1px solid #ffffff40;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 8px;
+  letter-spacing: 1.4px;
+}
+.guide-body {
+  display: flex;
+  position: relative;
+  padding: 17px 11px 14px 46px;
+  gap: 4px;
+  align-items: center;
+  min-height: 92px;
+}
+.guide-body > div {
+  flex: 1;
+  min-width: 0;
+}
+.guide-body > svg {
+  flex-shrink: 0;
+  color: #07593f;
+}
+.guide-medallion {
+  position: absolute;
+  left: 9px;
+  top: -19px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  color: #fff;
+  background: linear-gradient(145deg, #e1c074,#b18436);
+  border: 2px solid #f8e6b8;
+  border-radius: 50%;
+  box-shadow: 0 3px 7px #77633420;
+}
+.guide-body h3 {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.guide-body p {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #697a72;
+  margin-top: 5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.preparation-card, .active-booking {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-align: left;
+  border-radius: 18px;
+  padding: 16px 13px;
+  margin-top: 13px;
+  background: #e4ece1;
+  border: 1px solid #d6e2d1;
+}
+.preparation-card > span:nth-child(2), .active-booking > span {
+  flex: 1;
+}
+.preparation-card strong, .active-booking strong {
+  display: block;
+  font-size: 13px;
+}
+.preparation-card small, .active-booking small {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  color: #617361;
+}
+.preparation-icon {
+  color: #527b4b;
+}
+.active-booking {
+  background: #fffdf6;
+  margin-bottom: 22px;
+}
+.active-booking .eyebrow {
+  font-size: 8px;
+  margin-bottom: 5px;
+}
+.home-signoff {
+  font-size: 9px;
+  color: #728477;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 23px 0 0;
+}
+@media (hover: hover) { .service-card:hover { transform: translateY(-3px); box-shadow: 0 10px 20px -10px #315a4780; } .guide-card:hover { border-color: #c6aa69; } }
+@media (max-width: 359px) { .home-content { padding-left: 11px; padding-right: 11px; } .home-hero { padding-left: 14px; padding-right: 14px; } .greeting-copy h1 { font-size: 18px; } .service-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; } .service-title { font-size: 13px; min-height: 0; } .service-description { font-size: 11px; } .prayer-feature h2 { font-size: 38px; } .prayer-card-top .eyebrow { font-size: 9px; } }

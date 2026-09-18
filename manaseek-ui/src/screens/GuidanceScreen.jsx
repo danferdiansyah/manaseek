@@ -27,12 +27,12 @@ const TAG_STYLE = {
   Sunnah: { bg: '#EEF2FF', color: '#4F46E5' },
 }
 
-export default function GuidanceScreen({ navigate }) {
+export default function GuidanceScreen({ navigate, params }) {
   const [filter, setFilter] = useState(FILTERS[0])
-  const [search, setSearch] = useState('')
+  const [search, setSearch] = useState(params?.search ?? '')
   // Only the committed term hits the API, so typing does not fire a request
   // per keystroke.
-  const [term, setTerm] = useState('')
+  const [term, setTerm] = useState(params?.search ?? '')
 
   const fetchTopics = useCallback(() => {
     const query = new URLSearchParams()
@@ -64,7 +64,7 @@ export default function GuidanceScreen({ navigate }) {
           <button onClick={() => navigate('home')} className="glass-control w-9 h-9 rounded-full flex items-center justify-center">
             <ArrowLeft size={16} color="white" />
           </button>
-          <h2 className="text-white font-bold text-lg">Guidance Mandiri</h2>
+          <h2 className="text-white font-bold text-lg">Panduan Mandiri</h2>
         </div>
         <form onSubmit={submitSearch} className="relative">
           <Search size={15} color="#9CA3AF" className="absolute left-3 top-1/2 -translate-y-1/2" />

@@ -26,6 +26,21 @@ ada CORS yang perlu diurus.
 
 ## Menjalankan secara lokal
 
+Frontend juga dapat dijalankan langsung dari root repo:
+
+```bash
+npm --prefix manaseek-ui install # hanya saat dependensi belum terpasang
+npm run dev                    # atau yarn dev
+```
+
+Script root meneruskan perintah ke `manaseek-ui`. Untuk preview beranda tanpa
+login, buka URL Vite dengan `?screen=home&capture=1`. Data API tetap membutuhkan
+backend dan sesi yang sesuai.
+
+Jika backend sudah dikonfigurasi, jalankan `npm run dev:api` dari root repo di
+terminal kedua. Frontend meneruskan `/api` ke `http://localhost:3000`; error
+proxy `ECONNREFUSED` berarti backend belum mendengarkan di alamat tersebut.
+
 Backend lebih dulu:
 
 ```bash

@@ -1,0 +1,11 @@
+{
+  "name": "manaseek",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix manaseek-ui run dev",
+    "dev:api": "npm --prefix manaseek-api run dev",
+    "build": "npm --prefix manaseek-ui run build",
+    "lint": "npm --prefix manaseek-ui run lint",
+    "preview": "npm --prefix manaseek-ui run preview"
+  }
+}

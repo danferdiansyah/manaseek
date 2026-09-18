@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AlertTriangle, ChevronRight, Sun } from 'lucide-react'
+import { AlertTriangle, ChevronRight, Sun, Sunrise, Sunset, Moon, MapPin } from 'lucide-react'
 import KaabaIcon from './KaabaIcon'
 import { AT_KAABA_RADIUS_KM, compassPoint, distanceToKaabaKm, qiblaBearing } from './qibla'
 import {
@@ -30,110 +30,37 @@ export default function PrayerStrip({ navigate }) {
   }, [])
 
   const schedule = prayerTimes({ ...position, date: now })
-  const { next, current } = nextPrayer({ ...position, now })
+  const { next } = nextPrayer({ ...position, now })
   const bearing = qiblaBearing(position)
   const atKaaba = distanceToKaabaKm(position) < AT_KAABA_RADIUS_KM
   const daily = schedule.times.filter((t) => !t.informational)
   const zone = deviceTimezoneLabel(now)
   const zoneSuspect = position.precise && timezoneLooksWrong(position, now)
+  const dateLabel = new Intl.DateTimeFormat('id-ID', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).format(now)
+  const hijriLabel = new Intl.DateTimeFormat('id-ID-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' }).format(now)
+  const prayerIcons = { fajr: Sunrise, dhuhr: Sun, asr: Sun, maghrib: Sunset, isha: Moon }
+  const NextIcon = prayerIcons[next.id] ?? Sun
 
   return (
-    <section className="glass rounded-[20px] overflow-hidden">
-      <div className="px-4 pt-4 pb-3.5 flex items-start gap-3">
-        <span
-          className="w-10 h-10 rounded-[13px] flex items-center justify-center flex-shrink-0"
-          style={{ background: 'var(--color-canopy-100)' }}
-        >
-          <Sun size={19} color="var(--color-canopy-700)" strokeWidth={1.8} />
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm text-ink-soft">
-            {current ? `Sekarang waktu ${current.label}` : 'Menuju waktu shalat berikutnya'}
-          </p>
-          <p className="text-[17px] font-semibold text-ink mt-0.5">
-            {next.label} {formatClock(next.at)}
-          </p>
-          <p className="text-sm text-ink-soft mt-0.5">{formatCountdown(next.at, now)}</p>
+    <section className="prayer-section" aria-label="Waktu salat dan arah kiblat">
+      <div className="prayer-card">
+        <div className="prayer-card-top"><span className="eyebrow">WAKTU SALAT</span><span className="prayer-date">{dateLabel}<br /><span>{hijriLabel}</span></span></div>
+        <div className="prayer-feature"><div><p className="prayer-next-label">Salat berikutnya</p><h2>{next.label}</h2><p className="prayer-countdown">{formatCountdown(next.at, now) || 'Waktu belum tersedia'}</p></div><span className="prayer-sun"><NextIcon size={39} strokeWidth={1.5} /></span></div>
+        <p className="prayer-reminder">Sejenak berhenti, mendekatkan diri.<br /><span>Jadikan salat penenang perjalanan Anda.</span></p>
+        <div className="prayer-schedule">
+          {daily.map((time) => {
+            const Icon = prayerIcons[time.id]
+            return <div key={time.id} className={`prayer-time${time.id === next.id ? ' is-next' : ''}`}><Icon size={22} strokeWidth={1.6} /><span>{time.label}</span><strong>{formatClock(time.at)}</strong><i /></div>
+          })}
         </div>
       </div>
-
-      <div className="flex border-t border-white/70">
-        {daily.map((time) => {
-          const isNext = time.id === next.id
-          return (
-            <div
-              key={time.id}
-              className="flex-1 flex flex-col items-center py-2.5 gap-0.5"
-              style={isNext ? { background: 'var(--color-canopy-100)' } : undefined}
-            >
-              <span
-                className="text-xs"
-                style={{ color: isNext ? 'var(--color-canopy-700)' : 'var(--color-ink-faint)' }}
-              >
-                {time.label}
-              </span>
-              <span
-                className="text-sm tabular-nums"
-                style={{
-                  color: isNext ? 'var(--color-canopy-700)' : 'var(--color-ink-soft)',
-                  fontWeight: isNext ? 600 : 500,
-                }}
-              >
-                {formatClock(time.at)}
-              </span>
-            </div>
-          )
-        })}
-      </div>
-
-      <button
-        onClick={() => navigate('qibla')}
-        className="w-full flex items-center gap-3 px-4 py-3.5 border-t border-white/70 text-left"
-      >
-        <span
-          className="w-9 h-9 rounded-[12px] flex items-center justify-center flex-shrink-0"
-          style={{
-            background: 'var(--color-brass-bg)',
-            border: '1px solid rgba(184,148,74,.28)',
-          }}
-        >
-          <KaabaIcon size={19} />
-        </span>
-        <span className="flex-1 min-w-0">
-          <span className="block text-[15px] font-medium text-ink">Arah kiblat</span>
-          <span className="block text-xs text-ink-faint mt-0.5">
-            {atKaaba
-              ? 'Kamu berada di Masjidil Haram'
-              : `${Math.round(bearing)}° · ${compassPoint(bearing)}`}
-          </span>
-        </span>
-        <ChevronRight size={16} color="var(--color-ink-faint)" />
+      <button onClick={() => navigate('qibla')} className="qibla-card">
+        <span className="qibla-art"><KaabaIcon size={43} /></span>
+        <span className="qibla-copy"><span className="eyebrow">ARAH KIBLAT</span><strong>{!position.precise ? 'Lokasi acuan: Masjidil Haram' : atKaaba ? 'Kamu berada di Masjidil Haram' : `${Math.round(bearing)}° · ${compassPoint(bearing)}`}</strong><small>{schedule.method.label}{zone ? ` · waktu ${zone}` : ''}</small></span>
+        <span className="qibla-arrow"><ChevronRight size={20} /></span>
       </button>
-
-      <p className="px-4 pb-3 text-xs text-ink-faint">
-        {schedule.method.label} ·{' '}
-        {position.precise
-          ? position.accuracy
-            ? formatAccuracy(position.accuracy)
-            : 'lokasi kamu'
-          : position.status === 'locating'
-            ? 'mencari lokasi…'
-            : 'Masjidil Haram'}
-        {zone ? ` · waktu ${zone}` : ''}
-      </p>
-
-      {zoneSuspect && (
-        <div
-          className="mx-4 mb-4 rounded-[14px] px-3.5 py-3 flex items-start gap-2.5"
-          style={{ background: 'var(--color-brass-bg)', border: '1px solid rgba(184,148,74,.18)' }}
-        >
-          <AlertTriangle size={14} color="var(--color-brass)" className="flex-shrink-0 mt-0.5" />
-          <p className="text-xs leading-relaxed" style={{ color: '#7a6224' }}>
-            Jam ponselmu masih {zone}, tidak cocok dengan lokasimu sekarang. Ubah
-            zona waktu ponsel agar waktu shalat ini benar.
-          </p>
-        </div>
-      )}
+      <p className="location-note"><MapPin size={12} />{position.precise ? (position.accuracy ? formatAccuracy(position.accuracy) : 'Menggunakan lokasi kamu') : position.status === 'locating' ? 'Mencari lokasi Anda…' : 'Lokasi belum tersedia. Jadwal memakai acuan Makkah.'}{!position.precise && position.status !== 'locating' && <button onClick={position.refresh}>Cari ulang</button>}</p>
+      {zoneSuspect && <div className="timezone-notice"><AlertTriangle size={17} /><p>Jam ponselmu masih {zone}, tidak cocok dengan lokasimu sekarang. Ubah zona waktu ponsel agar waktu salat ini benar.</p></div>}
     </section>
   )
 }
