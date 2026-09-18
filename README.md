@@ -24,19 +24,6 @@ web) dan `manaseek-api` (root directory `manaseek-api`). Aplikasi web
 mem-proxy `/api/*` ke backend, jadi browser hanya mengenal satu origin dan tidak
 ada CORS yang perlu diurus.
 
-## Menguji melalui deployment
-
-Project web Vercel menggunakan root repository, dengan perintah install dan
-build di `vercel.json` yang menargetkan `manaseek-ui`. Output build berada di
-`manaseek-ui/dist`. Root repository tidak memiliki package aplikasi sendiri.
-
-Uji login dan fitur dari URL deployment; `/api/*` diteruskan ke deployment
-`manaseek-api`. Untuk melihat layout beranda tanpa login, tambahkan
-`?screen=home&capture=1` pada URL. Mode ini hanya melewati layar login untuk
-preview UI, bukan otorisasi API; pengujian data tetap melalui sesi normal.
-
-Referensi desain berada di [`docs/ui/references/`](docs/ui/references/).
-
 ## Menjalankan secara lokal
 
 Backend lebih dulu:
@@ -59,9 +46,7 @@ npm install
 npm run dev                   # http://localhost:5173
 ```
 
-Vite mem-proxy `/api` ke `localhost:3000`. Kedua server perlu berjalan untuk
-menguji login dan data lokal; error proxy `ECONNREFUSED` berarti backend belum
-mendengarkan di alamat tersebut. Di deployment, proxy ditangani oleh Vercel.
+Vite mem-proxy `/api` ke `localhost:3000`, sama seperti perilaku produksi.
 
 Detail lengkap backend — kontrak error, siklus booking, deployment, jebakan
 koneksi Supabase — ada di [`manaseek-api/README.md`](manaseek-api/README.md).

@@ -67,7 +67,7 @@ function Shell() {
   if (isCapture) {
     const CaptureScreen = screens[current] ?? HomeScreen
     return (
-      <div style={{ width: '100%', maxWidth: 420, minHeight: '100vh', margin: '0 auto', background: 'var(--color-stone)', overflow: 'hidden' }}>
+      <div style={{ width: 390, minHeight: 844, background: '#f9fafb', overflow: 'hidden' }}>
         <CaptureScreen navigate={navigate} params={routeParams} />
       </div>
     )
