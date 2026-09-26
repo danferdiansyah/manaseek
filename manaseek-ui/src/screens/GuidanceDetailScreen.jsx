@@ -1,13 +1,16 @@
 import { useCallback } from 'react'
-import { ArrowLeft, AlertTriangle, ChevronRight, Layers, Info, BookMarked } from 'lucide-react'
+import { AlertTriangle, ChevronRight, Info } from 'lucide-react'
 import { api } from '../lib/api'
 import { ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
+import PageHeader from '../components/PageHeader'
+import GlassIcon from '../components/GlassIcon'
+import { topicArtwork } from '../components/artwork'
 
 const TAG_STYLE = {
   Wajib: 'linear-gradient(135deg, #B8944A, #D4A855)',
   Rukun: 'linear-gradient(135deg, #1B5E35, #2D7A4F)',
-  Sunnah: 'linear-gradient(135deg, #4F46E5, #6366F1)',
+  Sunnah: 'linear-gradient(135deg, #527c64, #739982)',
 }
 
 export default function GuidanceDetailScreen({ navigate, params }) {
@@ -42,35 +45,13 @@ export default function GuidanceDetailScreen({ navigate, params }) {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-stone">
-      {/* Hero */}
-      <div className="canopy relative pt-14 pb-8 px-5">
-        <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => navigate('guidance')} className="glass-control w-9 h-9 rounded-full flex items-center justify-center">
-            <ArrowLeft size={16} color="white" />
-          </button>
-          <span className="text-canopy-100/85 text-sm flex-1">Guidance Mandiri</span>
+    <div className="app-page flex flex-col min-h-full bg-stone">
+      <PageHeader title={topic.title} eyebrow="Panduan ibadah" description={topic.summary} icon={topicArtwork(topic.icon)} onBack={() => navigate('guidance')}>
+        <div className="flex items-center gap-3">
+          {topic.obligation && <span className="text-xs px-3 py-1 rounded-full font-medium text-white" style={{ background: TAG_STYLE[topic.obligation] ?? 'rgba(255,255,255,.2)' }}>{topic.obligation}</span>}
+          <span className="text-xs text-canopy-100/85">{topic.readingMinutes} menit baca</span>
         </div>
-
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(255,255,255,0.18)' }}>
-            <Layers size={32} color="white" strokeWidth={1.5} />
-          </div>
-          <div className="min-w-0">
-            {topic.obligation && (
-              <span
-                className="text-xs px-2 py-1 rounded-full font-medium text-white"
-                style={{ background: TAG_STYLE[topic.obligation] ?? 'rgba(255,255,255,0.25)' }}
-              >
-                {topic.obligation}
-              </span>
-            )}
-            <h2 className="text-white text-xl font-bold mt-1">{topic.title}</h2>
-            <p className="text-canopy-100/85 text-xs mt-0.5">{topic.summary}</p>
-            <p className="text-canopy-100/70 text-xs mt-1">{topic.readingMinutes} menit baca</p>
-          </div>
-        </div>
-      </div>
+      </PageHeader>
 
       <div className="px-5 pt-5 space-y-5 mb-10">
         {topic.status !== 'PUBLISHED' && (
@@ -89,7 +70,7 @@ export default function GuidanceDetailScreen({ navigate, params }) {
             <p className="text-sm font-semibold text-ink mb-3">Tata Cara</p>
             <div className="space-y-3">
               {topic.steps.map((step, i) => (
-                <div key={step.id} className="flex gap-3">
+                <div key={step.id} className="reading-step flex gap-3">
                   <div
                     className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold text-white mt-0.5"
                     style={{ background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)' }}
@@ -130,12 +111,7 @@ export default function GuidanceDetailScreen({ navigate, params }) {
             <div className="space-y-2">
               {topic.references.map((ref) => (
                 <div key={ref.id} className="glass rounded-[16px] p-4 flex items-start gap-3">
-                  <span
-                    className="w-8 h-8 rounded-[11px] flex items-center justify-center flex-shrink-0"
-                    style={{ background: 'var(--color-canopy-100)' }}
-                  >
-                    <BookMarked size={15} color="var(--color-canopy-700)" strokeWidth={1.8} />
-                  </span>
+                  <GlassIcon name="hajj" size="sm" tone="gold" />
                   <div className="min-w-0">
                     <p className="text-[15px] font-medium text-ink">{ref.citation}</p>
                     {ref.gloss && <p className="text-sm text-ink-soft mt-0.5 leading-snug">{ref.gloss}</p>}

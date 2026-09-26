@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, Bot, Send, AlertCircle, UserCheck, BookOpen } from 'lucide-react'
-import { BottomNav } from './HomeScreen'
+import { Send, AlertCircle, BookOpen, ArrowUpRight } from 'lucide-react'
+import BottomNav from '../components/BottomNav'
 import { api } from '../lib/api'
+import PageHeader from '../components/PageHeader'
+import GlassIcon from '../components/GlassIcon'
 
 const SUGGESTIONS = [
   'Apa saja larangan saat ihram?',
@@ -51,7 +53,7 @@ function Bubble({ message, navigate, titleOf }) {
             className="mt-2 flex items-center gap-2 rounded-[14px] px-3.5 py-2.5 text-left w-full"
             style={{ background: 'var(--color-canopy-100)' }}
           >
-            <UserCheck size={15} color="var(--color-canopy-700)" strokeWidth={1.9} />
+            <GlassIcon name="mutawif" size="sm" bare />
             <span className="text-sm font-medium text-canopy-700">Tanya mutawif langsung</span>
           </button>
         )}
@@ -114,34 +116,10 @@ export default function ChatbotScreen({ navigate }) {
   const empty = messages.length === 0
 
   return (
-    <div className="flex flex-col min-h-full bg-stone">
-      <div className="glass-topbar px-5 pt-14 pb-4 sticky top-0 z-40">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('home')}
-            aria-label="Kembali"
-            className="w-9 h-9 rounded-full flex items-center justify-center"
-            style={{ background: 'var(--color-canopy-100)' }}
-          >
-            <ArrowLeft size={16} color="var(--color-canopy-700)" />
-          </button>
-          <span
-            className="w-10 h-10 rounded-full flex items-center justify-center"
-            style={{
-              background: 'linear-gradient(150deg, #1B5E35, #2D7A4F)',
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,.25)',
-            }}
-          >
-            <Bot size={19} color="white" strokeWidth={1.8} />
-          </span>
-          <div>
-            <p className="font-semibold text-ink">Manaseek AI</p>
-            <p className="text-xs text-ink-faint">Asisten informasi ibadah</p>
-          </div>
-        </div>
-      </div>
+    <div className="app-page flex flex-col min-h-full bg-stone">
+      <PageHeader title="Tanya Manaseek" eyebrow="Teman belajar ibadah" description="Ada yang ingin kamu pahami? Mulai percakapanmu di sini." icon="chat" onBack={() => navigate('home')} />
 
-      <div className="px-4 pt-4 pb-40 space-y-3">
+      <div className="chat-messages px-4 pt-4 space-y-3">
         <div
           className="rounded-[16px] px-4 py-3 flex items-start gap-2.5"
           style={{ background: 'var(--color-brass-bg)', border: '1px solid rgba(184,148,74,.18)' }}
@@ -155,15 +133,20 @@ export default function ChatbotScreen({ navigate }) {
 
         {empty && (
           <div className="pt-2">
-            <p className="text-sm text-ink-soft mb-3">Mulai dari salah satu ini:</p>
+            <div className="chat-intro">
+              <GlassIcon name="chat" size="feature" tone="teal" />
+              <h2>Belajar, lebih dekat.</h2>
+              <p>Dari persiapan hingga rangkaian ibadah, tanyakan yang ingin kamu ketahui.</p>
+            </div>
+            <p className="text-sm font-semibold text-ink mb-3">Mulai dari pertanyaan kecil</p>
             <div className="space-y-2">
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s}
                   onClick={() => send(s)}
-                  className="glass w-full text-left rounded-[16px] px-4 py-3 text-[15px] text-ink"
+                  className="chat-suggestion glass w-full text-left rounded-[18px] px-4 py-3.5 text-sm text-ink"
                 >
-                  {s}
+                  <span className="flex-1">{s}</span><ArrowUpRight size={16} color="var(--color-brass)" aria-hidden="true" />
                 </button>
               ))}
             </div>
@@ -202,7 +185,7 @@ export default function ChatbotScreen({ navigate }) {
               className="mt-2.5 flex items-center gap-2 rounded-[12px] px-3.5 py-2.5 w-full"
               style={{ background: 'var(--color-canopy-100)' }}
             >
-              <UserCheck size={15} color="var(--color-canopy-700)" strokeWidth={1.9} />
+              <GlassIcon name="mutawif" size="sm" bare />
               <span className="text-sm font-medium text-canopy-700">Tanya mutawif langsung</span>
             </button>
           </div>
@@ -212,7 +195,7 @@ export default function ChatbotScreen({ navigate }) {
       </div>
 
       {/* Composer sits above the nav, both on the same glass. */}
-      <div className="fixed bottom-[68px] left-1/2 -translate-x-1/2 w-full max-w-[420px] px-4 pb-3 pt-2">
+      <div className="chat-composer">
         <form
           onSubmit={(e) => {
             e.preventDefault()

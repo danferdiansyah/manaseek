@@ -1,6 +1,8 @@
 import { useCallback } from 'react'
-import { ArrowLeft, Bell, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { Bell, CheckCircle, Clock, XCircle } from 'lucide-react'
 import { api } from '../lib/api'
+import PageHeader from '../components/PageHeader'
+import GlassIcon from '../components/GlassIcon'
 import { EmptyState, ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
 
@@ -24,22 +26,15 @@ export default function NotificationsScreen({ navigate }) {
   const items = data?.items ?? []
 
   return (
-    <div className="flex flex-col min-h-full bg-stone">
-      <div className="canopy px-5 pt-14 pb-6">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('home')} className="glass-control w-9 h-9 rounded-full flex items-center justify-center">
-            <ArrowLeft size={16} color="white" />
-          </button>
-          <h2 className="text-white font-bold text-lg">Notifikasi</h2>
-        </div>
-      </div>
+    <div className="app-page flex flex-col min-h-full bg-stone">
+      <PageHeader title="Kabar untukmu" eyebrow="Notifikasi" description="Ikuti kabar terbaru pendampingan dan perjalanan ibadahmu." icon="notification" onBack={() => navigate('home')} />
 
       <div className="px-5 py-5 space-y-2.5 mb-10">
         {status === 'loading' && <Loading label="Memuat notifikasi…" />}
         {status === 'error' && <ErrorState message={error} onRetry={reload} />}
 
         {status === 'ready' && items.length === 0 && (
-          <EmptyState
+          <EmptyState icon="notification"
             title="Belum ada notifikasi"
             description="Kabar tentang pesanan mutawif akan muncul di sini."
           />
@@ -56,8 +51,11 @@ export default function NotificationsScreen({ navigate }) {
               disabled={!bookingId}
               className="w-full flex items-start gap-3 glass rounded-[20px] p-4 text-left disabled:cursor-default"
             >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: tone.bg }}>
-                <tone.Icon size={16} color={tone.fg} strokeWidth={1.8} />
+              <div className="relative flex-shrink-0">
+                <GlassIcon name="notification" size="sm" tone="gold" />
+                <span className="absolute -right-1 -bottom-1 rounded-full p-0.5 border-2 border-white" style={{ background: tone.bg }}>
+                  <tone.Icon size={12} color={tone.fg} strokeWidth={2} aria-hidden="true" />
+                </span>
               </div>
               <div className="flex-1 min-w-0">
                 {item.title && <p className="text-sm font-semibold text-ink">{item.title}</p>}

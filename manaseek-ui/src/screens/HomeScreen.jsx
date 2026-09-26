@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react'
-import {
-  Bell, Home, BookOpen, MessageCircle, UserCheck, Settings,
-  ChevronRight, ArrowRight, Clock3, Info,
-  Layers, RotateCcw, ArrowRightLeft, Sunrise, Scissors, Moon, Target,
-  Heart, ClipboardList,
-} from 'lucide-react'
+import { Bell, ChevronRight, ArrowRight, Clock3, Info } from 'lucide-react'
 import { api } from '../lib/api'
 import Avatar from '../lib/Avatar'
 import { useAuth } from '../lib/auth-context'
@@ -12,74 +7,20 @@ import { BOOKING_STATUS_LABELS, formatSchedule } from '../lib/format'
 import PrayerStrip from '../lib/PrayerStrip'
 import kaabaIllustration from '../assets/home/kaaba-cutout.png'
 import manaseekMark from '../assets/home/manaseek-mark.png'
-import umrahIcon from '../assets/home/services/umrah.webp'
-import hajjIcon from '../assets/home/services/hajj.webp'
-import chatIcon from '../assets/home/services/chat.webp'
-import mutawifIcon from '../assets/home/services/mutawif.webp'
-import qiblaIcon from '../assets/home/services/qibla.webp'
-import checklistIcon from '../assets/home/services/checklist.webp'
-import travelIcon from '../assets/home/services/travel.webp'
-import profileIcon from '../assets/home/services/profile.webp'
+import BottomNav from '../components/BottomNav'
+import GlassIcon from '../components/GlassIcon'
+import { topicArtwork } from '../components/artwork'
 import './home.css'
 
-const NAV_TABS = [
-  { id: 'home', label: 'Beranda', Icon: Home },
-  { id: 'guidance', label: 'Panduan', Icon: BookOpen },
-  { id: 'chatbot', label: 'AI Chat', Icon: MessageCircle },
-  { id: 'mutawif', label: 'Mutawif', Icon: UserCheck },
-  { id: 'profile', label: 'Profil', Icon: Settings },
-]
-
-export function BottomNav({ active, navigate }) {
-  return (
-    <nav aria-label="Navigasi utama" className={`glass-bar fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] flex z-50 pb-[env(safe-area-inset-bottom)] ${active === 'home' ? 'home-bottom-nav' : ''}`}>
-      {NAV_TABS.map(({ id, label, Icon }) => {
-        const isActive = active === id
-        return (
-          <button
-            key={id}
-            onClick={() => navigate(id)}
-            aria-current={isActive ? 'page' : undefined}
-            className="flex-1 flex flex-col items-center pt-2.5 pb-2 gap-1"
-          >
-            <span
-              className="w-11 h-7 rounded-full flex items-center justify-center transition-colors"
-              style={isActive ? { background: 'var(--color-canopy-100)' } : undefined}
-            >
-              <Icon
-                size={19}
-                color={isActive ? 'var(--color-canopy-700)' : 'var(--color-ink-faint)'}
-                strokeWidth={isActive ? 2.2 : 1.8}
-                aria-hidden="true"
-              />
-            </span>
-            <span
-              className="text-[11px] font-medium"
-              style={{ color: isActive ? 'var(--color-canopy-700)' : 'var(--color-ink-faint)' }}
-            >
-              {label}
-            </span>
-          </button>
-        )
-      })}
-    </nav>
-  )
-}
-
-const ICONS = {
-  BookOpen, Scissors, Sunrise, Moon, Target, Heart, RotateCcw, ArrowRightLeft,
-  Layers, ClipboardList,
-}
-
 const SERVICES = [
-  { label: 'Panduan\nUmrah', image: umrahIcon, screen: 'guidance', category: 'UMRAH', color: 'green' },
-  { label: 'Panduan\nHaji', image: hajjIcon, screen: 'guidance', category: 'HAJJ', color: 'gold' },
-  { label: 'Tanya\nAI', image: chatIcon, screen: 'chatbot', color: 'teal' },
-  { label: 'Cari\nMutawif', image: mutawifIcon, screen: 'mutawif', color: 'sage' },
-  { label: 'Arah\nKiblat', image: qiblaIcon, screen: 'qibla', color: 'gold' },
-  { label: 'Checklist\nIbadah', image: checklistIcon, screen: 'checklist', color: 'green' },
-  { label: 'Persiapan\nPerjalanan', image: travelIcon, screen: 'guidance', category: 'PERSIAPAN', color: 'sand' },
-  { label: 'Profil\nSaya', image: profileIcon, screen: 'profile', color: 'olive' },
+  { label: 'Panduan\nUmrah', icon: 'umrah', screen: 'guidance', category: 'UMRAH', color: 'green' },
+  { label: 'Panduan\nHaji', icon: 'hajj', screen: 'guidance', category: 'HAJJ', color: 'gold' },
+  { label: 'Tanya\nAI', icon: 'chat', screen: 'chatbot', color: 'teal' },
+  { label: 'Cari\nMutawif', icon: 'mutawif', screen: 'mutawif', color: 'sage' },
+  { label: 'Arah\nKiblat', icon: 'qibla', screen: 'qibla', color: 'gold' },
+  { label: 'Checklist\nIbadah', icon: 'checklist', screen: 'checklist', color: 'green' },
+  { label: 'Persiapan\nPerjalanan', icon: 'travel', screen: 'guidance', category: 'PERSIAPAN', color: 'sand' },
+  { label: 'Profil\nSaya', icon: 'profile', screen: 'profile', color: 'olive' },
 ]
 
 const HOME_RESOURCES = [
@@ -161,11 +102,9 @@ export default function HomeScreen({ navigate }) {
             <h2 id="home-services-heading">Temani setiap langkah</h2>
           </div>
           <div className="home-service-grid">
-            {SERVICES.map(({ label, image, screen, category, color }) => (
+            {SERVICES.map(({ label, icon, screen, category, color }) => (
               <button key={label} className="home-service" onClick={() => navigate(screen, category ? { category } : {})}>
-                <span className={`home-service-icon ${color}`} aria-hidden="true">
-                  <img src={image} alt="" width="192" height="192" decoding="async" />
-                </span>
+                <GlassIcon name={icon} tone={color} size="service" />
                 <span>{label}</span>
               </button>
             ))}
@@ -189,7 +128,7 @@ export default function HomeScreen({ navigate }) {
             onClick={() => bookingFailed ? retry() : activeBooking
               ? navigate('booking-success', { bookingId: activeBooking.id }) : navigate('mutawif')}
           >
-            <span className="home-booking-icon"><UserCheck size={23} strokeWidth={1.6} aria-hidden="true" /></span>
+            <GlassIcon name="mutawif" tone="sage" />
             <span className="home-booking-copy">
               <small>{activeBooking ? 'PENDAMPINGAN AKTIF' : 'MUTAWIF MANASEEK'}</small>
               <strong>{bookingLoading ? 'Memuat pesanan…' : bookingFailed ? 'Pesanan belum termuat' : activeBooking
@@ -213,10 +152,9 @@ export default function HomeScreen({ navigate }) {
             {resources.topics?.status === 'ready' && topics.length === 0 && <p className="home-inline-state">Panduan ibadah sedang disiapkan.</p>}
             <div className="home-topic-list">
               {topics.slice(0, 3).map((topic) => {
-                const Icon = ICONS[topic.icon] ?? BookOpen
                 return (
                   <button key={topic.slug} className="home-topic" onClick={() => navigate('guidance-detail', { slug: topic.slug })}>
-                    <span className="home-topic-icon"><Icon size={23} strokeWidth={1.6} aria-hidden="true" /></span>
+                    <GlassIcon name={topicArtwork(topic.icon)} tone={topic.icon === 'Layers' ? 'gold' : 'green'} />
                     <span className="home-topic-copy">
                       <strong>{topic.title}</strong>
                       <small><Clock3 size={11} aria-hidden="true" /> {topic.readingMinutes} menit baca{topic.status === 'DRAFT' && <em> · Draf</em>}</small>
@@ -230,7 +168,7 @@ export default function HomeScreen({ navigate }) {
           </section>
 
           <button className="home-checklist" onClick={() => navigate('checklist')}>
-            <ClipboardList size={25} strokeWidth={1.5} aria-hidden="true" />
+            <GlassIcon name="checklist" tone="gold" />
             <span className="home-checklist-copy">
               <strong>Sudah siap berangkat?</strong>
               <small>{checklist ? `${checklist.completed} dari ${checklist.total} persiapan selesai` : 'Cek kembali persiapan perjalanan ibadahmu'}</small>

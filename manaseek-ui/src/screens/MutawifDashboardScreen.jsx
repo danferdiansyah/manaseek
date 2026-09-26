@@ -7,10 +7,11 @@ import {
   Navigation,
   Power,
   RefreshCw,
-  UserCheck,
   XCircle,
 } from 'lucide-react'
 import { api } from '../lib/api'
+import PageHeader from '../components/PageHeader'
+import GlassIcon from '../components/GlassIcon'
 import { useAuth } from '../lib/auth-context'
 import { BOOKING_STATUS_LABELS, formatRupiah, formatSchedule, SERVICE_LABELS } from '../lib/format'
 import { EmptyState, ErrorState, Loading } from '../lib/ui'
@@ -43,12 +44,7 @@ function BookingCard({ booking, actionKey, onAction }) {
   return (
     <div className="glass-solid rounded-[20px] p-4">
       <div className="flex items-start gap-3">
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: pending ? '#FEF3C7' : '#E8F3EC' }}
-        >
-          <UserCheck size={18} color={pending ? '#B45309' : '#1B5E35'} strokeWidth={1.8} />
-        </div>
+        <GlassIcon name="profile" tone={pending ? 'gold' : 'green'} size="sm" />
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
@@ -222,23 +218,12 @@ export default function MutawifDashboardScreen() {
   const isOnline = isApproved && profile.availabilityStatus === 'ONLINE'
 
   return (
-    <div className="flex flex-col min-h-full bg-stone">
-      <div className="canopy px-5 pt-14 pb-6">
-        <div className="flex items-center justify-between gap-3 mb-5">
-          <div className="min-w-0">
-            <p className="text-canopy-100/80 text-sm">Panel Mutawif</p>
-            <h2 className="text-white text-xl font-semibold truncate">{user?.name ?? 'Mutawif'}</h2>
-          </div>
-          <button
-            type="button"
-            onClick={reload}
-            aria-label="Perbarui pesanan"
-            className="glass-control w-10 h-10 rounded-full flex items-center justify-center"
-          >
-            <RefreshCw size={17} color="white" />
-          </button>
-        </div>
-
+    <div className="app-page flex flex-col min-h-full bg-stone">
+      <PageHeader title={user?.name ?? 'Mutawif'} eyebrow="Ruang mutawif" icon="mutawif" action={
+        <button type="button" onClick={reload} aria-label="Perbarui pesanan" className="page-back glass-control">
+          <RefreshCw size={18} aria-hidden="true" />
+        </button>
+      }>
         <div className="glass-canopy rounded-[20px] p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
@@ -278,17 +263,19 @@ export default function MutawifDashboardScreen() {
             </button>
           </div>
         </div>
-      </div>
+      </PageHeader>
 
       <div className="px-5 pt-5 pb-10 space-y-6">
         <div className="grid grid-cols-2 gap-3">
-          <div className="glass rounded-[20px] p-4">
-            <p className="text-xs text-ink-faint">Order baru</p>
+          <div className="dashboard-stat glass rounded-[20px] p-4">
+            <GlassIcon name="notification" size="sm" bare />
+            <p className="text-xs text-ink-faint pr-10">Order baru</p>
             <p className="text-2xl font-bold text-ink mt-1">{incoming.length}</p>
             <p className="text-xs text-ink-soft mt-1">Perlu dikonfirmasi</p>
           </div>
-          <div className="glass rounded-[20px] p-4">
-            <p className="text-xs text-ink-faint">Tugas aktif</p>
+          <div className="dashboard-stat glass rounded-[20px] p-4">
+            <GlassIcon name="checklist" size="sm" bare />
+            <p className="text-xs text-ink-faint pr-10">Tugas aktif</p>
             <p className="text-2xl font-bold text-ink mt-1">{active.length}</p>
             <p className="text-xs text-ink-soft mt-1">Diterima atau berjalan</p>
           </div>
@@ -319,7 +306,7 @@ export default function MutawifDashboardScreen() {
           </div>
           {incoming.length === 0 ? (
             <div className="glass rounded-[20px]">
-              <EmptyState title="Belum ada order baru" description="Permintaan jamaah akan muncul otomatis di sini." />
+              <EmptyState icon="notification" title="Belum ada order baru" description="Permintaan jamaah akan muncul otomatis di sini." />
             </div>
           ) : (
             <div className="space-y-3">
@@ -364,8 +351,7 @@ export default function MutawifDashboardScreen() {
         <button
           type="button"
           onClick={signOut}
-          className="w-full py-3 rounded-2xl text-sm font-semibold border-2 flex items-center justify-center gap-2"
-          style={{ borderColor: '#EF4444', color: '#EF4444' }}
+          className="quiet-danger w-full py-3 text-sm font-semibold flex items-center justify-center gap-2"
         >
           <LogOut size={15} /> Keluar dari akun
         </button>

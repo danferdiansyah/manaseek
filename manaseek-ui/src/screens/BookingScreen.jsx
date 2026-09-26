@@ -1,16 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ArrowLeft, Star, CheckCircle, MapPin, Accessibility, ShieldAlert, Info } from 'lucide-react'
+import { Star, CheckCircle, MapPin, Info } from 'lucide-react'
 import { api } from '../lib/api'
+import PageHeader from '../components/PageHeader'
+import GlassIcon from '../components/GlassIcon'
+import { serviceArtwork } from '../components/artwork'
 import Avatar from '../lib/Avatar'
 import { formatRupiah, SERVICE_LABELS } from '../lib/format'
 import { ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
-
-const SERVICE_ICONS = {
-  IBADAH_GUIDANCE: Star,
-  MOBILITY_ASSISTANCE: Accessibility,
-  EMERGENCY: ShieldAlert,
-}
 
 const TIMES = ['08:00', '09:00', '10:00', '13:00', '14:00', '15:00']
 const DURATIONS = [1, 2, 3, 4]
@@ -156,16 +153,8 @@ export default function BookingScreen({ navigate, params }) {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-stone">
-      {/* Header */}
-      <div className="glass-topbar px-5 pt-14 pb-4 sticky top-0 z-40">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('mutawif-profile', { mutawifId })} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#E8F3EC' }}>
-            <ArrowLeft size={16} color="#1B5E35" />
-          </button>
-          <h2 className="font-semibold text-ink text-base">Konfirmasi Pemesanan</h2>
-        </div>
-      </div>
+    <div className="app-page flex flex-col min-h-full bg-stone">
+      <PageHeader title="Atur pendampingan" eyebrow="Pemesanan mutawif" description="Pilih layanan dan waktu yang sesuai dengan perjalananmu." icon="checklist" onBack={() => navigate('mutawif-profile', { mutawifId })} />
 
       <div className="px-5 py-5 space-y-4 mb-44">
         {/* Mutawif */}
@@ -202,18 +191,16 @@ export default function BookingScreen({ navigate, params }) {
           <p className="text-sm font-semibold text-ink-soft mb-3">Jenis Layanan</p>
           <div className="space-y-2">
             {profile.rates.map((r) => {
-              const Icon = SERVICE_ICONS[r.serviceType] ?? Star
               const selected = r.serviceType === activeService
               return (
                 <button
                   key={r.serviceType}
                   onClick={() => setServiceType(r.serviceType)}
-                  className="w-full flex items-center gap-3 p-3 rounded-xl border text-left"
+                  aria-pressed={selected}
+                  className="w-full flex items-center gap-2 p-2.5 rounded-2xl border text-left"
                   style={{ borderColor: selected ? '#1B5E35' : '#E5E7EB', background: selected ? '#E8F3EC' : 'transparent' }}
                 >
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: selected ? '#C3DFC9' : '#F3F4F6' }}>
-                    <Icon size={14} color={selected ? '#1B5E35' : '#9CA3AF'} strokeWidth={1.8} />
-                  </div>
+                  <GlassIcon name={serviceArtwork(r.serviceType)} size="sm" bare />
                   <p className="flex-1 text-sm font-medium text-ink">
                     {SERVICE_LABELS[r.serviceType] ?? r.serviceType}
                   </p>
@@ -237,6 +224,7 @@ export default function BookingScreen({ navigate, params }) {
                 <button
                   key={d.iso}
                   onClick={() => setDateIso(d.iso)}
+                  aria-pressed={selected}
                   className="flex-shrink-0 w-12 flex flex-col items-center py-2 rounded-xl text-xs font-semibold"
                   style={selected
                     ? { background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)', color: 'white' }
@@ -257,6 +245,7 @@ export default function BookingScreen({ navigate, params }) {
                 <button
                   key={t}
                   onClick={() => setTime(t)}
+                  aria-pressed={selected}
                   className="py-2 rounded-xl text-xs font-semibold text-center"
                   style={selected
                     ? { background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)', color: 'white' }
@@ -276,6 +265,7 @@ export default function BookingScreen({ navigate, params }) {
                 <button
                   key={d}
                   onClick={() => setDurationHours(d)}
+                  aria-pressed={selected}
                   className="flex-1 py-2 rounded-xl text-xs font-semibold text-center"
                   style={selected
                     ? { background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)', color: 'white' }
@@ -304,7 +294,8 @@ export default function BookingScreen({ navigate, params }) {
               value={meetingPoint}
               onChange={(e) => setMeetingPoint(e.target.value)}
               placeholder="Contoh: Pintu King Fahd, Masjidil Haram"
-              className="flex-1 text-sm text-ink py-2 border-b border-gray-200 focus:outline-none focus:border-green-700"
+              aria-label="Lokasi pertemuan"
+              className="flex-1 min-w-0 text-sm text-ink py-2 border-b border-gray-200 focus:outline-none focus:border-green-700"
             />
           </div>
 
@@ -314,6 +305,7 @@ export default function BookingScreen({ navigate, params }) {
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
             placeholder="Contoh: jamaah lansia, memakai kursi roda"
+            aria-label="Catatan untuk mutawif"
             className="w-full text-sm text-ink p-2 rounded-xl bg-stone border border-gray-200 focus:outline-none focus:border-green-700 resize-none"
           />
         </div>

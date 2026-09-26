@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react'
-import { CheckCircle, Clock, Home, RefreshCw, UserCheck } from 'lucide-react'
+import { Home, RefreshCw, UserCheck } from 'lucide-react'
 import { api } from '../lib/api'
+import GlassIcon from '../components/GlassIcon'
 import { BOOKING_STATUS_LABELS, formatRupiah, formatSchedule, SERVICE_LABELS } from '../lib/format'
 import { ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
@@ -68,18 +69,11 @@ export default function BookingSuccessScreen({ navigate, params }) {
   ]
 
   return (
-    <div className="flex flex-col min-h-full bg-white items-center justify-between px-6 py-12">
+    <div className="app-page flex flex-col min-h-full bg-stone items-center justify-between px-5 py-10">
       <div />
 
       <div className="flex flex-col items-center text-center w-full">
-        <div
-          className="w-24 h-24 rounded-full flex items-center justify-center mb-6 shadow-xl"
-          style={{ background: pending
-            ? 'linear-gradient(135deg, #B8944A 0%, #D4A855 100%)'
-            : 'linear-gradient(135deg, #1B5E35 0%, #2D7A4F 100%)' }}
-        >
-          {pending ? <Clock size={44} color="white" strokeWidth={1.8} /> : <CheckCircle size={44} color="white" strokeWidth={1.8} />}
-        </div>
+        <GlassIcon name={pending ? 'notification' : booking.status === 'COMPLETED' ? 'checklist' : ['ACCEPTED', 'ONGOING'].includes(booking.status) ? 'mutawif' : 'travel'} size="feature" tone={pending ? 'gold' : 'green'} className="mb-6" />
 
         <h2 className="text-2xl font-semibold text-ink mb-2">
           {pending ? 'Permintaan Terkirim' : BOOKING_STATUS_LABELS[booking.status]}
@@ -97,12 +91,12 @@ export default function BookingSuccessScreen({ navigate, params }) {
           {BOOKING_STATUS_LABELS[booking.status] ?? booking.status}
         </span>
 
-        <div className="mt-6 w-full rounded-2xl p-5 text-left" style={{ background: 'linear-gradient(135deg, #E8F3EC, #D1EBD8)' }}>
+        <div className="booking-receipt mt-6 w-full">
           <p className="text-sm font-semibold text-ink-soft mb-3">Detail pesanan</p>
           {rows.map((r) => (
-            <div key={r.label} className="flex justify-between gap-3 py-1.5 border-b border-green-100 last:border-0">
+            <div key={r.label} className="booking-summary-row">
               <span className="text-xs text-ink-soft flex-shrink-0">{r.label}</span>
-              <span className="text-xs font-semibold text-ink text-right">{r.val}</span>
+              <span className="text-sm font-medium text-ink text-right break-words min-w-0">{r.val}</span>
             </div>
           ))}
         </div>
@@ -132,8 +126,7 @@ export default function BookingSuccessScreen({ navigate, params }) {
         </button>
         <button
           onClick={() => navigate('mutawif')}
-          className="w-full py-4 rounded-2xl font-semibold border-2 text-sm flex items-center justify-center gap-2"
-          style={{ borderColor: '#1B5E35', color: '#1B5E35' }}
+          className="w-full py-4 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 glass text-canopy-700"
         >
           <UserCheck size={16} /> Cari Mutawif Lain
         </button>

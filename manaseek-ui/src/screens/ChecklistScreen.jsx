@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react'
-import { ArrowLeft, Check } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { api } from '../lib/api'
 import { ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
+import PageHeader from '../components/PageHeader'
 
 export default function ChecklistScreen({ navigate }) {
   const fetchChecklist = useCallback(() => api.get('/content/checklist'), [])
@@ -51,15 +52,8 @@ export default function ChecklistScreen({ navigate }) {
   const percent = items.length === 0 ? 0 : Math.round((completed / items.length) * 100)
 
   return (
-    <div className="flex flex-col min-h-full bg-stone">
-      <div className="canopy px-5 pt-14 pb-6">
-        <div className="flex items-center gap-3 mb-5">
-          <button onClick={() => navigate('guidance')} className="glass-control w-9 h-9 rounded-full flex items-center justify-center">
-            <ArrowLeft size={16} color="white" />
-          </button>
-          <h2 className="text-white font-bold text-lg">Checklist Persiapan</h2>
-        </div>
-
+    <div className="app-page flex flex-col min-h-full bg-stone">
+      <PageHeader title="Siap melangkah" eyebrow="Checklist persiapan" description="Lengkapi bekalmu untuk perjalanan yang lebih tenang." icon="checklist" onBack={() => navigate('guidance')}>
         <div className="glass-canopy rounded-[20px] p-4">
           <p className="text-white font-semibold">{completed} dari {items.length} selesai</p>
           <div className="mt-3 bg-white/20 rounded-full h-1.5">
@@ -70,7 +64,7 @@ export default function ChecklistScreen({ navigate }) {
           </div>
           <p className="text-canopy-100/85 text-xs mt-1.5">Tersimpan otomatis di akunmu</p>
         </div>
-      </div>
+      </PageHeader>
 
       <div className="px-5 py-5 space-y-2 mb-10">
         {saveError && (
@@ -82,6 +76,7 @@ export default function ChecklistScreen({ navigate }) {
           <button
             key={item.id}
             onClick={() => toggle(item)}
+            aria-pressed={item.completed}
             className="w-full flex items-start gap-3 glass rounded-[20px] p-4 text-left"
             style={{ borderColor: item.completed ? '#C3DFC9' : '#F3F4F6' }}
           >

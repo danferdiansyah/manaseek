@@ -1,16 +1,13 @@
 import { useCallback } from 'react'
-import { ArrowLeft, Star, CheckCircle, MapPin, Accessibility, ShieldAlert } from 'lucide-react'
+import { ArrowLeft, Star, CheckCircle, MapPin } from 'lucide-react'
 import { api } from '../lib/api'
+import PageHeader from '../components/PageHeader'
+import GlassIcon from '../components/GlassIcon'
+import { serviceArtwork } from '../components/artwork'
 import Avatar from '../lib/Avatar'
 import { formatRupiah, SERVICE_LABELS } from '../lib/format'
 import { ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
-
-const SERVICE_ICONS = {
-  IBADAH_GUIDANCE: Star,
-  MOBILITY_ASSISTANCE: Accessibility,
-  EMERGENCY: ShieldAlert,
-}
 
 const DAY_LABELS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
 
@@ -59,16 +56,8 @@ export default function MutawifProfileScreen({ navigate, params }) {
   )
 
   return (
-    <div className="flex flex-col min-h-full bg-stone">
-      {/* Hero */}
-      <div className="canopy relative pt-14 pb-6 px-5">
-        <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => navigate('mutawif')} className="glass-control w-9 h-9 rounded-full flex items-center justify-center">
-            <ArrowLeft size={16} color="white" />
-          </button>
-          <span className="text-canopy-100/85 text-sm flex-1">Detail Mutawif</span>
-        </div>
-
+    <div className="app-page flex flex-col min-h-full bg-stone">
+      <PageHeader title="Kenali pendampingmu" eyebrow="Profil mutawif" onBack={() => navigate('mutawif')}>
         <div className="flex items-center gap-4">
           <Avatar
             src={profile.user.avatarUrl}
@@ -111,7 +100,7 @@ export default function MutawifProfileScreen({ navigate, params }) {
             <CheckCircle size={11} color="#86EFAC" /> Terverifikasi
           </span>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Languages */}
       {profile.languages.length > 0 && (
@@ -137,13 +126,10 @@ export default function MutawifProfileScreen({ navigate, params }) {
           <p className="text-sm font-semibold text-ink mb-3">Layanan</p>
           <div className="space-y-2">
             {rates.map((rate) => {
-              const Icon = SERVICE_ICONS[rate.serviceType] ?? Star
               return (
                 <div key={rate.serviceType} className="glass rounded-[16px] p-3.5 flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#E8F3EC' }}>
-                    <Icon size={16} color="#1B5E35" strokeWidth={1.8} />
-                  </div>
-                  <p className="flex-1 text-sm font-medium text-ink">
+                  <GlassIcon name={serviceArtwork(rate.serviceType)} size="sm" />
+                  <p className="flex-1 min-w-0 text-sm font-medium text-ink">
                     {SERVICE_LABELS[rate.serviceType] ?? rate.serviceType}
                   </p>
                   <p className="text-xs font-bold flex-shrink-0" style={{ color: '#1B5E35' }}>
@@ -210,14 +196,14 @@ export default function MutawifProfileScreen({ navigate, params }) {
         <div className="flex items-center justify-between gap-3">
           <div>
             <p className="text-xs text-ink-faint">Mulai dari</p>
-            <p className="text-lg font-bold" style={{ color: '#1B5E35' }}>
+            <p className="text-base font-bold" style={{ color: '#1B5E35' }}>
               {cheapest ? `${formatRupiah(cheapest.hourlyRate)} / jam` : '—'}
             </p>
           </div>
           <button
             onClick={() => navigate('booking', { mutawifId: profile.id })}
             disabled={rates.length === 0}
-            className="px-6 py-3.5 rounded-2xl text-white font-bold text-sm shadow-sm disabled:opacity-40"
+            className="px-4 py-3.5 rounded-2xl text-white font-bold text-sm shadow-sm disabled:opacity-40"
             style={{ background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)' }}
           >
             Pesan Sekarang

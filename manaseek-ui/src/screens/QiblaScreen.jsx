@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
-import { ArrowLeft, Compass, Info, Loader2, LocateFixed, MapPin } from 'lucide-react'
-import KaabaIcon from '../lib/KaabaIcon'
+import { Compass, Info, Loader2, LocateFixed, MapPin } from 'lucide-react'
+import PageHeader from '../components/PageHeader'
+import GlassIcon from '../components/GlassIcon'
 import { AT_KAABA_RADIUS_KM, compassPoint, distanceToKaabaKm, qiblaBearing } from '../lib/qibla'
 import { useCompassHeading } from '../lib/useCompassHeading'
 import { formatAccuracy, useDeviceLocation } from '../lib/useDeviceLocation'
@@ -42,20 +43,9 @@ export default function QiblaScreen({ navigate }) {
   const kaaba = markerPosition(markerAngle)
 
   return (
-    <div className="flex flex-col min-h-full bg-stone">
-      <div className="canopy px-5 pt-14 pb-6">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('home')}
-            aria-label="Kembali"
-            className="glass-control w-9 h-9 rounded-full flex items-center justify-center"
-          >
-            <ArrowLeft size={16} color="white" />
-          </button>
-          <h2 className="text-white font-semibold text-lg">Arah Kiblat</h2>
-        </div>
-
-        <div className="glass-canopy rounded-[20px] p-4 mt-5 flex items-center gap-2.5">
+    <div className="app-page flex flex-col min-h-full bg-stone">
+      <PageHeader title="Menghadap kiblat" eyebrow="Arah ibadahmu" icon="qibla" onBack={() => navigate('home')}>
+        <div className="glass-canopy rounded-[20px] p-4 flex items-center gap-2.5">
           <MapPin size={15} color="#86EFAC" className="flex-shrink-0" />
           <div className="min-w-0 flex-1">
             <p className="text-white text-sm font-medium truncate">{position.label}</p>
@@ -76,13 +66,13 @@ export default function QiblaScreen({ navigate }) {
               : <LocateFixed size={14} color="white" />}
           </button>
         </div>
-      </div>
+      </PageHeader>
 
       <div className="px-5 pt-8 pb-28 flex flex-col items-center">
         {/* Dial */}
         <div className="relative" style={{ width: DIAL, height: DIAL }}>
           <div
-            className="absolute inset-0 rounded-full glass transition-transform duration-200 ease-out"
+            className="absolute inset-0 rounded-full compass-dial transition-transform duration-200 ease-out"
             style={{ transform: `rotate(${dialRotation}deg)` }}
           >
             {['U', 'T', 'S', 'B'].map((label, i) => {
@@ -115,7 +105,7 @@ export default function QiblaScreen({ navigate }) {
                 boxShadow: 'inset 0 1px 0 rgba(255,255,255,.35), 0 8px 20px -12px rgba(15,61,34,.9)',
               }}
             >
-              <KaabaIcon size={24} />
+              <GlassIcon name="umrah" size="sm" bare />
             </span>
           </div>
 

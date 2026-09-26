@@ -1,7 +1,8 @@
 import { useCallback, useState } from 'react'
-import { ArrowLeft, MapPin, Star, CheckCircle, LocateFixed, Loader2 } from 'lucide-react'
-import { BottomNav } from './HomeScreen'
+import { MapPin, Star, CheckCircle, LocateFixed, Loader2 } from 'lucide-react'
+import BottomNav from '../components/BottomNav'
 import { api } from '../lib/api'
+import PageHeader from '../components/PageHeader'
 import Avatar from '../lib/Avatar'
 import { formatDistance, formatRupiah } from '../lib/format'
 import { EmptyState, ErrorState, Loading } from '../lib/ui'
@@ -43,15 +44,8 @@ export default function MutawifListScreen({ navigate }) {
   const bbox = [longitude - 0.008, latitude - 0.006, longitude + 0.008, latitude + 0.006].join('%2C')
 
   return (
-    <div className="flex flex-col min-h-full bg-stone">
-      {/* Header */}
-      <div className="canopy px-5 pt-14 pb-5">
-        <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => navigate('home')} className="glass-control w-9 h-9 rounded-full flex items-center justify-center">
-            <ArrowLeft size={16} color="white" />
-          </button>
-          <h2 className="text-white font-bold text-lg">Mutawif On-Demand</h2>
-        </div>
+    <div className="app-page flex flex-col min-h-full bg-stone">
+      <PageHeader title="Bersama mutawif" eyebrow="Pendamping ibadahmu" description="Temukan pendamping untuk setiap langkah perjalananmu." icon="mutawif" onBack={() => navigate('home')}>
         <div className="glass-canopy flex items-center gap-2.5 rounded-[16px] px-3.5 py-3">
           <MapPin size={15} color="#86EFAC" />
           <div className="flex-1 min-w-0">
@@ -71,7 +65,7 @@ export default function MutawifListScreen({ navigate }) {
               : <LocateFixed size={14} color="white" />}
           </button>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Map centred on the search point */}
       <div className="glass mx-5 mt-5 rounded-[20px] overflow-hidden p-1" style={{ height: 158 }}>
@@ -91,10 +85,8 @@ export default function MutawifListScreen({ navigate }) {
             <button
               key={f.id}
               onClick={() => setFilter(f)}
-              className="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium"
-              style={active
-                ? { background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)', color: 'white' }
-                : { background: 'rgba(255,255,255,.75)', color: 'var(--color-ink-soft)', border: '1px solid rgba(255,255,255,.9)' }}
+              className="filter-chip"
+              aria-pressed={active}
             >
               {f.label}
             </button>
@@ -109,7 +101,7 @@ export default function MutawifListScreen({ navigate }) {
         {status === 'error' && <ErrorState message={error} onRetry={reload} />}
 
         {status === 'ready' && items.length === 0 && (
-          <EmptyState
+          <EmptyState icon="mutawif"
             title="Belum ada mutawif tersedia"
             description="Tidak ada mutawif yang sedang online di radius 25 km. Coba lagi beberapa saat lagi atau ganti jenis layanan."
           />
@@ -124,7 +116,7 @@ export default function MutawifListScreen({ navigate }) {
               <button
                 key={m.id}
                 onClick={() => navigate('mutawif-profile', { mutawifId: m.id })}
-                className="w-full glass rounded-[20px] p-4 text-left"
+                className="w-full glass rounded-[24px] p-4 text-left"
               >
                 <div className="flex items-start gap-3">
                   <div className="relative flex-shrink-0">

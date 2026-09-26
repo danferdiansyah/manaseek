@@ -1,18 +1,12 @@
 import { useCallback, useState } from 'react'
-import {
-  ArrowLeft, Search, CheckSquare, ChevronRight, BookOpen, Scissors, Sunrise, Moon,
-  Target, Heart, RotateCcw, ArrowRightLeft, Layers, ClipboardList, Info,
-} from 'lucide-react'
-import { BottomNav } from './HomeScreen'
+import { Search, ChevronRight, Info } from 'lucide-react'
+import BottomNav from '../components/BottomNav'
 import { api } from '../lib/api'
 import { EmptyState, ErrorState, Loading } from '../lib/ui'
 import { useResource } from '../lib/useResource'
-
-// The API names an icon; the client owns the mapping to a component.
-const ICONS = {
-  BookOpen, Scissors, Sunrise, Moon, Target, Heart, RotateCcw, ArrowRightLeft,
-  Layers, ClipboardList,
-}
+import PageHeader from '../components/PageHeader'
+import GlassIcon from '../components/GlassIcon'
+import { topicArtwork } from '../components/artwork'
 
 const FILTERS = [
   { id: 'all', label: 'Semua', category: null },
@@ -24,7 +18,7 @@ const FILTERS = [
 const TAG_STYLE = {
   Wajib: { bg: '#FFF4E5', color: '#B8944A' },
   Rukun: { bg: '#E8F3EC', color: '#1B5E35' },
-  Sunnah: { bg: '#EEF2FF', color: '#4F46E5' },
+  Sunnah: { bg: '#edf3ee', color: '#50765d' },
 }
 
 export default function GuidanceScreen({ navigate, params = {} }) {
@@ -59,25 +53,19 @@ export default function GuidanceScreen({ navigate, params = {} }) {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-stone">
-      {/* Header */}
-      <div className="canopy px-5 pt-14 pb-5">
-        <div className="flex items-center gap-3 mb-5">
-          <button onClick={() => navigate('home')} className="glass-control w-9 h-9 rounded-full flex items-center justify-center">
-            <ArrowLeft size={16} color="white" />
-          </button>
-          <h2 className="text-white font-bold text-lg">Guidance Mandiri</h2>
-        </div>
+    <div className="app-page flex flex-col min-h-full bg-stone">
+      <PageHeader title="Panduan ibadah" eyebrow="Bekal setiap langkah" description="Kenali rangkaian ibadah, satu langkah demi satu langkah." icon="hajj" onBack={() => navigate('home')}>
         <form onSubmit={submitSearch} className="relative">
           <Search size={15} color="#9CA3AF" className="absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cari panduan ibadah..."
+            placeholder="Cari panduan ibadah…"
+            aria-label="Cari panduan ibadah"
             className="w-full pl-9 pr-4 py-3 rounded-xl bg-white text-sm text-ink outline-none"
           />
         </form>
-      </div>
+      </PageHeader>
 
       {/* Filters */}
       <div className="flex gap-2 px-5 py-4 overflow-x-auto">
@@ -87,10 +75,8 @@ export default function GuidanceScreen({ navigate, params = {} }) {
             <button
               key={f.id}
               onClick={() => setFilter(f)}
-              className="flex-shrink-0 px-4 py-1.5 rounded-full text-xs font-semibold"
-              style={active
-                ? { background: 'linear-gradient(135deg, #1B5E35, #2D7A4F)', color: 'white' }
-                : { background: 'white', color: '#6B7280', border: '1px solid #E5E7EB' }}
+              className="filter-chip"
+              aria-pressed={active}
             >
               {f.label}
             </button>
@@ -102,10 +88,9 @@ export default function GuidanceScreen({ navigate, params = {} }) {
       {checklist && (
         <button
           onClick={() => navigate('checklist')}
-          className="mx-5 mb-4 rounded-2xl p-4 flex items-center gap-3 text-left"
-          style={{ background: 'linear-gradient(135deg, #F5EDD8, #FFF4E5)' }}
+          className="feature-link mx-5 mb-4"
         >
-          <CheckSquare size={24} color="#B8944A" strokeWidth={1.8} />
+          <GlassIcon name="checklist" tone="gold" />
           <div className="flex-1">
             <p className="text-sm font-bold" style={{ color: '#8B6914' }}>Checklist Persiapan</p>
             <p className="text-xs" style={{ color: '#A07C2A' }}>
@@ -143,7 +128,6 @@ export default function GuidanceScreen({ navigate, params = {} }) {
 
         {status === 'ready' &&
           topics.map((topic) => {
-            const Icon = ICONS[topic.icon] ?? BookOpen
             const tag = topic.obligation
             const style = TAG_STYLE[tag] ?? { bg: '#F3F4F6', color: '#6B7280' }
 
@@ -151,20 +135,15 @@ export default function GuidanceScreen({ navigate, params = {} }) {
               <button
                 key={topic.slug}
                 onClick={() => navigate('guidance-detail', { slug: topic.slug })}
-                className="w-full flex items-start gap-3.5 glass rounded-[20px] p-4 text-left"
+                className="topic-card w-full flex gap-3.5 glass text-left"
               >
-                <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, #E8F3EC, #C3DFC9)' }}
-                >
-                  <Icon size={22} color="#1B5E35" strokeWidth={1.8} />
-                </div>
+                <GlassIcon name={topicArtwork(topic.icon)} tone={topic.icon === 'Layers' ? 'gold' : 'green'} />
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-start gap-2">
-                    <p className="text-[15px] font-semibold text-ink flex-1">{topic.title}</p>
+                  <div className="topic-card-title">
+                    <p className="text-[15px] font-semibold text-ink">{topic.title}</p>
                     {tag && (
                       <span
-                        className="text-xs px-2.5 py-1 rounded-full font-medium flex-shrink-0"
+                        className="app-tag font-medium"
                         style={{ background: style.bg, color: style.color }}
                       >
                         {tag}

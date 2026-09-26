@@ -1,27 +1,26 @@
 import { useState } from 'react'
 import {
-  ArrowLeft,
   BriefcaseBusiness,
   Check,
   ChevronRight,
   MapPin,
   Phone,
   ShieldCheck,
-  UserCheck,
-  UserRound,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth-context'
+import PageHeader from '../components/PageHeader'
+import GlassIcon from '../components/GlassIcon'
 
 const ROLES = [
   {
     id: 'JAMAAH',
-    Icon: UserRound,
+    icon: 'profile',
     title: 'Jamaah',
     description: 'Cari panduan ibadah, gunakan chatbot AI, dan pesan mutawif.',
   },
   {
     id: 'MUTAWIF',
-    Icon: UserCheck,
+    icon: 'mutawif',
     title: 'Mutawif',
     description: 'Tawarkan pendampingan ibadah dan terima permintaan jamaah.',
   },
@@ -103,19 +102,13 @@ export default function OnboardingScreen({ navigate }) {
 
   if (step === 'role') {
     return (
-      <div className="flex flex-col min-h-full bg-stone">
-        <div className="canopy px-5 pt-14 pb-8">
-          <p className="text-canopy-100/80 text-sm">Selamat datang di Manaseek</p>
-          <h1 className="text-white text-2xl font-bold leading-tight mt-2">Kamu ingin menggunakan Manaseek sebagai?</h1>
-          <p className="text-canopy-100/85 text-sm leading-relaxed mt-3">
-            Pilihan ini membantu kami menyiapkan pengalaman yang sesuai untukmu.
-          </p>
-        </div>
+      <div className="app-page flex flex-col min-h-full bg-stone">
+        <PageHeader title="Mulai perjalananmu" eyebrow="Selamat datang · 1 dari 2" description="Kamu ingin menggunakan Manaseek sebagai siapa? Pilih peran yang sesuai untukmu." icon="travel" />
 
         <div className="px-5 pt-6 pb-10 flex-1">
           <p className="text-xs font-semibold text-ink-faint uppercase tracking-wider mb-3">Pilih peranmu</p>
           <div className="space-y-3">
-            {ROLES.map(({ id, Icon, title, description }) => {
+            {ROLES.map(({ id, icon, title, description }) => {
               const selected = role === id
               return (
                 <button
@@ -133,12 +126,7 @@ export default function OnboardingScreen({ navigate }) {
                     boxShadow: selected ? '0 8px 20px rgba(27,94,53,.10)' : '0 8px 20px rgba(35,53,42,.05)',
                   }}
                 >
-                  <span
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: selected ? '#1B5E35' : '#F3F7F4' }}
-                  >
-                    <Icon size={22} color={selected ? 'white' : '#1B5E35'} strokeWidth={1.8} />
-                  </span>
+                  <GlassIcon name={icon} tone={id === 'MUTAWIF' ? 'gold' : 'green'} />
                   <span className="flex-1 min-w-0">
                     <span className="flex items-center justify-between gap-2">
                       <span className="text-base font-bold text-ink">{title}</span>
@@ -184,24 +172,8 @@ export default function OnboardingScreen({ navigate }) {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-stone">
-      <div className="canopy px-5 pt-14 pb-7">
-        <div className="flex items-center gap-3 mb-6">
-          <button
-            type="button"
-            onClick={() => setStep('role')}
-            className="glass-control w-9 h-9 rounded-full flex items-center justify-center"
-            aria-label="Kembali pilih peran"
-          >
-            <ArrowLeft size={16} color="white" />
-          </button>
-          <span className="text-canopy-100/85 text-sm">Data awal · 2 dari 2</span>
-        </div>
-        <h1 className="text-white text-2xl font-bold leading-tight">Lengkapi data singkatmu</h1>
-        <p className="text-canopy-100/85 text-sm leading-relaxed mt-2">
-          Data ini membantu jamaah dan mutawif saling mengenal.
-        </p>
-      </div>
+    <div className="app-page flex flex-col min-h-full bg-stone">
+      <PageHeader title="Mari berkenalan" eyebrow="Data awal · 2 dari 2" description="Lengkapi profil singkatmu agar jamaah dan mutawif dapat saling mengenal." icon={role === 'MUTAWIF' ? 'mutawif' : 'profile'} onBack={() => setStep('role')} />
 
       <form onSubmit={submit} className="px-5 pt-6 pb-10 flex-1">
         <div className="glass rounded-[20px] p-4 space-y-4">

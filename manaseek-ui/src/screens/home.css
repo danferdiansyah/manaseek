@@ -75,33 +75,6 @@
 .home-section-heading h2 { font-size: 17px; font-weight: 700; letter-spacing: -.35px; }
 .home-service-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 23px; column-gap: 6px; }
 .home-service { display: flex; flex-direction: column; align-items: center; gap: 11px; }
-.home-service-icon {
-  --service-tint: 84 148 111;
-  position: relative;
-  isolation: isolate;
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  flex-shrink: 0;
-  border-radius: 20px;
-  border: 1px solid rgb(255 255 255 / .9);
-  background:
-    radial-gradient(ellipse at 80% 90%, rgb(var(--service-tint) / .26), transparent 75%),
-    linear-gradient(145deg, rgb(255 255 255 / .94), rgb(var(--service-tint) / .08));
-  backdrop-filter: blur(12px) saturate(1.4);
-  -webkit-backdrop-filter: blur(12px) saturate(1.4);
-  box-shadow: inset 1px 1px 0 white, inset -1px -1px 0 rgb(var(--service-tint) / .14), 0 5px 14px -8px rgb(var(--service-tint) / .5);
-  transition: transform 160ms ease;
-}
-.home-service-icon::before { content: ''; position: absolute; inset: 11px 5px 5px 17px; border-radius: 50%; background: rgb(var(--service-tint) / .17); filter: blur(9px); z-index: -1; }
-.home-service-icon::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(140deg, rgb(255 255 255 / .65), transparent 48%); pointer-events: none; }
-.home-service-icon img { position: relative; z-index: 1; width: 60px; height: 60px; max-width: none; object-fit: contain; pointer-events: none; user-select: none; filter: drop-shadow(0 3px 2px rgb(20 62 41 / .1)); }
-.home-service-icon.gold { --service-tint: 204 163 77; }
-.home-service-icon.sage { --service-tint: 124 160 133; }
-.home-service-icon.teal { --service-tint: 69 150 137; }
-.home-service-icon.olive { --service-tint: 153 157 98; }
-.home-service-icon.sand { --service-tint: 192 159 111; }
 .home-service > span:last-child { font-size: 12px; font-weight: 550; line-height: 1.4; white-space: pre-line; text-align: center; }
 
 .home-content { padding: 22px 20px 0; }
@@ -114,8 +87,7 @@
 /* Oversize the transparent cutout and crop it at the card's lower-right edge.
    The left edge stays clear of the copy at both narrow and wide phone sizes. */
 .home-guide-promo img { position: absolute; z-index: 0; width: 78%; max-width: none; height: auto; right: -34%; bottom: -35%; pointer-events: none; user-select: none; }
-.home-booking { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: white; border: 1px solid #e5ebe3; border-radius: 15px; padding: 16px 14px; margin-top: 17px; }
-.home-booking-icon { display: grid; place-items: center; width: 43px; height: 43px; flex-shrink: 0; border-radius: 13px; background: #edf4ec; color: var(--home-green); }
+.home-booking { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: white; border: 0; border-radius: 22px; padding: 16px 14px; margin-top: 17px; }
 .home-booking-copy { flex: 1; min-width: 0; }
 .home-booking-copy small { display: block; font-size: 10px; color: #718077; }
 .home-booking-copy strong { display: block; font-size: 14px; font-weight: 650; color: var(--home-dark); line-height: 1.5; margin: 2px 0; overflow-wrap: anywhere; }
@@ -125,9 +97,7 @@
 .home-reading .home-section-heading { margin-bottom: 12px; }
 .home-section-link { display: flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 600; color: var(--home-green); min-height: 44px; }
 .home-topic-list { display: flex; flex-direction: column; gap: 9px; }
-.home-topic { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px; background: white; border: 1px solid #e5ebe3; border-radius: 13px; text-align: left; }
-.home-topic-icon { display: grid; place-items: center; width: 46px; height: 49px; flex-shrink: 0; border-radius: 11px; color: #267450; background: #edf3e9; }
-.home-topic:nth-child(even) .home-topic-icon { color: #a3823f; background: #f8f0df; }
+.home-topic { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px; background: white; border: 0; border-radius: 20px; text-align: left; }
 .home-topic-copy { min-width: 0; flex: 1; }
 .home-topic-copy strong { display: block; color: #284835; font-size: 14px; font-weight: 650; line-height: 1.4; }
 .home-topic-copy small { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; color: #647267; font-size: 11px; margin-top: 6px; }
@@ -137,9 +107,9 @@
 .home-topic-notice svg { flex-shrink: 0; margin-top: 2px; }
 .home-inline-state { padding: 22px 15px; text-align: center; border: 1px dashed #d8e2d7; border-radius: 13px; font-size: 12px; color: #718077; line-height: 1.6; }
 .home-inline-state button { display: block; min-height: 44px; margin: 5px auto 0; color: var(--home-green); font-weight: 600; }
-.home-checklist { display: flex; align-items: center; gap: 11px; width: 100%; margin-top: 22px; padding: 15px; border-radius: 13px; background: #eaf0e7; color: var(--home-green); text-align: left; }
+.home-checklist { display: flex; align-items: center; gap: 11px; width: 100%; margin-top: 22px; padding: 17px 14px; border-radius: 22px; background: linear-gradient(115deg, #e8f0e6, #f4f4e9); color: var(--home-green); text-align: left; }
 .home-checklist > svg { flex-shrink: 0; }
-.home-checklist-copy { flex: 1; }
+.home-checklist-copy { flex: 1; min-width: 0; }
 .home-checklist strong { display: block; font-size: 13px; font-weight: 650; }
 .home-checklist small { display: block; font-size: 11px; color: #697d66; margin-top: 4px; }
 .home-checklist progress { display: block; width: 100%; height: 4px; margin-top: 9px; border: 0; border-radius: 3px; overflow: hidden; appearance: none; }
@@ -148,13 +118,8 @@
 .home-checklist progress::-moz-progress-bar { background: #8f783c; }
 .home-footer { margin-top: 23px; text-align: center; color: #667560; font-size: 11px; letter-spacing: .3px; }
 
-.home-bottom-nav { background: #fffffff5; border-top: 1px solid #e5ebe3; box-shadow: 0 -4px 20px #143f2705; }
-.home-bottom-nav button { min-height: 69px; padding-top: 10px; }
-.home-bottom-nav button[aria-current='page'] > span:first-child { background: #e8f1e7 !important; }
-.home-bottom-nav button[aria-current='page'] > span:last-child { color: #07533b !important; font-weight: 700; }
-
 @media (hover: hover) {
-  .home-service:hover .home-service-icon { transform: translateY(-2px); }
+  .home-service:hover .glass-icon { transform: translateY(-2px); }
   .home-topic:hover, .home-booking:hover { background: #fbfcf9; }
   .home-guide-promo button:hover { background: #063e2e; }
 }
@@ -163,8 +128,6 @@
   .home-services { padding-inline: 12px; }
   .home-content { padding-inline: 15px; }
   .home-prayer-next h2 { font-size: 21px; }
-  .home-service-icon { width: 57px; height: 57px; border-radius: 18px; }
-  .home-service-icon img { width: 54px; height: 54px; }
   .home-guide-promo { padding: 17px; }
   .home-guide-promo h2 { font-size: 18px; }
 }

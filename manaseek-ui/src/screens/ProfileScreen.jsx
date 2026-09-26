@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import {
-  ClipboardList, CheckSquare, Bell, ChevronRight, LogOut, Landmark, Star,
-} from 'lucide-react'
-import { BottomNav } from './HomeScreen'
+import { ChevronRight, LogOut } from 'lucide-react'
+import BottomNav from '../components/BottomNav'
 import { api } from '../lib/api'
+import PageHeader from '../components/PageHeader'
+import GlassIcon from '../components/GlassIcon'
 import Avatar from '../lib/Avatar'
 import { useAuth } from '../lib/auth-context'
 import { BOOKING_STATUS_LABELS, formatSchedule, SERVICE_LABELS } from '../lib/format'
@@ -44,19 +44,15 @@ export default function ProfileScreen({ navigate }) {
   }
 
   return (
-    <div className="flex flex-col min-h-full bg-stone">
-      {/* Header */}
-      <div className="canopy px-5 pt-14 pb-8">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-white font-bold text-lg">Profil Saya</h2>
-        </div>
+    <div className="app-page flex flex-col min-h-full bg-stone">
+      <PageHeader title="Profil saya" eyebrow="Perjalananmu" icon="profile">
         <div className="flex items-center gap-4">
           <Avatar
             src={user?.avatarUrl}
             name={user?.name ?? user?.email}
             alt={user?.name}
-            imageClassName="w-16 h-16 rounded-2xl object-cover border-2 border-white/25"
-            fallbackClassName="w-16 h-16 rounded-2xl flex items-center justify-center font-bold text-white text-xl border-2 border-white/25"
+            imageClassName="w-16 h-16 profile-avatar object-cover border-2 border-white/25"
+            fallbackClassName="w-16 h-16 profile-avatar flex items-center justify-center font-bold text-white text-xl border-2 border-white/25"
             fallbackStyle={{ background: 'linear-gradient(135deg, #B8944A, #D4A855)' }}
           />
           <div className="min-w-0">
@@ -65,16 +61,14 @@ export default function ProfileScreen({ navigate }) {
             {user?.phone && <p className="text-canopy-100/85 text-xs mt-0.5">{user.phone}</p>}
           </div>
         </div>
-      </div>
+      </PageHeader>
 
       {/* Trip */}
       <div className="mx-5 mt-5 glass rounded-[20px] p-4">
         <p className="text-sm font-semibold text-ink mb-3">Rencana Ibadah</p>
         {trip ? (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, #E8F3EC, #C3DFC9)' }}>
-              <Landmark size={20} color="#1B5E35" strokeWidth={1.8} />
-            </div>
+            <GlassIcon name="travel" tone="sand" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-ink truncate">
                 {trip.packageName ?? (trip.type === 'HAJJ' ? 'Haji' : 'Umrah')}
@@ -93,7 +87,7 @@ export default function ProfileScreen({ navigate }) {
       {/* Booking history */}
       <div className="mx-5 mt-4 glass rounded-[20px] p-4">
         <div className="flex items-center gap-2 mb-3">
-          <ClipboardList size={16} color="#1B5E35" />
+          <GlassIcon name="checklist" size="sm" bare />
           <p className="text-sm font-semibold text-ink">Riwayat Pemesanan</p>
         </div>
 
@@ -107,9 +101,7 @@ export default function ProfileScreen({ navigate }) {
                 onClick={() => navigate('booking-success', { bookingId: b.id })}
                 className="w-full flex items-center gap-3 text-left"
               >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: '#E8F3EC' }}>
-                  <Star size={15} color="#1B5E35" strokeWidth={1.8} />
-                </div>
+                <GlassIcon name="mutawif" size="sm" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-ink truncate">
                     {b.mutawif?.user?.name ?? 'Mutawif'}
@@ -131,13 +123,13 @@ export default function ProfileScreen({ navigate }) {
       <div className="mx-5 mt-4 glass rounded-[20px] overflow-hidden">
         {[
           {
-            Icon: CheckSquare,
+            icon: 'checklist',
             label: 'Checklist Persiapan',
             sub: checklist ? `${checklist.completed} dari ${checklist.total} selesai` : 'Memuat…',
             screen: 'checklist',
           },
           {
-            Icon: Bell,
+            icon: 'notification',
             label: 'Notifikasi',
             sub: notificationCount === null
               ? 'Memuat…'
@@ -146,15 +138,13 @@ export default function ProfileScreen({ navigate }) {
                 : `${notificationCount} notifikasi`,
             screen: 'notifications',
           },
-        ].map(({ Icon, label, sub, screen }, i, all) => (
+        ].map(({ icon, label, sub, screen }, i, all) => (
           <button
             key={label}
             onClick={() => navigate(screen)}
             className={`w-full flex items-center gap-3 px-4 py-3.5 text-left ${i < all.length - 1 ? 'border-b border-gray-50' : ''}`}
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: '#E8F3EC' }}>
-              <Icon size={15} color="#1B5E35" strokeWidth={1.8} />
-            </div>
+            <GlassIcon name={icon} size="sm" />
             <div className="flex-1">
               <p className="text-sm font-medium text-ink">{label}</p>
               <p className="text-xs text-ink-faint mt-0.5">{sub}</p>
@@ -168,8 +158,7 @@ export default function ProfileScreen({ navigate }) {
       <div className="mx-5 mt-4 mb-24">
         <button
           onClick={handleSignOut}
-          className="w-full py-3.5 rounded-2xl text-sm font-semibold border-2 flex items-center justify-center gap-2"
-          style={{ borderColor: '#EF4444', color: '#EF4444' }}
+          className="quiet-danger w-full py-3.5 text-sm font-semibold flex items-center justify-center gap-2"
         >
           <LogOut size={15} /> Keluar dari Akun
         </button>
