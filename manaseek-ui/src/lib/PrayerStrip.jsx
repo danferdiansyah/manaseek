@@ -1,139 +1,80 @@
 import { useEffect, useState } from 'react'
-import { AlertTriangle, ChevronRight, Sun } from 'lucide-react'
-import KaabaIcon from './KaabaIcon'
+import { AlertTriangle, ChevronRight, Compass, MapPin, Moon, Sun, Sunrise, Sunset } from 'lucide-react'
 import { AT_KAABA_RADIUS_KM, compassPoint, distanceToKaabaKm, qiblaBearing } from './qibla'
 import {
-  deviceTimezoneLabel,
-  formatClock,
-  formatCountdown,
-  nextPrayer,
-  prayerTimes,
-  timezoneLooksWrong,
+  deviceTimezoneLabel, formatClock, formatCountdown, nextPrayer, prayerTimes, timezoneLooksWrong,
 } from './prayer-times'
 import { formatAccuracy, useDeviceLocation } from './useDeviceLocation'
 
-/**
- * Next prayer, the day's five times, and the qibla, in one card.
- *
- * Times are computed on the device rather than fetched: jamaah lose signal
- * constantly in Makkah and Mina, and a prayer time that needs data is not a
- * prayer time.
- */
+const PRAYER_ICONS = [Sunrise, Sun, Sun, Sunset, Moon]
+
+// Keep the schedule local so it remains available without an API connection.
 export default function PrayerStrip({ navigate }) {
   const position = useDeviceLocation()
   const [now, setNow] = useState(() => new Date())
 
-  // A minute is the finest granularity anything here shows.
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 30_000)
     return () => clearInterval(timer)
   }, [])
 
   const schedule = prayerTimes({ ...position, date: now })
-  const { next, current } = nextPrayer({ ...position, now })
+  const { next } = nextPrayer({ ...position, now })
   const bearing = qiblaBearing(position)
   const atKaaba = distanceToKaabaKm(position) < AT_KAABA_RADIUS_KM
-  const daily = schedule.times.filter((t) => !t.informational)
+  const daily = schedule.times.filter((time) => !time.informational)
+  const NextPrayerIcon = PRAYER_ICONS[daily.findIndex((time) => time.id === next.id)] ?? Sun
   const zone = deviceTimezoneLabel(now)
   const zoneSuspect = position.precise && timezoneLooksWrong(position, now)
+  const dateLabel = new Intl.DateTimeFormat('id-ID', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  }).format(now)
 
   return (
-    <section className="glass rounded-[20px] overflow-hidden">
-      <div className="px-4 pt-4 pb-3.5 flex items-start gap-3">
-        <span
-          className="w-10 h-10 rounded-[13px] flex items-center justify-center flex-shrink-0"
-          style={{ background: 'var(--color-canopy-100)' }}
-        >
-          <Sun size={19} color="var(--color-canopy-700)" strokeWidth={1.8} />
-        </span>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm text-ink-soft">
-            {current ? `Sekarang waktu ${current.label}` : 'Menuju waktu shalat berikutnya'}
-          </p>
-          <p className="text-[17px] font-semibold text-ink mt-0.5">
-            {next.label} {formatClock(next.at)}
-          </p>
-          <p className="text-sm text-ink-soft mt-0.5">{formatCountdown(next.at, now)}</p>
-        </div>
+    <section className="home-prayer" aria-label="Jadwal shalat hari ini">
+      <div className="home-prayer-location">
+        <span><MapPin size={13} aria-hidden="true" />{position.precise ? 'Lokasi kamu' : 'Acuan: Makkah'}</span>
+        <span>{dateLabel}</span>
       </div>
-
-      <div className="flex border-t border-white/70">
-        {daily.map((time) => {
+      <div className="home-prayer-next">
+        <div>
+          <p className="home-prayer-caption">Shalat berikutnya</p>
+          <h2>{next.label} <span>{formatClock(next.at)}</span><small>{zone}</small></h2>
+          <p className="home-prayer-countdown">{formatCountdown(next.at, now)}</p>
+        </div>
+        <div className="home-prayer-sun" aria-hidden="true"><NextPrayerIcon size={32} strokeWidth={1.4} /></div>
+      </div>
+      <div className="home-prayer-times">
+        {daily.map((time, index) => {
           const isNext = time.id === next.id
+          const Icon = PRAYER_ICONS[index]
           return (
-            <div
-              key={time.id}
-              className="flex-1 flex flex-col items-center py-2.5 gap-0.5"
-              style={isNext ? { background: 'var(--color-canopy-100)' } : undefined}
-            >
-              <span
-                className="text-xs"
-                style={{ color: isNext ? 'var(--color-canopy-700)' : 'var(--color-ink-faint)' }}
-              >
-                {time.label}
-              </span>
-              <span
-                className="text-sm tabular-nums"
-                style={{
-                  color: isNext ? 'var(--color-canopy-700)' : 'var(--color-ink-soft)',
-                  fontWeight: isNext ? 600 : 500,
-                }}
-              >
-                {formatClock(time.at)}
-              </span>
+            <div key={time.id} className={isNext ? 'is-next' : ''} aria-current={isNext ? 'true' : undefined}>
+              <Icon size={17} strokeWidth={1.6} aria-hidden="true" />
+              <span>{time.label}</span>
+              <strong>{formatClock(time.at)}</strong>
             </div>
           )
         })}
       </div>
-
-      <button
-        onClick={() => navigate('qibla')}
-        className="w-full flex items-center gap-3 px-4 py-3.5 border-t border-white/70 text-left"
-      >
-        <span
-          className="w-9 h-9 rounded-[12px] flex items-center justify-center flex-shrink-0"
-          style={{
-            background: 'var(--color-brass-bg)',
-            border: '1px solid rgba(184,148,74,.28)',
-          }}
-        >
-          <KaabaIcon size={19} />
-        </span>
-        <span className="flex-1 min-w-0">
-          <span className="block text-[15px] font-medium text-ink">Arah kiblat</span>
-          <span className="block text-xs text-ink-faint mt-0.5">
-            {atKaaba
-              ? 'Kamu berada di Masjidil Haram'
-              : `${Math.round(bearing)}° · ${compassPoint(bearing)}`}
-          </span>
-        </span>
-        <ChevronRight size={16} color="var(--color-ink-faint)" />
-      </button>
-
-      <p className="px-4 pb-3 text-xs text-ink-faint">
-        {schedule.method.label} ·{' '}
-        {position.precise
-          ? position.accuracy
-            ? formatAccuracy(position.accuracy)
-            : 'lokasi kamu'
-          : position.status === 'locating'
-            ? 'mencari lokasi…'
-            : 'Masjidil Haram'}
-        {zone ? ` · waktu ${zone}` : ''}
+      <p className="home-prayer-method">
+        {schedule.method.label} · {position.precise
+          ? position.accuracy ? formatAccuracy(position.accuracy) : 'lokasi perangkat'
+          : position.status === 'locating' ? 'mencari lokasi…' : 'lokasi acuan Masjidil Haram'}
+        {zone ? ` · ${zone}` : ''}
       </p>
-
       {zoneSuspect && (
-        <div
-          className="mx-4 mb-4 rounded-[14px] px-3.5 py-3 flex items-start gap-2.5"
-          style={{ background: 'var(--color-brass-bg)', border: '1px solid rgba(184,148,74,.18)' }}
-        >
-          <AlertTriangle size={14} color="var(--color-brass)" className="flex-shrink-0 mt-0.5" />
-          <p className="text-xs leading-relaxed" style={{ color: '#7a6224' }}>
-            Jam ponselmu masih {zone}, tidak cocok dengan lokasimu sekarang. Ubah
-            zona waktu ponsel agar waktu shalat ini benar.
-          </p>
+        <div className="home-prayer-warning" role="status">
+          <AlertTriangle size={16} aria-hidden="true" />
+          <p>Jam ponselmu masih {zone}, tidak cocok dengan lokasimu sekarang. Ubah zona waktu ponsel agar waktu shalat ini benar.</p>
         </div>
       )}
+      <button className="home-qibla" onClick={() => navigate('qibla')}>
+        <Compass size={21} strokeWidth={1.7} aria-hidden="true" />
+        <span>Arah kiblat</span>
+        <small>{atKaaba ? 'Masjidil Haram' : `${Math.round(bearing)}° · ${compassPoint(bearing)}`}</small>
+        <ChevronRight size={17} aria-hidden="true" />
+      </button>
     </section>
   )
 }

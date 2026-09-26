@@ -27,8 +27,10 @@ const TAG_STYLE = {
   Sunnah: { bg: '#EEF2FF', color: '#4F46E5' },
 }
 
-export default function GuidanceScreen({ navigate }) {
-  const [filter, setFilter] = useState(FILTERS[0])
+export default function GuidanceScreen({ navigate, params = {} }) {
+  const [filter, setFilter] = useState(() =>
+    FILTERS.find((item) => item.category === params.category) ?? FILTERS[0],
+  )
   const [search, setSearch] = useState('')
   // Only the committed term hits the API, so typing does not fire a request
   // per keystroke.

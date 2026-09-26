@@ -1,0 +1,158 @@
+/* The BPKH-inspired home has solid white surfaces, round service icons,
+   Manaseek green, and warm gold. Keep these styles scoped to this screen. */
+.jamaah-home {
+  --home-green: #07533b;
+  --home-dark: #063e2e;
+  --home-gold: #c59b4e;
+  --home-muted: #647267;
+  min-height: 100vh;
+  background: #f5f7f4;
+  color: #20392d;
+  padding-bottom: calc(94px + env(safe-area-inset-bottom));
+}
+.jamaah-home button { cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color 160ms ease, transform 160ms ease; }
+.jamaah-home button:disabled { cursor: default; }
+.jamaah-home button:active:not(:disabled) { transform: translateY(1px); }
+.home-header {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: max(28px, env(safe-area-inset-top)) 22px 36px;
+  background: linear-gradient(125deg, #064832, #176a48);
+}
+.home-header::before, .home-header::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 320px;
+  height: 410px;
+  border: 1px solid #ffffff10;
+  border-radius: 50% 50% 0 0;
+  transform: rotate(-32deg);
+  right: -190px;
+  top: -150px;
+  box-shadow: 0 0 0 25px #ffffff04, 0 0 0 50px #ffffff04;
+}
+.home-header::after { right: 235px; top: 130px; width: 160px; height: 240px; }
+.home-topbar, .home-brand, .home-greeting, .home-section-heading { display: flex; align-items: center; }
+.home-topbar { justify-content: space-between; }
+.home-brand { gap: 10px; color: white; }
+.home-brand-mark { position: relative; display: block; width: 42px; height: 42px; overflow: hidden; border-radius: 13px; background: white; }
+.home-brand-mark img { position: absolute; width: 84px; max-width: none; height: auto; left: -21px; top: -12px; }
+.home-brand strong { display: block; font-size: 25px; font-weight: 700; letter-spacing: -.9px; line-height: 1.1; }
+.home-brand small { display: block; color: #dfca9b; font-size: 10px; letter-spacing: 1.5px; margin-top: 4px; }
+.home-notifications { position: relative; display: grid; place-items: center; width: 44px; height: 44px; color: white; border: 1px solid #ffffff35; border-radius: 50%; background: #ffffff0b; }
+.home-notifications > span { position: absolute; top: -3px; right: -3px; background: #e4bd6d; color: #3b321e; border: 2px solid #0e583d; border-radius: 20px; min-width: 19px; padding: 1px 4px; font-size: 10px; font-weight: 700; }
+.home-greeting { justify-content: space-between; gap: 16px; margin: 26px 0 21px; }
+.home-greeting > div { min-width: 0; }
+.home-greeting p { color: #d9e9df; font-size: 13px; }
+.home-greeting h1 { color: white; font-size: 23px; line-height: 1.35; font-weight: 650; letter-spacing: -.5px; overflow-wrap: anywhere; margin-top: 3px; }
+.home-greeting h1 span { color: #e4bd6d; }
+.home-avatar { width: 44px; height: 44px; flex-shrink: 0; overflow: hidden; border-radius: 50%; color: #f5dfac; background: #ffffff12; border: 1px solid #c8a96570; font-size: 14px; font-weight: 600; }
+.home-avatar-image, .home-avatar-fallback { width: 100%; height: 100%; object-fit: cover; }
+.home-avatar-fallback { display: grid; place-items: center; }
+.home-header :focus-visible { outline-color: #f6d68f; outline-offset: 4px; }
+
+.home-prayer { overflow: hidden; color: #20392d; background: white; border: 1px solid #fff; border-radius: 19px; box-shadow: 0 9px 24px #03291918; }
+.home-prayer :focus-visible { outline-color: var(--home-green); outline-offset: -3px; }
+.home-prayer-location { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin: 0 16px; padding: 13px 0 11px; border-bottom: 1px solid #edf0eb; color: #69786e; font-size: 11px; }
+.home-prayer-location > span:first-child { display: flex; align-items: center; gap: 4px; color: var(--home-green); font-weight: 600; }
+.home-prayer-next { display: flex; align-items: center; justify-content: space-between; padding: 13px 17px 12px; gap: 8px; }
+.home-prayer-caption { font-size: 12px; color: var(--home-muted); }
+.home-prayer-next h2 { display: flex; align-items: baseline; flex-wrap: wrap; column-gap: 8px; color: var(--home-green); font-size: 23px; font-weight: 700; letter-spacing: -.6px; margin-top: 2px; }
+.home-prayer-next h2 span { font-variant-numeric: tabular-nums; }
+.home-prayer-next h2 small { font-weight: 500; font-size: 10px; letter-spacing: 0; color: var(--home-muted); }
+.home-prayer-countdown { color: #7b642d; font-size: 12px; margin-top: 2px; }
+.home-prayer-sun { display: grid; place-items: center; width: 53px; height: 53px; flex-shrink: 0; color: #b88a35; background: #fbf5e7; border-radius: 50%; }
+.home-prayer-times { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin: 0 12px; }
+.home-prayer-times > div { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 9px 0; border-radius: 10px; color: #7d887e; }
+.home-prayer-times span { font-size: 11px; }
+.home-prayer-times strong { font-size: 13px; font-weight: 650; color: #364f40; font-variant-numeric: tabular-nums; }
+.home-prayer-times .is-next { background: #eaf3ec; color: var(--home-green); }
+.home-prayer-times .is-next strong { color: var(--home-green); }
+.home-prayer-method { text-align: center; font-size: 10px; color: #647267; line-height: 1.5; padding: 10px 12px; }
+.home-prayer-warning { display: flex; align-items: flex-start; gap: 7px; margin: 0 12px 12px; padding: 10px; border-radius: 8px; background: #fff5df; color: #78581d; font-size: 12px; line-height: 1.5; }
+.home-prayer-warning svg { flex-shrink: 0; margin-top: 2px; }
+.home-qibla { display: flex; align-items: center; gap: 9px; width: 100%; padding: 12px 16px; background: linear-gradient(105deg, #dbb76f, #caa052); color: #3d331c; text-align: left; }
+.home-qibla > span { font-size: 13px; font-weight: 650; }
+.home-qibla > small { flex: 1; text-align: right; font-size: 11px; }
+
+.home-services { position: relative; margin-top: -16px; padding: 23px 19px 20px; border-radius: 24px 24px 0 0; background: white; border-bottom: 1px solid #edf0eb; }
+.home-section-heading { justify-content: space-between; gap: 8px; margin-bottom: 18px; }
+.home-section-heading h2 { font-size: 17px; font-weight: 700; letter-spacing: -.35px; }
+.home-section-heading > span { font-size: 10px; color: #8a784a; background: #f9f3e6; border-radius: 5px; padding: 4px 7px; }
+.home-service-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 20px; column-gap: 5px; }
+.home-service { display: flex; flex-direction: column; align-items: center; gap: 9px; }
+.home-service-icon { position: relative; display: grid; place-items: center; width: 55px; height: 55px; flex-shrink: 0; border-radius: 50%; box-shadow: inset 0 2px 1px #ffffff25, 0 4px 9px -5px #153e3035; transition: transform 160ms ease; }
+.home-service-icon::after { content: ''; position: absolute; inset: 4px; border: 1px solid #ffffff25; border-radius: inherit; }
+.home-service-icon.green { color: #fff; background: linear-gradient(145deg, #2c8056, #12603e); }
+.home-service-icon.gold { color: #fff; background: linear-gradient(145deg, #e1b961, #c79638); }
+.home-service-icon.sage { color: #fff; background: linear-gradient(145deg, #75a187, #507e64); }
+.home-service-icon.teal { color: #fff; background: linear-gradient(145deg, #369787, #147267); }
+.home-service-icon.olive { color: #fff; background: linear-gradient(145deg, #a3a062, #818044); }
+.home-service-icon.sand { color: #fff; background: linear-gradient(145deg, #c5a078, #a57c50); }
+.home-service > span:last-child { font-size: 12px; font-weight: 550; line-height: 1.4; white-space: pre-line; text-align: center; }
+
+.home-content { padding: 22px 20px 0; }
+.home-guide-promo { position: relative; isolation: isolate; display: flex; align-items: center; min-height: 189px; padding: 20px; overflow: hidden; border: 1px solid #ece3cd; border-radius: 17px; background: #fbf7ed; }
+.home-guide-promo::after { content: ''; position: absolute; z-index: -1; width: 150px; height: 200px; border: 1px solid #d7bd8055; border-radius: 100px 100px 0 0; right: -12px; top: 25px; transform: rotate(20deg); }
+.home-guide-copy { position: relative; z-index: 1; width: 60%; }
+.home-eyebrow { display: flex; align-items: center; gap: 4px; color: #8d7035; text-transform: uppercase; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8px; }
+.home-guide-promo h2 { font-size: 20px; line-height: 1.3; font-weight: 700; letter-spacing: -.5px; color: var(--home-dark); }
+.home-guide-promo p:not(.home-eyebrow) { font-size: 12px; line-height: 1.6; color: #69715d; max-width: 175px; margin-top: 7px; }
+.home-guide-promo button { display: inline-flex; align-items: center; gap: 8px; color: white; background: var(--home-green); font-size: 12px; font-weight: 600; padding: 10px 12px; border-radius: 8px; margin-top: 14px; min-height: 44px; }
+.home-guide-promo img { position: absolute; z-index: 0; width: 190px; height: 190px; object-fit: contain; right: -29px; bottom: 1px; mix-blend-mode: multiply; }
+.home-booking { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: white; border: 1px solid #e5ebe3; border-radius: 15px; padding: 16px 14px; margin-top: 17px; }
+.home-booking-icon { display: grid; place-items: center; width: 43px; height: 43px; flex-shrink: 0; border-radius: 13px; background: #edf4ec; color: var(--home-green); }
+.home-booking-copy { flex: 1; min-width: 0; }
+.home-booking-copy small { display: block; font-size: 10px; color: #718077; }
+.home-booking-copy strong { display: block; font-size: 14px; font-weight: 650; color: var(--home-dark); line-height: 1.5; margin: 2px 0; overflow-wrap: anywhere; }
+.home-booking-copy > span { display: block; font-size: 12px; color: #647267; line-height: 1.6; }
+.home-booking > svg { flex-shrink: 0; color: var(--home-green); }
+.home-reading { margin-top: 27px; }
+.home-reading .home-section-heading { margin-bottom: 12px; }
+.home-section-link { display: flex; align-items: center; gap: 2px; font-size: 12px; font-weight: 600; color: var(--home-green); min-height: 44px; }
+.home-topic-list { display: flex; flex-direction: column; gap: 9px; }
+.home-topic { display: flex; align-items: center; gap: 12px; width: 100%; padding: 13px; background: white; border: 1px solid #e5ebe3; border-radius: 13px; text-align: left; }
+.home-topic-icon { display: grid; place-items: center; width: 46px; height: 49px; flex-shrink: 0; border-radius: 11px; color: #267450; background: #edf3e9; }
+.home-topic:nth-child(even) .home-topic-icon { color: #a3823f; background: #f8f0df; }
+.home-topic-copy { min-width: 0; flex: 1; }
+.home-topic-copy strong { display: block; color: #284835; font-size: 14px; font-weight: 650; line-height: 1.4; }
+.home-topic-copy small { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; color: #647267; font-size: 11px; margin-top: 6px; }
+.home-topic-copy em { font-style: normal; color: #8d7035; }
+.home-topic > svg { color: #8c998e; flex-shrink: 0; }
+.home-topic-notice { display: flex; align-items: flex-start; gap: 6px; font-size: 11px; line-height: 1.6; color: #647267; margin-top: 11px; }
+.home-topic-notice svg { flex-shrink: 0; margin-top: 2px; }
+.home-inline-state { padding: 22px 15px; text-align: center; border: 1px dashed #d8e2d7; border-radius: 13px; font-size: 12px; color: #718077; line-height: 1.6; }
+.home-inline-state button { display: block; min-height: 44px; margin: 5px auto 0; color: var(--home-green); font-weight: 600; }
+.home-checklist { display: flex; align-items: center; gap: 11px; width: 100%; margin-top: 22px; padding: 15px; border-radius: 13px; background: #eaf0e7; color: var(--home-green); text-align: left; }
+.home-checklist > svg { flex-shrink: 0; }
+.home-checklist-copy { flex: 1; }
+.home-checklist strong { display: block; font-size: 13px; font-weight: 650; }
+.home-checklist small { display: block; font-size: 11px; color: #697d66; margin-top: 4px; }
+.home-checklist progress { display: block; width: 100%; height: 4px; margin-top: 9px; border: 0; border-radius: 3px; overflow: hidden; appearance: none; }
+.home-checklist progress::-webkit-progress-bar { background: #d6e1ce; }
+.home-checklist progress::-webkit-progress-value { background: #8f783c; }
+.home-checklist progress::-moz-progress-bar { background: #8f783c; }
+.home-footer { margin-top: 23px; text-align: center; color: #667560; font-size: 11px; letter-spacing: .3px; }
+
+.home-bottom-nav { background: #fffffff5; border-top: 1px solid #e5ebe3; box-shadow: 0 -4px 20px #143f2705; }
+.home-bottom-nav button { min-height: 69px; padding-top: 10px; }
+.home-bottom-nav button[aria-current='page'] > span:first-child { background: #e8f1e7 !important; }
+.home-bottom-nav button[aria-current='page'] > span:last-child { color: #07533b !important; font-weight: 700; }
+
+@media (hover: hover) {
+  .home-service:hover .home-service-icon { transform: translateY(-2px); }
+  .home-topic:hover, .home-booking:hover { background: #fbfcf9; }
+  .home-guide-promo button:hover { background: #063e2e; }
+}
+@media (max-width: 359px) {
+  .home-header { padding-inline: 16px; }
+  .home-services { padding-inline: 12px; }
+  .home-content { padding-inline: 15px; }
+  .home-prayer-next h2 { font-size: 21px; }
+  .home-service-icon { width: 50px; height: 50px; }
+  .home-guide-promo { padding: 17px; }
+  .home-guide-promo img { width: 156px; height: 156px; right: -30px; }
+  .home-guide-promo h2 { font-size: 18px; }
+}
