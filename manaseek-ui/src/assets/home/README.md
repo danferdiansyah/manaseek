@@ -1,5 +1,18 @@
 # Beranda illustration
 
+## Current asset: transparent Kaaba
+
+`kaaba-cutout.png` is the current home-card illustration. It was edited from
+`kaaba-guide.webp` with the built-in `imagegen` tool and resized to 640 × 640
+while preserving its alpha channel. The card positions the cutout at the lower
+right, enlarged and clipped by the card edges.
+
+Final edit prompt:
+
+> Use case: background-extraction. Asset type: transparent PNG cutout for the bottom-right corner of a mobile app card. Edit target: the provided Kaaba illustration. Isolate ONLY the Kaaba building: the black cube, its gold kiswah band, gold door and the narrow stone base directly belonging to the cube. Preserve its existing three-quarter perspective, recognizable geometry, black cloth texture, warm gold detailing and soft lighting. Remove the entire cream background, the mosque arches, green dome, crescent, minarets, plants, round pedestal and ground shadows. Output one standalone Kaaba with real RGBA transparency, tightly framed with about 5 percent transparent padding around the full building. The Kaaba should fill the image and be a substantial close-up, not a small miniature surrounded by empty space. Keep the complete cube in the PNG; clipping will be handled by the app. No background color, no drawn checkerboard, no environment, no added text, no UI, no logo or watermark.
+
+## Original illustration
+
 `kaaba-guide.webp` was generated with the built-in `imagegen` tool, then resized
 to 640 × 640 and encoded as WebP for the home screen. It is a decorative
 illustration, not a representation of the mosque's actual layout.

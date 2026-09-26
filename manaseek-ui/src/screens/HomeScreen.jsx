@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   Bell, Home, BookOpen, MessageCircle, UserCheck, Settings, UserRound,
-  ChevronRight, ArrowRight, Clock3, Compass, Sparkles, Luggage, Info,
+  ChevronRight, ArrowRight, Clock3, Compass, Luggage, Info,
   Layers, RotateCcw, ArrowRightLeft, Sunrise, Scissors, Moon, Target,
   Heart, ClipboardList,
 } from 'lucide-react'
@@ -11,7 +11,7 @@ import KaabaIcon from '../lib/KaabaIcon'
 import { useAuth } from '../lib/auth-context'
 import { BOOKING_STATUS_LABELS, formatSchedule } from '../lib/format'
 import PrayerStrip from '../lib/PrayerStrip'
-import kaabaIllustration from '../assets/home/kaaba-guide.webp'
+import kaabaIllustration from '../assets/home/kaaba-cutout.png'
 import './home.css'
 
 const NAV_TABS = [
@@ -169,12 +169,12 @@ export default function HomeScreen({ navigate }) {
         <div className="home-content">
           <section className="home-guide-promo" aria-labelledby="home-guide-heading">
             <div className="home-guide-copy">
-              <p className="home-eyebrow"><Sparkles size={11} aria-hidden="true" /> Bekal ibadahmu</p>
+              <p className="home-eyebrow">Bekal ibadahmu</p>
               <h2 id="home-guide-heading">Langkah tenang,<br />ibadah khusyuk.</h2>
               <p>Kenali rangkaian haji &amp; umrah, satu langkah demi satu langkah.</p>
               <button onClick={() => navigate('guidance')}>Mulai belajar <ArrowRight size={13} aria-hidden="true" /></button>
             </div>
-            <img src={kaabaIllustration} alt="" width="190" height="190" />
+            <img src={kaabaIllustration} alt="" width="640" height="640" />
           </section>
 
           <button

@@ -94,14 +94,15 @@
 .home-service > span:last-child { font-size: 12px; font-weight: 550; line-height: 1.4; white-space: pre-line; text-align: center; }
 
 .home-content { padding: 22px 20px 0; }
-.home-guide-promo { position: relative; isolation: isolate; display: flex; align-items: center; min-height: 189px; padding: 20px; overflow: hidden; border: 1px solid #ece3cd; border-radius: 17px; background: #fbf7ed; }
-.home-guide-promo::after { content: ''; position: absolute; z-index: -1; width: 150px; height: 200px; border: 1px solid #d7bd8055; border-radius: 100px 100px 0 0; right: -12px; top: 25px; transform: rotate(20deg); }
+.home-guide-promo { position: relative; isolation: isolate; display: flex; align-items: center; min-height: 216px; padding: 20px; overflow: hidden; border-radius: 17px; background: white; }
 .home-guide-copy { position: relative; z-index: 1; width: 60%; }
 .home-eyebrow { display: flex; align-items: center; gap: 4px; color: #8d7035; text-transform: uppercase; font-size: 9px; font-weight: 700; letter-spacing: 1.5px; margin-bottom: 8px; }
 .home-guide-promo h2 { font-size: 20px; line-height: 1.3; font-weight: 700; letter-spacing: -.5px; color: var(--home-dark); }
 .home-guide-promo p:not(.home-eyebrow) { font-size: 12px; line-height: 1.6; color: #69715d; max-width: 175px; margin-top: 7px; }
 .home-guide-promo button { display: inline-flex; align-items: center; gap: 8px; color: white; background: var(--home-green); font-size: 12px; font-weight: 600; padding: 10px 12px; border-radius: 8px; margin-top: 14px; min-height: 44px; }
-.home-guide-promo img { position: absolute; z-index: 0; width: 190px; height: 190px; object-fit: contain; right: -29px; bottom: 1px; mix-blend-mode: multiply; }
+/* Oversize the transparent cutout and crop it at the card's lower-right edge.
+   The left edge stays clear of the copy at both narrow and wide phone sizes. */
+.home-guide-promo img { position: absolute; z-index: 0; width: 78%; max-width: none; height: auto; right: -34%; bottom: -20%; pointer-events: none; user-select: none; }
 .home-booking { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: white; border: 1px solid #e5ebe3; border-radius: 15px; padding: 16px 14px; margin-top: 17px; }
 .home-booking-icon { display: grid; place-items: center; width: 43px; height: 43px; flex-shrink: 0; border-radius: 13px; background: #edf4ec; color: var(--home-green); }
 .home-booking-copy { flex: 1; min-width: 0; }
@@ -153,6 +154,5 @@
   .home-prayer-next h2 { font-size: 21px; }
   .home-service-icon { width: 50px; height: 50px; }
   .home-guide-promo { padding: 17px; }
-  .home-guide-promo img { width: 156px; height: 156px; right: -30px; }
   .home-guide-promo h2 { font-size: 18px; }
 }
