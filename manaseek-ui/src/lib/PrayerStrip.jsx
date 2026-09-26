@@ -39,7 +39,7 @@ export default function PrayerStrip({ navigate }) {
       <div className="home-prayer-next">
         <div>
           <p className="home-prayer-caption">Shalat berikutnya</p>
-          <h2>{next.label} <span>{formatClock(next.at)}</span><small>{zone}</small></h2>
+          <h2>{next.label}</h2>
           <p className="home-prayer-countdown">{formatCountdown(next.at, now)}</p>
         </div>
         <div className="home-prayer-sun" aria-hidden="true"><NextPrayerIcon size={32} strokeWidth={1.4} /></div>

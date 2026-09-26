@@ -12,6 +12,7 @@ import { useAuth } from '../lib/auth-context'
 import { BOOKING_STATUS_LABELS, formatSchedule } from '../lib/format'
 import PrayerStrip from '../lib/PrayerStrip'
 import kaabaIllustration from '../assets/home/kaaba-cutout.png'
+import manaseekMark from '../assets/home/manaseek-mark.png'
 import './home.css'
 
 const NAV_TABS = [
@@ -125,10 +126,7 @@ export default function HomeScreen({ navigate }) {
     <div className="jamaah-home">
       <header className="home-header">
         <div className="home-topbar">
-          <div className="home-brand" aria-label="Manaseek, teman perjalanan ibadah">
-            <span className="home-brand-mark"><img src="/logo.png" alt="" /></span>
-            <span><strong>manaseek</strong><small>TEMAN PERJALANAN IBADAH</small></span>
-          </div>
+          <img className="home-brand-mark" src={manaseekMark} alt="Manaseek" width="48" height="48" />
           <button
             onClick={() => navigate('notifications')}
             aria-label={notificationCount > 0 ? `Notifikasi, ${notificationCount} notifikasi` : 'Notifikasi'}
@@ -141,7 +139,7 @@ export default function HomeScreen({ navigate }) {
         <div className="home-greeting">
           <div>
             <p>Assalamu’alaikum,</p>
-            <h1>{displayName}<span> ✦</span></h1>
+            <h1>{displayName}</h1>
           </div>
           <button onClick={() => navigate('profile')} aria-label="Buka profil" className="home-avatar">
             <Avatar src={user?.avatarUrl} name={displayName} imageClassName="home-avatar-image" fallbackClassName="home-avatar-fallback" />

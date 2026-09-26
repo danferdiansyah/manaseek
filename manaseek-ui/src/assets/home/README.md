@@ -1,5 +1,17 @@
 # Beranda illustration
 
+## Header logo
+
+`manaseek-mark.png` is the transparent emblem extracted from `public/logo.png`
+using the built-in `imagegen` tool, then resized to 256 × 256 with its alpha
+channel preserved. The source keeps the green and gold fills; the home header
+renders them uniformly white with `filter: brightness(0) invert(1)`. This keeps
+the transparent gaps clean without adding a background tile or wordmark.
+
+Final generation prompt:
+
+> Use case: background-extraction. Asset type: transparent Manaseek brand emblem PNG for a mobile app header. Extract ONLY the upper green-and-gold emblem from the supplied logo. Keep its original green and gold colors and exact original shape: the two curved human figures, their circular heads, pointed top, and the central Kaaba with separate bands. Remove the 'manaseek' wordmark entirely. Remove the white paper background, its texture and ALL white space inside and around the emblem, so those regions are fully transparent. IMPORTANT: retain ONLY the colored green and gold parts; no white pixels, white patches, white paper residue, or shadows in any negative space. Preserve smooth clean contours and proportions without redesign. Center the complete original emblem with a 5 percent transparent margin in a square genuine RGBA PNG. Flat colored shapes with crisp anti-aliased edges, no paper texture or speckles. This colored transparent source will be displayed in white by the app, so keeping the alpha silhouette perfectly clean is critical.
+
 ## Current asset: transparent Kaaba
 
 `kaaba-cutout.png` is the current home-card illustration. It was edited from
