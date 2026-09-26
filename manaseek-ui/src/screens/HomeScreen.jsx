@@ -1,18 +1,25 @@
 import { useEffect, useState } from 'react'
 import {
-  Bell, Home, BookOpen, MessageCircle, UserCheck, Settings, UserRound,
-  ChevronRight, ArrowRight, Clock3, Compass, Luggage, Info,
+  Bell, Home, BookOpen, MessageCircle, UserCheck, Settings,
+  ChevronRight, ArrowRight, Clock3, Info,
   Layers, RotateCcw, ArrowRightLeft, Sunrise, Scissors, Moon, Target,
   Heart, ClipboardList,
 } from 'lucide-react'
 import { api } from '../lib/api'
 import Avatar from '../lib/Avatar'
-import KaabaIcon from '../lib/KaabaIcon'
 import { useAuth } from '../lib/auth-context'
 import { BOOKING_STATUS_LABELS, formatSchedule } from '../lib/format'
 import PrayerStrip from '../lib/PrayerStrip'
 import kaabaIllustration from '../assets/home/kaaba-cutout.png'
 import manaseekMark from '../assets/home/manaseek-mark.png'
+import umrahIcon from '../assets/home/services/umrah.webp'
+import hajjIcon from '../assets/home/services/hajj.webp'
+import chatIcon from '../assets/home/services/chat.webp'
+import mutawifIcon from '../assets/home/services/mutawif.webp'
+import qiblaIcon from '../assets/home/services/qibla.webp'
+import checklistIcon from '../assets/home/services/checklist.webp'
+import travelIcon from '../assets/home/services/travel.webp'
+import profileIcon from '../assets/home/services/profile.webp'
 import './home.css'
 
 const NAV_TABS = [
@@ -65,14 +72,14 @@ const ICONS = {
 }
 
 const SERVICES = [
-  { label: 'Panduan\nUmrah', Icon: KaabaIcon, screen: 'guidance', category: 'UMRAH', color: 'green' },
-  { label: 'Panduan\nHaji', Icon: BookOpen, screen: 'guidance', category: 'HAJJ', color: 'gold' },
-  { label: 'Tanya\nAI', Icon: MessageCircle, screen: 'chatbot', color: 'teal' },
-  { label: 'Cari\nMutawif', Icon: UserCheck, screen: 'mutawif', color: 'sage' },
-  { label: 'Arah\nKiblat', Icon: Compass, screen: 'qibla', color: 'gold' },
-  { label: 'Checklist\nIbadah', Icon: ClipboardList, screen: 'checklist', color: 'green' },
-  { label: 'Persiapan\nPerjalanan', Icon: Luggage, screen: 'guidance', category: 'PERSIAPAN', color: 'sand' },
-  { label: 'Profil\nSaya', Icon: UserRound, screen: 'profile', color: 'olive' },
+  { label: 'Panduan\nUmrah', image: umrahIcon, screen: 'guidance', category: 'UMRAH', color: 'green' },
+  { label: 'Panduan\nHaji', image: hajjIcon, screen: 'guidance', category: 'HAJJ', color: 'gold' },
+  { label: 'Tanya\nAI', image: chatIcon, screen: 'chatbot', color: 'teal' },
+  { label: 'Cari\nMutawif', image: mutawifIcon, screen: 'mutawif', color: 'sage' },
+  { label: 'Arah\nKiblat', image: qiblaIcon, screen: 'qibla', color: 'gold' },
+  { label: 'Checklist\nIbadah', image: checklistIcon, screen: 'checklist', color: 'green' },
+  { label: 'Persiapan\nPerjalanan', image: travelIcon, screen: 'guidance', category: 'PERSIAPAN', color: 'sand' },
+  { label: 'Profil\nSaya', image: profileIcon, screen: 'profile', color: 'olive' },
 ]
 
 const HOME_RESOURCES = [
@@ -152,12 +159,13 @@ export default function HomeScreen({ navigate }) {
         <section className="home-services" aria-labelledby="home-services-heading">
           <div className="home-section-heading">
             <h2 id="home-services-heading">Temani setiap langkah</h2>
-            <span>Haji &amp; Umrah</span>
           </div>
           <div className="home-service-grid">
-            {SERVICES.map(({ label, Icon, screen, category, color }) => (
+            {SERVICES.map(({ label, image, screen, category, color }) => (
               <button key={label} className="home-service" onClick={() => navigate(screen, category ? { category } : {})}>
-                <span className={`home-service-icon ${color}`} aria-hidden="true"><Icon size={25} strokeWidth={1.7} color="currentColor" /></span>
+                <span className={`home-service-icon ${color}`} aria-hidden="true">
+                  <img src={image} alt="" width="192" height="192" decoding="async" />
+                </span>
                 <span>{label}</span>
               </button>
             ))}

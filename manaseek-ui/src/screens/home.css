@@ -73,17 +73,35 @@
 .home-services { position: relative; margin-top: -16px; padding: 23px 19px 20px; border-radius: 24px 24px 0 0; background: white; border-bottom: 1px solid #edf0eb; }
 .home-section-heading { justify-content: space-between; gap: 8px; margin-bottom: 18px; }
 .home-section-heading h2 { font-size: 17px; font-weight: 700; letter-spacing: -.35px; }
-.home-section-heading > span { font-size: 10px; color: #8a784a; background: #f9f3e6; border-radius: 5px; padding: 4px 7px; }
-.home-service-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 20px; column-gap: 5px; }
-.home-service { display: flex; flex-direction: column; align-items: center; gap: 9px; }
-.home-service-icon { position: relative; display: grid; place-items: center; width: 55px; height: 55px; flex-shrink: 0; border-radius: 50%; box-shadow: inset 0 2px 1px #ffffff25, 0 4px 9px -5px #153e3035; transition: transform 160ms ease; }
-.home-service-icon::after { content: ''; position: absolute; inset: 4px; border: 1px solid #ffffff25; border-radius: inherit; }
-.home-service-icon.green { color: #fff; background: linear-gradient(145deg, #2c8056, #12603e); }
-.home-service-icon.gold { color: #fff; background: linear-gradient(145deg, #e1b961, #c79638); }
-.home-service-icon.sage { color: #fff; background: linear-gradient(145deg, #75a187, #507e64); }
-.home-service-icon.teal { color: #fff; background: linear-gradient(145deg, #369787, #147267); }
-.home-service-icon.olive { color: #fff; background: linear-gradient(145deg, #a3a062, #818044); }
-.home-service-icon.sand { color: #fff; background: linear-gradient(145deg, #c5a078, #a57c50); }
+.home-service-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 23px; column-gap: 6px; }
+.home-service { display: flex; flex-direction: column; align-items: center; gap: 11px; }
+.home-service-icon {
+  --service-tint: 84 148 111;
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 20px;
+  border: 1px solid rgb(255 255 255 / .9);
+  background:
+    radial-gradient(ellipse at 80% 90%, rgb(var(--service-tint) / .26), transparent 75%),
+    linear-gradient(145deg, rgb(255 255 255 / .94), rgb(var(--service-tint) / .08));
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  box-shadow: inset 1px 1px 0 white, inset -1px -1px 0 rgb(var(--service-tint) / .14), 0 5px 14px -8px rgb(var(--service-tint) / .5);
+  transition: transform 160ms ease;
+}
+.home-service-icon::before { content: ''; position: absolute; inset: 11px 5px 5px 17px; border-radius: 50%; background: rgb(var(--service-tint) / .17); filter: blur(9px); z-index: -1; }
+.home-service-icon::after { content: ''; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(140deg, rgb(255 255 255 / .65), transparent 48%); pointer-events: none; }
+.home-service-icon img { position: relative; z-index: 1; width: 60px; height: 60px; max-width: none; object-fit: contain; pointer-events: none; user-select: none; filter: drop-shadow(0 3px 2px rgb(20 62 41 / .1)); }
+.home-service-icon.gold { --service-tint: 204 163 77; }
+.home-service-icon.sage { --service-tint: 124 160 133; }
+.home-service-icon.teal { --service-tint: 69 150 137; }
+.home-service-icon.olive { --service-tint: 153 157 98; }
+.home-service-icon.sand { --service-tint: 192 159 111; }
 .home-service > span:last-child { font-size: 12px; font-weight: 550; line-height: 1.4; white-space: pre-line; text-align: center; }
 
 .home-content { padding: 22px 20px 0; }
@@ -145,7 +163,8 @@
   .home-services { padding-inline: 12px; }
   .home-content { padding-inline: 15px; }
   .home-prayer-next h2 { font-size: 21px; }
-  .home-service-icon { width: 50px; height: 50px; }
+  .home-service-icon { width: 57px; height: 57px; border-radius: 18px; }
+  .home-service-icon img { width: 54px; height: 54px; }
   .home-guide-promo { padding: 17px; }
   .home-guide-promo h2 { font-size: 18px; }
 }
