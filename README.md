@@ -80,6 +80,7 @@ Config validator menolak start bila flag ini menyala di produksi.
 | Riwayat notifikasi | jalan |
 | Waktu shalat di beranda | jalan, dihitung di perangkat |
 | Arah kiblat | jalan, kompas dengan cadangan manual |
+| Konverter Riyal ↔ Rupiah | jalan, kurs statis XE per 29 September 2026; dua arah dan nominal cepat |
 | Chatbot AI | jalan, menjawab dari pustaka panduan dengan sitasi |
 | Riwayat AI Chat | jalan, tersimpan per akun; buka ulang, lanjutkan percakapan, atau mulai chat baru |
 | Push notification (FCM) | belum, menunggu kredensial Firebase |

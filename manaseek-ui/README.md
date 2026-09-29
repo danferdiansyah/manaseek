@@ -24,6 +24,26 @@ melanjutkan chat lama, chat baru, kegagalan pengiriman, pergantian sesi saat
 request masih berjalan, serta tampilan layar kecil. Tidak memakai akun atau
 layanan AI sungguhan.
 
+## Konverter Riyal ↔ Rupiah
+
+Akses dari kartu **Riyal ↔ Rupiah** di beranda atau `?screen=currency`.
+Perhitungan SAR/IDR berlangsung di perangkat, tanpa API kurs. Kurs tetap
+**1 SAR = Rp4.803,30**, dibulatkan dari snapshot [XE](https://www.xe.com/en-us/currencyconverter/convert/?Amount=1&From=SAR&To=IDR)
+pada **29 September 2026, 00.55 UTC / 07.55 WIB**. Tanggal acuan tetap ditampilkan;
+aplikasi tidak memperbarui kurs secara otomatis.
+
+Untuk mengganti acuan, perbarui nilai, timestamp, dan sumber `SAR_IDR_RATE`
+di `src/lib/currency.js` bersama-sama. Sesuaikan ekspektasi snapshot di
+`scripts/check-currency.mjs` jika kurs berubah.
+
+```bash
+npm run test:currency
+```
+
+Memeriksa format nominal Indonesia, perhitungan dua arah, tombol tukar,
+nominal cepat, input kosong/tidak valid, perhitungan tanpa jaringan,
+navigasi beranda, dan tampilan 320–420px dengan API fixture.
+
 ## Mengambil Screenshot
 
 Pastikan dev server sudah berjalan, lalu di tab terminal lain:
@@ -50,6 +70,7 @@ Akses tiap screen langsung via URL param `?screen=<id>`:
 |----|--------|
 | `splash` | Splash / onboarding |
 | `home` | Beranda |
+| `currency` | Konverter Riyal ↔ Rupiah |
 | `guidance` | Guidance Mandiri |
 | `guidance-detail` | Detail panduan |
 | `chatbot` | Chatbot AI |

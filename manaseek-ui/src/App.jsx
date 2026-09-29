@@ -15,6 +15,7 @@ import ProfileScreen from './screens/ProfileScreen'
 import ChecklistScreen from './screens/ChecklistScreen'
 import NotificationsScreen from './screens/NotificationsScreen'
 import QiblaScreen from './screens/QiblaScreen'
+import CurrencyScreen from './screens/CurrencyScreen'
 import MutawifDashboardScreen from './screens/MutawifDashboardScreen'
 import OnboardingScreen from './screens/OnboardingScreen'
 
@@ -32,6 +33,7 @@ const screens = {
   checklist: ChecklistScreen,
   notifications: NotificationsScreen,
   qibla: QiblaScreen,
+  currency: CurrencyScreen,
   'mutawif-dashboard': MutawifDashboardScreen,
   onboarding: OnboardingScreen,
 }

@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "test:chat-history": "node scripts/check-chat-history.mjs",
+    "test:currency": "node scripts/check-currency.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

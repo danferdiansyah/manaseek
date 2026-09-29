@@ -9,6 +9,8 @@ import kaabaIllustration from '../assets/home/kaaba-cutout.png'
 import manaseekMark from '../assets/home/manaseek-mark.png'
 import BottomNav from '../components/BottomNav'
 import GlassIcon from '../components/GlassIcon'
+import CurrencyArtwork from '../components/CurrencyArtwork'
+import { formatAmount, RATE_DATE, SAR_IDR_RATE } from '../lib/currency'
 import { topicArtwork } from '../components/artwork'
 import './home.css'
 
@@ -112,6 +114,16 @@ export default function HomeScreen({ navigate }) {
         </section>
 
         <div className="home-content">
+          <button type="button" className="currency-entry" onClick={() => navigate('currency')}>
+            <CurrencyArtwork />
+            <span className="currency-entry-copy">
+              <strong>Riyal ↔ Rupiah</strong>
+              <span>1 SAR = Rp{formatAmount(SAR_IDR_RATE.idrPerSar)}</span>
+              <small>Kurs acuan {RATE_DATE}</small>
+            </span>
+            <ChevronRight size={18} aria-hidden="true" />
+          </button>
+
           <section className="home-guide-promo" aria-labelledby="home-guide-heading">
             <div className="home-guide-copy">
               <p className="home-eyebrow">Bekal ibadahmu</p>
