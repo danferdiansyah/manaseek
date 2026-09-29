@@ -12,6 +12,18 @@ npm run dev -- --port 5174
 
 Buka browser di `http://localhost:5174`
 
+## Memeriksa riwayat AI Chat
+
+```bash
+npm run test:chat-history
+```
+
+Pengecekan browser ini menjalankan Vite di port lokal yang tersedia dan memakai
+API fixture. Mencakup pemulihan chat terakhir, pagination riwayat dan pesan,
+melanjutkan chat lama, chat baru, kegagalan pengiriman, pergantian sesi saat
+request masih berjalan, serta tampilan layar kecil. Tidak memakai akun atau
+layanan AI sungguhan.
+
 ## Mengambil Screenshot
 
 Pastikan dev server sudah berjalan, lalu di tab terminal lain:

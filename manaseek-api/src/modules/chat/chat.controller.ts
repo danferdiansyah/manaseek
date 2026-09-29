@@ -1,10 +1,11 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import type { PaginationDto } from '@/common/dto/pagination.dto';
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
 import { ChatService } from './chat.service';
-import { sendMessageSchema, type SendMessageDto } from './dto/chat.dto';
+import { chatMessagesQuerySchema, chatSessionsQuerySchema, sendMessageSchema, type SendMessageDto } from './dto/chat.dto';
 
 @ApiTags('chat')
 @ApiBearerAuth('access-token')
@@ -13,15 +14,22 @@ export class ChatController {
   constructor(private readonly chat: ChatService) {}
 
   @Get('sessions')
-  @ApiOperation({ summary: 'Recent chat sessions for the current user' })
-  listSessions(@CurrentUser('id') userId: string) {
-    return this.chat.listSessions(userId);
+  @ApiOperation({ summary: 'Paginated chat history for the current user, newest activity first' })
+  listSessions(
+    @CurrentUser('id') userId: string,
+    @Query(new ZodValidationPipe(chatSessionsQuerySchema)) query: PaginationDto,
+  ) {
+    return this.chat.listSessions(userId, query);
   }
 
   @Get('sessions/:id/messages')
-  @ApiOperation({ summary: 'Messages in one chat session' })
-  getMessages(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string) {
-    return this.chat.getMessages(userId, id);
+  @ApiOperation({ summary: 'Messages in an owned session; page 1 contains the latest messages in chronological order' })
+  getMessages(
+    @CurrentUser('id') userId: string,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query(new ZodValidationPipe(chatMessagesQuerySchema)) query: PaginationDto,
+  ) {
+    return this.chat.getMessages(userId, id, query);
   }
 
   // Each answer costs a model call, so the limit is per user, not per IP.

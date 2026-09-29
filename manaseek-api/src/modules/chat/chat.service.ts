@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { ChatRole } from '@prisma/client';
+import { ChatRole, Prisma } from '@prisma/client';
 import { AppConfigService } from '@/common/config/config.service';
+import { paginate, toSkipTake, type PaginationDto } from '@/common/dto/pagination.dto';
 import { AppError, ErrorCode } from '@/common/errors/app-error';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { SYSTEM_PROMPT, renderContext, type TopicContext } from './chat.prompt';
@@ -10,6 +11,14 @@ import type { SendMessageDto } from './dto/chat.dto';
 /** How much of the conversation is replayed to the model. */
 const HISTORY_TURNS = 8;
 const CONTEXT_TTL_MS = 5 * 60 * 1000;
+const MESSAGE_SELECT = {
+  id: true,
+  role: true,
+  content: true,
+  citedSlugs: true,
+  escalated: true,
+  createdAt: true,
+} satisfies Prisma.ChatMessageSelect;
 
 @Injectable()
 export class ChatService {
@@ -21,34 +30,51 @@ export class ChatService {
     private readonly config: AppConfigService,
   ) {}
 
-  async listSessions(userId: string) {
-    return this.prisma.chatSession.findMany({
-      where: { userId },
-      orderBy: { updatedAt: 'desc' },
-      take: 20,
-      select: { id: true, title: true, updatedAt: true },
-    });
+  async listSessions(userId: string, query: PaginationDto) {
+    const where = { userId, messages: { some: {} } };
+    const [sessions, total] = await this.prisma.$transaction([
+      this.prisma.chatSession.findMany({
+        where,
+        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+        ...toSkipTake(query),
+        select: {
+          id: true, title: true, createdAt: true, updatedAt: true,
+          _count: { select: { messages: true } },
+          messages: {
+            orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+            take: 1,
+            select: { content: true },
+          },
+        },
+      }),
+      this.prisma.chatSession.count({ where }),
+    ]);
+
+    return paginate(sessions.map(({ messages, _count, ...session }) => ({
+      ...session,
+      preview: messages[0]?.content.replace(/\s+/g, ' ').trim().slice(0, 160) ?? '',
+      messageCount: _count.messages,
+    })), total, query);
   }
 
-  async getMessages(userId: string, sessionId: string) {
+  async getMessages(userId: string, sessionId: string, query: PaginationDto) {
     const session = await this.prisma.chatSession.findFirst({
       where: { id: sessionId, userId },
-      select: { id: true },
+      select: { id: true, title: true, createdAt: true, updatedAt: true },
     });
     if (!session) throw AppError.notFound('ChatSession', sessionId);
 
-    return this.prisma.chatMessage.findMany({
-      where: { sessionId },
-      orderBy: { createdAt: 'asc' },
-      select: {
-        id: true,
-        role: true,
-        content: true,
-        citedSlugs: true,
-        escalated: true,
-        createdAt: true,
-      },
-    });
+    const [messages, total] = await this.prisma.$transaction([
+      this.prisma.chatMessage.findMany({
+        where: { sessionId },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        ...toSkipTake(query),
+        select: MESSAGE_SELECT,
+      }),
+      this.prisma.chatMessage.count({ where: { sessionId } }),
+    ]);
+
+    return { ...paginate(messages.reverse(), total, query), session };
   }
 
   async sendMessage(userId: string, dto: SendMessageDto) {
@@ -67,23 +93,30 @@ export class ChatService {
           data: { userId, title: dto.text.slice(0, 80) },
         });
 
-    await this.prisma.chatMessage.create({
-      data: { sessionId: session.id, role: ChatRole.USER, content: dto.text },
-    });
+    // Persist the question and its activity timestamp together, even when the
+    // model cannot answer. Error responses identify the saved conversation.
+    const [userMessage] = await this.prisma.$transaction([
+      this.prisma.chatMessage.create({
+        data: { sessionId: session.id, role: ChatRole.USER, content: dto.text },
+        select: MESSAGE_SELECT,
+      }),
+      this.prisma.chatSession.update({
+        where: { id: session.id },
+        data: { updatedAt: new Date() },
+      }),
+    ]);
+    const savedQuestion = { sessionId: session.id, userMessage };
 
-    const history = await this.prisma.chatMessage.findMany({
-      where: { sessionId: session.id },
-      orderBy: { createdAt: 'desc' },
-      take: HISTORY_TURNS,
-      select: { role: true, content: true },
-    });
-
-    const context = await this.guidanceContext();
-    const models = [this.config.get('GEMINI_MODEL'), ...this.config.get('GEMINI_FALLBACK_MODELS')];
-
-    let result;
     try {
-      result = await GeminiClient.generateAnswer({
+      const history = await this.prisma.chatMessage.findMany({
+        where: { sessionId: session.id },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        take: HISTORY_TURNS,
+        select: { role: true, content: true },
+      });
+      const context = await this.guidanceContext();
+      const models = [this.config.get('GEMINI_MODEL'), ...this.config.get('GEMINI_FALLBACK_MODELS')];
+      const result = await GeminiClient.generateAnswer({
         apiKey,
         models,
         system: `${SYSTEM_PROMPT}\n\n${context.text}`,
@@ -92,6 +125,34 @@ export class ChatService {
           text: m.content,
         })),
       });
+
+      // Keep only citations that exist in the curated library.
+      const citedSlugs = result.object.citedSlugs.filter((slug) => context.slugs.has(slug));
+      const [reply] = await this.prisma.$transaction([
+        this.prisma.chatMessage.create({
+          data: {
+            sessionId: session.id,
+            role: ChatRole.ASSISTANT,
+            content: result.object.answer,
+            citedSlugs,
+            escalated: result.object.needsHuman,
+            promptTokens: result.promptTokens,
+            completionTokens: result.completionTokens,
+            model: result.model,
+          },
+          select: MESSAGE_SELECT,
+        }),
+        this.prisma.chatSession.update({
+          where: { id: session.id },
+          data: { updatedAt: new Date() },
+        }),
+      ]);
+
+      this.logger.log(
+        `chat ${session.id} model=${result.model} in=${result.promptTokens ?? '?'} out=${result.completionTokens ?? '?'}`,
+      );
+
+      return { sessionId: session.id, userMessage, message: reply };
     } catch (error) {
       if (error instanceof GeminiUnavailableError) {
         this.logger.warn(error.message);
@@ -103,6 +164,7 @@ export class ChatService {
             ErrorCode.AI_QUOTA_EXCEEDED,
             'Kuota harian asisten AI sudah habis. Coba lagi besok, atau tanyakan langsung ke mutawif.',
             HttpStatus.TOO_MANY_REQUESTS,
+            savedQuestion,
           );
         }
 
@@ -110,54 +172,18 @@ export class ChatService {
           ErrorCode.AI_UNAVAILABLE,
           'Asisten sedang ramai dipakai. Coba kirim ulang sebentar lagi, atau tanyakan langsung ke mutawif.',
           HttpStatus.SERVICE_UNAVAILABLE,
+          savedQuestion,
         );
       }
 
-      this.logger.error(`Gemini call failed: ${(error as Error).message}`);
+      this.logger.error(`Chat answer failed: ${(error as Error).message}`);
       throw new AppError(
         ErrorCode.INTERNAL_ERROR,
         'Asisten sedang tidak dapat menjawab. Coba lagi sebentar lagi.',
         HttpStatus.BAD_GATEWAY,
+        savedQuestion,
       );
     }
-
-    // Drop any slug the model invented; a citation that goes nowhere is worse
-    // than no citation.
-    const citedSlugs = result.object.citedSlugs.filter((slug) => context.slugs.has(slug));
-
-    const reply = await this.prisma.chatMessage.create({
-      data: {
-        sessionId: session.id,
-        role: ChatRole.ASSISTANT,
-        content: result.object.answer,
-        citedSlugs,
-        escalated: result.object.needsHuman,
-        promptTokens: result.promptTokens,
-        completionTokens: result.completionTokens,
-        model: result.model,
-      },
-    });
-
-    await this.prisma.chatSession.update({
-      where: { id: session.id },
-      data: { updatedAt: new Date() },
-    });
-
-    this.logger.log(
-      `chat ${session.id} model=${result.model} in=${result.promptTokens ?? '?'} out=${result.completionTokens ?? '?'}`,
-    );
-
-    return {
-      sessionId: session.id,
-      message: {
-        id: reply.id,
-        role: reply.role,
-        content: reply.content,
-        citedSlugs: reply.citedSlugs,
-        escalated: reply.escalated,
-        createdAt: reply.createdAt,
-      },
-    };
   }
 
   private async requireSession(userId: string, sessionId: string) {

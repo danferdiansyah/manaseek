@@ -125,6 +125,42 @@ caller on the anonymous auth routes.
 
 ## The assistant
 
+### User chat history
+
+The AI Chat screen restores the account's most recently active conversation.
+**Riwayat** lists saved conversations; selecting one loads its messages and
+continues that same session. **Chat baru** starts a separate conversation when
+the first question is sent. Existing sessions and messages remain available;
+this feature uses the existing database schema and needs no new migration.
+
+All chat routes require a bearer token. The owner comes from the authenticated
+user, never from a request parameter. Reading or continuing another user's
+session returns `404 NOT_FOUND`.
+
+| Endpoint | Response |
+| --- | --- |
+| `GET /api/chat/sessions?page=1&limit=20` | `{ items, meta }`, sorted by latest activity; each item has `id`, `title`, `preview`, `messageCount`, `createdAt`, and `updatedAt` |
+| `GET /api/chat/sessions/:id/messages?page=1&limit=50` | `{ items, meta, session }`; page 1 contains the newest messages, in chronological display order; later pages contain older messages |
+| `POST /api/chat/messages` | `{ sessionId, userMessage, message }`; include `sessionId` to continue an existing conversation |
+
+Pagination limits are validated from 1 to 100. `meta` contains `page`, `limit`,
+`total`, and `totalPages`. Messages retain their citations and human-escalation
+flag; token accounting and model metadata stay internal.
+
+The history GET endpoints now return paginated objects instead of bare arrays.
+Questions and session activity are saved together before requesting an AI
+answer. If generating or saving the answer fails after the question was saved,
+`error.details` contains `sessionId` and `userMessage` so the frontend can retain
+the conversation and reconcile its temporary message. History can be read
+without an AI provider key or another model call.
+
+Backend regression coverage: `src/modules/chat/chat.service.spec.ts`.
+Frontend browser coverage: run `npm run test:chat-history` in `manaseek-ui`.
+The browser check starts its own local Vite server and uses fixture responses;
+it does not contact real accounts or invoke the AI provider.
+
+### Answer generation
+
 `POST /api/chat/messages` answers from the guidance library and nothing else.
 The whole curated library is small enough to sit in one prompt, so there is no
 retrieval step and the model has nothing outside it to draw on. Three rules are

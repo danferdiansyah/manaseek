@@ -81,6 +81,7 @@ Config validator menolak start bila flag ini menyala di produksi.
 | Waktu shalat di beranda | jalan, dihitung di perangkat |
 | Arah kiblat | jalan, kompas dengan cadangan manual |
 | Chatbot AI | jalan, menjawab dari pustaka panduan dengan sitasi |
+| Riwayat AI Chat | jalan, tersimpan per akun; buka ulang, lanjutkan percakapan, atau mulai chat baru |
 | Push notification (FCM) | belum, menunggu kredensial Firebase |
 | Upload dokumen verifikasi mutawif | belum, API baru menerima URL |
 | Pembayaran | di luar cakupan; booking diselesaikan di luar aplikasi |
