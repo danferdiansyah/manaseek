@@ -56,7 +56,8 @@
 .home-prayer-caption { font-size: 12px; color: var(--home-muted); }
 .home-prayer-next h2 { color: var(--home-green); font-size: 23px; font-weight: 700; letter-spacing: -.6px; margin-top: 2px; }
 .home-prayer-countdown { color: #7b642d; font-size: 12px; margin-top: 2px; }
-.home-prayer-sun { display: grid; place-items: center; width: 53px; height: 53px; flex-shrink: 0; color: #b88a35; background: #fbf5e7; border-radius: 50%; }
+.home-prayer-icon { display: block; flex-shrink: 0; object-fit: contain; pointer-events: none; user-select: none; }
+.home-prayer-art { display: grid; place-items: center; width: 76px; height: 76px; flex-shrink: 0; background: #fbf5e7; border-radius: 50%; }
 .home-prayer-times { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; margin: 0 12px; }
 .home-prayer-times > div { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 9px 0; border-radius: 10px; color: #7d887e; }
 .home-prayer-times span { font-size: 11px; }

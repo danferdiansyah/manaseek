@@ -2,6 +2,8 @@
 
 The current icon family was regenerated with the built-in `image_gen` tool. The objects use solid, opaque matte materials, simple shapes, muted Manaseek green, ivory, and occasional subdued ochre accents. Glassmorphism belongs to the UI containers in `styles/design.css`, not the raster objects.
 
+The prayer schedule card also has a matching [3D prayer icon set with its asset inventory and generation prompts](home/prayers/README.md).
+
 All twelve final assets are transparent 192 × 192 WebP images (quality 88, alpha quality 100). They replace the earlier glossy assets at the same paths and are shared by every screen through `components/artwork.js`. The brand mark and large Kaaba hero illustration are separate assets.
 
 ## Asset paths
@@ -74,4 +76,3 @@ Subject: a small simple charcoal Kaaba cube with narrow flat muted-ochre top ban
 ### notification
 
 Subject: one simple softly rounded forest-green bell with a small sage top nub and a tiny muted ochre clapper underneath. Plain bell body with no ornamental rim, no large ring handle, no metallic band, no badges or numbers.
-

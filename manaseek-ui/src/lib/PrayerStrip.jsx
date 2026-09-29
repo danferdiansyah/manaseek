@@ -1,12 +1,30 @@
 import { useEffect, useState } from 'react'
-import { AlertTriangle, ChevronRight, Compass, MapPin, Moon, Sun, Sunrise, Sunset } from 'lucide-react'
+import { AlertTriangle } from 'lucide-react'
+import subuhIcon from '../assets/home/prayers/subuh.webp'
+import zuhurIcon from '../assets/home/prayers/zuhur.webp'
+import asarIcon from '../assets/home/prayers/asar.webp'
+import magribIcon from '../assets/home/prayers/magrib.webp'
+import isyaIcon from '../assets/home/prayers/isya.webp'
+import locationIcon from '../assets/home/prayers/location.webp'
+import chevronIcon from '../assets/home/prayers/chevron.webp'
+import qiblaIcon from '../assets/home/services/qibla.webp'
 import { AT_KAABA_RADIUS_KM, compassPoint, distanceToKaabaKm, qiblaBearing } from './qibla'
 import {
   deviceTimezoneLabel, formatClock, formatCountdown, nextPrayer, prayerTimes, timezoneLooksWrong,
 } from './prayer-times'
 import { formatAccuracy, useDeviceLocation } from './useDeviceLocation'
 
-const PRAYER_ICONS = [Sunrise, Sun, Sun, Sunset, Moon]
+const PRAYER_ICONS = {
+  fajr: subuhIcon,
+  dhuhr: zuhurIcon,
+  asr: asarIcon,
+  maghrib: magribIcon,
+  isha: isyaIcon,
+}
+
+function PrayerIcon({ src, size }) {
+  return <img src={src} className="home-prayer-icon" width={size} height={size} alt="" aria-hidden="true" decoding="async" draggable="false" />
+}
 
 // Keep the schedule local so it remains available without an API connection.
 export default function PrayerStrip({ navigate }) {
@@ -23,7 +41,7 @@ export default function PrayerStrip({ navigate }) {
   const bearing = qiblaBearing(position)
   const atKaaba = distanceToKaabaKm(position) < AT_KAABA_RADIUS_KM
   const daily = schedule.times.filter((time) => !time.informational)
-  const NextPrayerIcon = PRAYER_ICONS[daily.findIndex((time) => time.id === next.id)] ?? Sun
+  const nextPrayerIcon = PRAYER_ICONS[next.id] ?? zuhurIcon
   const zone = deviceTimezoneLabel(now)
   const zoneSuspect = position.precise && timezoneLooksWrong(position, now)
   const dateLabel = new Intl.DateTimeFormat('id-ID', {
@@ -33,7 +51,7 @@ export default function PrayerStrip({ navigate }) {
   return (
     <section className="home-prayer" aria-label="Jadwal shalat hari ini">
       <div className="home-prayer-location">
-        <span><MapPin size={13} aria-hidden="true" />{position.precise ? 'Lokasi kamu' : 'Acuan: Makkah'}</span>
+        <span><PrayerIcon src={locationIcon} size={24} />{position.precise ? 'Lokasi kamu' : 'Acuan: Makkah'}</span>
         <span>{dateLabel}</span>
       </div>
       <div className="home-prayer-next">
@@ -42,15 +60,14 @@ export default function PrayerStrip({ navigate }) {
           <h2>{next.label}</h2>
           <p className="home-prayer-countdown">{formatCountdown(next.at, now)}</p>
         </div>
-        <div className="home-prayer-sun" aria-hidden="true"><NextPrayerIcon size={32} strokeWidth={1.4} /></div>
+        <div className="home-prayer-art"><PrayerIcon src={nextPrayerIcon} size={76} /></div>
       </div>
       <div className="home-prayer-times">
-        {daily.map((time, index) => {
+        {daily.map((time) => {
           const isNext = time.id === next.id
-          const Icon = PRAYER_ICONS[index]
           return (
             <div key={time.id} className={isNext ? 'is-next' : ''} aria-current={isNext ? 'true' : undefined}>
-              <Icon size={17} strokeWidth={1.6} aria-hidden="true" />
+              <PrayerIcon src={PRAYER_ICONS[time.id]} size={36} />
               <span>{time.label}</span>
               <strong>{formatClock(time.at)}</strong>
             </div>
@@ -70,10 +87,10 @@ export default function PrayerStrip({ navigate }) {
         </div>
       )}
       <button className="home-qibla" onClick={() => navigate('qibla')}>
-        <Compass size={21} strokeWidth={1.7} aria-hidden="true" />
+        <PrayerIcon src={qiblaIcon} size={32} />
         <span>Arah kiblat</span>
         <small>{atKaaba ? 'Masjidil Haram' : `${Math.round(bearing)}° · ${compassPoint(bearing)}`}</small>
-        <ChevronRight size={17} aria-hidden="true" />
+        <PrayerIcon src={chevronIcon} size={18} />
       </button>
     </section>
   )
