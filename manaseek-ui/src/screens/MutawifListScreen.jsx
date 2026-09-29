@@ -3,6 +3,7 @@ import { MapPin, Star, CheckCircle, LocateFixed, Loader2 } from 'lucide-react'
 import BottomNav from '../components/BottomNav'
 import { api } from '../lib/api'
 import PageHeader from '../components/PageHeader'
+import NearbyMutawifMap from '../components/NearbyMutawifMap'
 import Avatar from '../lib/Avatar'
 import { formatDistance, formatRupiah } from '../lib/format'
 import { EmptyState, ErrorState, Loading } from '../lib/ui'
@@ -40,8 +41,9 @@ export default function MutawifListScreen({ navigate }) {
   const { status, data, error, reload } = useResource(fetchNearby)
   const items = data ?? []
 
-  const { latitude, longitude } = position
-  const bbox = [longitude - 0.008, latitude - 0.006, longitude + 0.008, latitude + 0.006].join('%2C')
+  const openProfile = useCallback((mutawifId) => {
+    navigate('mutawif-profile', { mutawifId })
+  }, [navigate])
 
   return (
     <div className="app-page flex flex-col min-h-full bg-stone">
@@ -67,15 +69,12 @@ export default function MutawifListScreen({ navigate }) {
         </div>
       </PageHeader>
 
-      {/* Map centred on the search point */}
-      <div className="glass mx-5 mt-5 rounded-[20px] overflow-hidden p-1" style={{ height: 158 }}>
-        <iframe
-          title="Peta lokasi"
-          src={`https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${latitude}%2C${longitude}`}
-          style={{ width: '100%', height: '100%', border: 'none', display: 'block', borderRadius: 16 }}
-          loading="eager"
-        />
-      </div>
+      <NearbyMutawifMap
+        position={position}
+        mutawifs={items}
+        status={status}
+        onSelect={openProfile}
+      />
 
       {/* Filters */}
       <div className="flex gap-2 px-5 py-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
