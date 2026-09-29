@@ -55,7 +55,7 @@ button:disabled { cursor: default; }
 .app-bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 420px; display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr)); z-index: 50;
+  grid-template-columns: repeat(var(--nav-columns, 6), minmax(0, 1fr)); z-index: 50;
   padding: 6px 8px env(safe-area-inset-bottom, 0px);
   background: #fff;
   border-top: 1px solid #e7eee7;
@@ -144,6 +144,7 @@ button:disabled { cursor: default; }
   .glass-icon--hero { --icon-size: 70px; --icon-radius: 23px; }
   .glass-icon--service { --icon-size: 57px; --icon-radius: 18px; }
   .app-bottom-nav { padding-inline: 4px; }
+  .app-bottom-nav button { font-size: 10px; }
   .topic-card { gap: 10px; padding: 14px; }
   .feature-link { gap: 10px; padding: 14px; }
 }

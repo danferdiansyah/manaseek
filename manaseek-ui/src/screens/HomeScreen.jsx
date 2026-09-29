@@ -10,6 +10,7 @@ import manaseekMark from '../assets/home/manaseek-mark.png'
 import BottomNav from '../components/BottomNav'
 import GlassIcon from '../components/GlassIcon'
 import CurrencyArtwork from '../components/CurrencyArtwork'
+import UmrahBanner from '../components/UmrahBanner'
 import { formatAmount, RATE_DATE, SAR_IDR_RATE } from '../lib/currency'
 import { topicArtwork } from '../components/artwork'
 import './home.css'
@@ -116,9 +117,8 @@ export default function HomeScreen({ navigate }) {
 
         <div className="home-content">
           <button type="button" className="home-umrah" onClick={() => navigate('umrah-packages')}>
-            <GlassIcon name="umrah" size="service" bare />
-            <span><small>PAKET UMROH · DEMO</small><strong>Wujudkan perjalananmu</strong><p>Pesawat PP, hotel, visa & pendamping ibadah.</p></span>
-            <ChevronRight size={18} aria-hidden="true" />
+            <UmrahBanner decorative />
+            <span className="home-umrah-copy"><small>PAKET UMROH · DEMO</small><strong>Perjalanan ke Baitullah</strong><span>Pesawat PP, hotel, visa & pendamping ibadah.</span><span className="home-umrah-cta">Jelajahi paket <ArrowRight size={15} aria-hidden="true" /></span></span>
           </button>
           <button type="button" className="currency-entry" onClick={() => navigate('currency')}>
             <CurrencyArtwork />

@@ -42,6 +42,6 @@ export default function UmrahOrderScreen({ navigate, params }) {
         <button className="umrah-secondary umrah-full" onClick={() => navigate('home')}>Kembali ke beranda</button>
       </>}
     </main>
-    <BottomNav active="profile" navigate={navigate} />
+    <BottomNav active="umrah-packages" navigate={navigate} />
   </div>
 }

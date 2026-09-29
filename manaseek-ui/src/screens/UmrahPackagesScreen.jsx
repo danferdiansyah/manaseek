@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { ArrowRight, CalendarDays, Hotel, Plane, ReceiptText } from 'lucide-react'
 import PageHeader from '../components/PageHeader'
 import BottomNav from '../components/BottomNav'
-import GlassIcon from '../components/GlassIcon'
+import UmrahBanner from '../components/UmrahBanner'
 import { UmrahDemoNotice } from '../components/UmrahDetails'
 import { api } from '../lib/api'
 import { useResource } from '../lib/useResource'
@@ -14,7 +14,7 @@ export default function UmrahPackagesScreen({ navigate }) {
   const { status, data, error, reload } = useResource(useCallback(() => api.get('/umrah/packages'), []))
   return (
     <div className="app-page umrah-page bg-stone">
-      <PageHeader title="Perjalanan ke Baitullah" eyebrow="Paket umroh" description="Pesawat, hotel, dan kebutuhan ibadah dalam satu paket." icon="umrah" onBack={() => navigate('home')}>
+      <PageHeader title="Perjalanan ke Baitullah" eyebrow="Paket umroh" description="Pesawat, hotel, dan kebutuhan ibadah dalam satu paket." onBack={() => navigate('home')}>
         <button className="umrah-header-link" onClick={() => navigate('umrah-orders')}><ReceiptText size={17} /> Pesanan saya <ArrowRight size={16} /></button>
       </PageHeader>
       <main className="umrah-content">
@@ -27,11 +27,13 @@ export default function UmrahPackagesScreen({ navigate }) {
             const departure = pkg.departures.find((item) => item.availableSeats > 0)
             return (
               <article className="umrah-package-card" key={pkg.id} data-package-slug={pkg.slug}>
-                <div className={`umrah-package-cover umrah-cover-${index % 3}`}>
-                  <div><span className="umrah-tag">{pkg.durationDays} hari · Paket demo</span><h2>{pkg.name}</h2><p>{pkg.summary}</p></div>
-                  <GlassIcon name={index === 1 ? 'travel' : 'umrah'} size="hero" bare />
+                <div className="umrah-package-cover">
+                  <UmrahBanner pkg={pkg} priority={index === 0} />
+                  <span className="umrah-tag">{pkg.durationDays} hari · Paket demo</span>
+                  <span className="umrah-image-caption">Ilustrasi</span>
                 </div>
                 <div className="umrah-package-body">
+                  <h2>{pkg.name}</h2><p className="umrah-package-summary">{pkg.summary}</p>
                   <div className="umrah-package-facts"><span><Plane size={14} /> Pesawat PP</span><span><Hotel size={14} /> Hotel {pkg.details.hotels[0].stars}★</span><span><CalendarDays size={14} /> {pkg.departureCity}</span></div>
                   <p className="umrah-next-date">{departure ? `${umrahDate(departure.departureDate)} · ${departure.availableSeats} kursi tersedia` : 'Belum ada keberangkatan tersedia'}</p>
                   <div className="umrah-card-row"><div className="umrah-price"><small>Mulai dari / jamaah</small><strong>{formatRupiah(pkg.basePrice)}</strong></div><button className="umrah-primary umrah-compact" onClick={() => navigate('umrah-package', { slug: pkg.slug })}>Lihat paket <ArrowRight size={15} /></button></div>
@@ -41,7 +43,7 @@ export default function UmrahPackagesScreen({ navigate }) {
           })}
         </div>
       </main>
-      <BottomNav active="home" navigate={navigate} />
+      <BottomNav active="umrah-packages" navigate={navigate} />
     </div>
   )
 }

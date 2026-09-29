@@ -32,6 +32,6 @@ export default function UmrahOrdersScreen({ navigate }) {
   return <div className="app-page umrah-page bg-stone">
     <PageHeader title="Pesanan umroh saya" eyebrow="Perjalananmu" description="Detail perjalanan dan bukti pembayaran dalam satu tempat." icon="travel" onBack={() => navigate('umrah-packages')} />
     <main className="umrah-content"><OrderPage key={page} page={page} setPage={setPage} navigate={navigate} /></main>
-    <BottomNav active="profile" navigate={navigate} />
+    <BottomNav active="umrah-packages" navigate={navigate} />
   </div>
 }

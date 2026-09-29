@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import PageHeader from '../components/PageHeader'
 import BottomNav from '../components/BottomNav'
+import UmrahBanner from '../components/UmrahBanner'
 import UmrahDetails, { UmrahDemoNotice } from '../components/UmrahDetails'
 import { api } from '../lib/api'
 import { useResource } from '../lib/useResource'
@@ -45,11 +46,13 @@ export default function UmrahPackageScreen({ navigate, params }) {
   const { status, data, error, reload } = useResource(useCallback(() => api.get(`/umrah/packages/${encodeURIComponent(slug)}`), [slug]))
   return (
     <div className="app-page umrah-page bg-stone">
-      <PageHeader title={data?.name ?? 'Detail paket umroh'} eyebrow="Perjalanan pilihanmu" description={data?.summary} icon="umrah" onBack={() => navigate('umrah-packages')} />
+      <PageHeader title={data?.name ?? 'Detail paket umroh'} eyebrow="Perjalanan pilihanmu" description={data?.summary} onBack={() => navigate('umrah-packages')}>
+        {status === 'ready' && <div className="umrah-detail-banner"><UmrahBanner pkg={data} priority /><span className="umrah-image-caption">Ilustrasi paket</span></div>}
+      </PageHeader>
       {status === 'loading' && <Loading />}
       {status === 'error' && <div className="umrah-content"><ErrorState message={error} onRetry={reload} /></div>}
       {status === 'ready' && <PackageContent key={data.id} pkg={data} navigate={navigate} />}
-      <BottomNav active="home" navigate={navigate} />
+      <BottomNav active="umrah-packages" navigate={navigate} />
     </div>
   )
 }

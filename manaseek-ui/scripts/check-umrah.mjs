@@ -58,10 +58,19 @@ try {
     await handle.asElement().click()
     await handle.dispose()
   }
+  const checkUmrahNav = async () => {
+    assert.equal(await page.$$eval('.app-bottom-nav button', buttons => buttons.length), 6)
+    assert.equal(await page.$eval('.app-bottom-nav [aria-current="page"]', button => button.dataset.tab), 'umrah-packages')
+  }
   await page.goto(`${origin}/?screen=home`, { waitUntil: 'networkidle0' })
-  await page.click('.home-umrah')
+  await page.waitForSelector('.app-bottom-nav [data-tab="umrah-packages"]')
+  await page.click('.app-bottom-nav [data-tab="umrah-packages"]')
   await page.waitForSelector('.umrah-package-card')
+  await checkUmrahNav()
   assert.ok(await page.$$eval('.umrah-package-card', cards => cards.length >= 3))
+  const covers = await page.$$eval('.umrah-package-card', cards => cards.filter(card => card.dataset.packageSlug.startsWith('umroh-')).map(card => card.querySelector('.umrah-banner').getAttribute('src')))
+  assert.equal(new Set(covers).size, 3, 'Each seeded package has its own destination banner')
+  await page.waitForFunction(() => document.querySelector('.umrah-banner')?.naturalWidth > 0)
   await screenshot('umrah-catalog-mobile')
   await page.evaluate(slug => {
     const card = [...document.querySelectorAll('.umrah-package-card')].find(el => el.dataset.packageSlug === slug)
@@ -69,6 +78,8 @@ try {
     card.querySelector('button').click()
   }, pkg.slug)
   await page.waitForSelector('.umrah-room-grid')
+  await checkUmrahNav()
+  await page.waitForFunction(() => document.querySelector('.umrah-detail-banner img')?.naturalWidth > 0)
   assert.equal(await page.$$eval('.umrah-flight', items => items.length), 2)
   assert.equal(await page.$$eval('.umrah-hotel', items => items.length), 2)
   await page.$eval('.umrah-room-grid', el => el.scrollIntoView({ block: 'center' }))
@@ -84,6 +95,7 @@ try {
   await screenshot('umrah-checkout-mobile')
   await page.click('button[type="submit"]')
   await page.waitForSelector('.umrah-order-code')
+  await checkUmrahNav()
   const code = await page.$eval('.umrah-order-code', el => el.textContent)
   let saved = await prisma.umrahOrder.findUniqueOrThrow({ where: { code }, include: { payment: true, travelers: true } })
   assert.equal(saved.totalAmount.toString(), '54800000')
@@ -97,6 +109,7 @@ try {
   await screenshot('umrah-receipt-mobile')
   await button('Semua pesanan saya')
   await page.waitForSelector('.umrah-order-card')
+  await checkUmrahNav()
   assert.equal(await page.$$eval('.umrah-order-card', items => items.length), 1)
   await page.click('.umrah-order-card')
   await page.waitForSelector('.umrah-order-code')
@@ -144,11 +157,15 @@ try {
     for (const width of [320, 390, 420]) {
       await page.setViewport({ width, height: 844 })
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `No overflow: ${screen}, ${width}px`)
+      if (!screen.startsWith('umrah-checkout')) {
+        await checkUmrahNav()
+        assert.equal(await page.$$eval('.app-bottom-nav button', buttons => buttons.every(button => button.getBoundingClientRect().width >= 44)), true, `Navigation touch targets at ${width}px`)
+      }
     }
     if (screen.startsWith('umrah-package&')) assert.equal(await page.$eval('.umrah-action button', el => el.disabled), true)
   }
   assert.deepEqual(errors, [])
-  console.log('PASS sold-out state, HTTP authorization/validation, mobile layouts and no browser errors')
+  console.log('PASS sold-out state, HTTP authorization/validation, dedicated Umroh tab, varied banners, mobile layouts and no browser errors')
 } finally {
   await browser?.close()
   await server?.close()

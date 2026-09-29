@@ -46,11 +46,13 @@ navigasi beranda, dan tampilan 320–420px dengan API fixture.
 
 ## Pembelian paket umroh
 
-Buka kartu **Paket Umroh** di beranda. Alur lengkap: katalog → detail tiket
+Buka tab **Umroh** di navbar bawah atau banner **Paket Umroh** di beranda. Alur lengkap: katalog → detail tiket
 pergi–pulang, hotel, fasilitas dan itinerary → pilih jadwal/kamar → data jamaah
 → pembayaran dummy langsung berhasil → bukti pesanan. Riwayat dapat dibuka
 melalui katalog atau **Profil → Pesanan Paket Umroh**. URL detail pesanan tetap
-dapat dibuka setelah refresh.
+dapat dibuka setelah refresh. Tab Umroh tetap aktif saat membuka katalog,
+detail paket, riwayat, dan bukti pesanan. Setiap paket memakai banner destinasi
+yang berbeda; aset dan prompt imagegen ada di [daftar banner](src/assets/umrah/README.md).
 
 Paket, maskapai, hotel, harga dan pembayaran merupakan simulasi. Katalog berasal
 dari API; checkout benar-benar menyimpan pesanan, jamaah dan pembayaran di
