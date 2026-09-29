@@ -67,6 +67,7 @@ model User {
   reviewsWritten      Review[]            @relation("ReviewAuthor")
   checklistProgresses ChecklistProgress[]
   chatSessions        ChatSession[]
+  umrahOrders         UmrahOrder[]
 
   @@index([role, status])
   @@index([organizationId])
@@ -703,4 +704,127 @@ model ChatMessage {
 
   @@index([sessionId, createdAt])
   @@map("chat_messages")
+}
+
+// ---------------------------------------------------------------------------
+// Umrah packages: demo inventory with real persisted orders and dummy payments.
+// Independent from the mutawif booking/payment lifecycle above.
+// ---------------------------------------------------------------------------
+
+enum UmrahRoomType {
+  QUAD
+  TRIPLE
+  DOUBLE
+}
+
+enum UmrahOrderStatus {
+  CONFIRMED
+}
+
+enum UmrahPaymentStatus {
+  SUCCESS
+}
+
+enum UmrahPaymentMethod {
+  DUMMY
+}
+
+model UmrahPackage {
+  id               String   @id @default(uuid()) @db.Uuid
+  slug             String   @unique
+  name             String
+  summary          String
+  description      String
+  durationDays     Int
+  departureCity    String
+  basePrice        Decimal  @db.Decimal(14, 2)
+  tripleSupplement Decimal  @db.Decimal(14, 2)
+  doubleSupplement Decimal  @db.Decimal(14, 2)
+  currency         String   @default("IDR")
+  /// Flights, hotels, itinerary and inclusions. Entire value is snapshotted on purchase.
+  details          Json
+  isDemo           Boolean  @default(true)
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  departures UmrahDeparture[]
+
+  @@map("umrah_packages")
+}
+
+model UmrahDeparture {
+  id             String   @id @default(uuid()) @db.Uuid
+  packageId      String   @db.Uuid
+  departureDate  DateTime @db.Date
+  returnDate     DateTime @db.Date
+  availableSeats Int
+  createdAt      DateTime @default(now())
+
+  package UmrahPackage @relation(fields: [packageId], references: [id])
+  orders  UmrahOrder[]
+
+  @@unique([packageId, departureDate])
+  @@index([departureDate])
+  @@map("umrah_departures")
+}
+
+model UmrahOrder {
+  id              String           @id @default(uuid()) @db.Uuid
+  code            String           @unique
+  userId          String           @db.Uuid
+  departureId     String           @db.Uuid
+  requestId       String           @db.Uuid
+  requestHash     String
+  status          UmrahOrderStatus @default(CONFIRMED)
+  roomType        UmrahRoomType
+  travelerCount   Int
+  contactName     String
+  contactEmail    String
+  contactPhone    String
+  unitPrice       Decimal          @db.Decimal(14, 2)
+  totalAmount     Decimal          @db.Decimal(14, 2)
+  currency        String           @default("IDR")
+  /// Immutable purchased package, departure dates and room/price breakdown.
+  packageSnapshot Json
+  isDemo          Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+
+  user      User            @relation(fields: [userId], references: [id])
+  departure UmrahDeparture  @relation(fields: [departureId], references: [id])
+  travelers UmrahTraveler[]
+  payment   UmrahPayment?
+
+  @@unique([userId, requestId])
+  @@index([userId, createdAt])
+  @@map("umrah_orders")
+}
+
+model UmrahTraveler {
+  id        String   @id @default(uuid()) @db.Uuid
+  orderId   String   @db.Uuid
+  fullName  String
+  gender    Gender
+  birthDate DateTime @db.Date
+  position  Int
+
+  order UmrahOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([orderId, position])
+  @@map("umrah_travelers")
+}
+
+model UmrahPayment {
+  id        String             @id @default(uuid()) @db.Uuid
+  orderId   String             @unique @db.Uuid
+  reference String             @unique
+  method    UmrahPaymentMethod @default(DUMMY)
+  status    UmrahPaymentStatus @default(SUCCESS)
+  amount    Decimal            @db.Decimal(14, 2)
+  currency  String             @default("IDR")
+  paidAt    DateTime           @default(now())
+
+  order UmrahOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@map("umrah_payments")
 }

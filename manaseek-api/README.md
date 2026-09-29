@@ -250,11 +250,68 @@ x-internal-token: <INTERNAL_TASK_TOKEN>
 
 ## Payments
 
-Out of scope for the MVP: bookings settle offline. `Booking.paymentStatus`
+Mutawif bookings settle offline. `Booking.paymentStatus`
 exists (`UNPAID` / `SETTLED_OFFLINE` / `WAIVED`) and admins record settlement
 through `PATCH /api/bookings/:id/payment`, so adding a payment module later
 needs no data migration. `User.organizationId` is reserved the same way for
 the B2B partner track.
+
+## Umrah packages and dummy checkout
+
+The `umrah` module has its own inventory, order and payment tables. Every route
+requires authentication. Orders and receipts are scoped to the authenticated
+user; another user's receipt returns 404.
+
+| Endpoint | Response / behavior |
+| --- | --- |
+| `GET /api/umrah/packages` | Active demo packages with future departures, prices, flights, hotels, itinerary and inclusions |
+| `GET /api/umrah/packages/:slug` | One package with its available departure schedules |
+| `POST /api/umrah/orders` | Reserve seats and persist a confirmed order, travelers and successful dummy payment atomically |
+| `GET /api/umrah/orders?page=1&limit=20` | Current user's orders, newest first, `{ items, meta }` |
+| `GET /api/umrah/orders/:id` | Owned receipt, travelers and immutable purchased package snapshot |
+
+Checkout accepts `requestId` (UUID), `departureId` (UUID), `roomType`
+(`QUAD`, `TRIPLE`, `DOUBLE`), `contactName`, `contactEmail`, `contactPhone`,
+`travelers` (1–6 objects with `fullName`, `gender`, `birthDate` as YYYY-MM-DD),
+and `acceptDemo: true`. Prices, totals, user IDs and payment status are never
+accepted from the client. All ages use the same demo price per traveler.
+Shared-room capacity is displayed in the UI; incomplete rooms are shared with
+other travelers of the same gender, rather than charging for unused beds.
+
+The server computes `(basePrice + roomSupplement) × travelerCount` using
+Prisma Decimal, then atomically decrements available seats, creates the order
+and traveler rows, and writes a `DUMMY` / `SUCCESS` payment with the same amount.
+The order is `CONFIRMED` and explicitly `isDemo`. There is no Midtrans call,
+money movement, airline ticket issuance, hotel reservation or external message.
+Inactive, expired, non-demo and insufficient-seat departures are rejected.
+
+`(userId, requestId)` is unique. Retries with the same payload return the saved
+order; a changed payload with the same request ID returns 409. The transaction
+and conditional seat update prevent partial writes and overselling, including
+concurrent retries. Order snapshots preserve flight, hotel, itinerary, dates
+and prices even if the catalog is subsequently changed.
+
+Migration `20260929090000_add_umrah_packages` creates five tables and inserts
+three fictional packages (9, 12 and 15 days) with nine departures from November
+2026 through January 2027. It runs with `npm run db:deploy`, including the Vercel
+build. Catalog data is in the migration; rerunning the general development seed
+does not reset remaining seats or existing orders.
+
+Validation with a **local** PostgreSQL database:
+
+```bash
+npm run db:deploy
+npm run db:generate
+npm run build
+npm test
+npm run test:umrah-db
+```
+
+The database checks create and remove their own fixture accounts and packages.
+They verify persistence across connections, access control, price snapshots,
+duplicate submissions, final-seat races, rollback and unavailable packages.
+The UI's `npm run test:umrah` additionally runs a real Nest app and browser
+against this database, including a response lost after payment was committed.
 
 ## Error contract
 

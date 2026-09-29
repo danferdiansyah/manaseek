@@ -123,6 +123,12 @@ export default function ProfileScreen({ navigate }) {
       <div className="mx-5 mt-4 glass rounded-[20px] overflow-hidden">
         {[
           {
+            icon: 'travel',
+            label: 'Pesanan Paket Umroh',
+            sub: 'Perjalanan dan bukti pembayaran dummy',
+            screen: 'umrah-orders',
+          },
+          {
             icon: 'checklist',
             label: 'Checklist Persiapan',
             sub: checklist ? `${checklist.completed} dari ${checklist.total} selesai` : 'Memuat…',

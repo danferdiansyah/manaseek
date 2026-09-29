@@ -13,6 +13,7 @@ import CurrencyArtwork from '../components/CurrencyArtwork'
 import { formatAmount, RATE_DATE, SAR_IDR_RATE } from '../lib/currency'
 import { topicArtwork } from '../components/artwork'
 import './home.css'
+import './umrah.css'
 
 const SERVICES = [
   { label: 'Panduan\nUmrah', icon: 'umrah', screen: 'guidance', category: 'UMRAH', color: 'green' },
@@ -114,6 +115,11 @@ export default function HomeScreen({ navigate }) {
         </section>
 
         <div className="home-content">
+          <button type="button" className="home-umrah" onClick={() => navigate('umrah-packages')}>
+            <GlassIcon name="umrah" size="service" bare />
+            <span><small>PAKET UMROH · DEMO</small><strong>Wujudkan perjalananmu</strong><p>Pesawat PP, hotel, visa & pendamping ibadah.</p></span>
+            <ChevronRight size={18} aria-hidden="true" />
+          </button>
           <button type="button" className="currency-entry" onClick={() => navigate('currency')}>
             <CurrencyArtwork />
             <span className="currency-entry-copy">

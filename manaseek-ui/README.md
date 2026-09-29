@@ -44,6 +44,32 @@ Memeriksa format nominal Indonesia, perhitungan dua arah, tombol tukar,
 nominal cepat, input kosong/tidak valid, perhitungan tanpa jaringan,
 navigasi beranda, dan tampilan 320–420px dengan API fixture.
 
+## Pembelian paket umroh
+
+Buka kartu **Paket Umroh** di beranda. Alur lengkap: katalog → detail tiket
+pergi–pulang, hotel, fasilitas dan itinerary → pilih jadwal/kamar → data jamaah
+→ pembayaran dummy langsung berhasil → bukti pesanan. Riwayat dapat dibuka
+melalui katalog atau **Profil → Pesanan Paket Umroh**. URL detail pesanan tetap
+dapat dibuka setelah refresh.
+
+Paket, maskapai, hotel, harga dan pembayaran merupakan simulasi. Katalog berasal
+dari API; checkout benar-benar menyimpan pesanan, jamaah dan pembayaran di
+PostgreSQL. Tombol **Isi data contoh** menyediakan data dummy untuk mencoba
+formulir. Harga final dihitung backend, bukan dipercaya dari browser.
+
+Jalankan migrasi, generate Prisma Client, dan build backend terlebih dahulu
+(lihat README API). Lalu:
+
+```bash
+npm run test:umrah
+```
+
+Pengecekan ini menjalankan Nest dan Vite pada port lokal, memakai PostgreSQL
+lokal dari `.env` backend, serta membuat/membersihkan akun dan paket pengujian.
+Mencakup checkout dua jamaah, pilihan kamar, pembayaran nyata di tabel database,
+refresh bukti pesanan, riwayat, respons pembayaran terputus, otorisasi, kursi
+habis, dan layar 320–420px. Tidak menghubungi penyedia pembayaran eksternal.
+
 ## Mengambil Screenshot
 
 Pastikan dev server sudah berjalan, lalu di tab terminal lain:
@@ -71,6 +97,11 @@ Akses tiap screen langsung via URL param `?screen=<id>`:
 | `splash` | Splash / onboarding |
 | `home` | Beranda |
 | `currency` | Konverter Riyal ↔ Rupiah |
+| `umrah-packages` | Katalog paket umroh demo |
+| `umrah-package&slug=umroh-hemat-9-hari` | Detail paket dan pilihan jadwal/kamar |
+| `umrah-checkout&slug=umroh-hemat-9-hari` | Form pemesanan dan pembayaran dummy |
+| `umrah-orders` | Riwayat pesanan paket umroh |
+| `umrah-order&orderId=<uuid>` | Bukti pesanan, pembayaran dan rincian perjalanan |
 | `guidance` | Guidance Mandiri |
 | `guidance-detail` | Detail panduan |
 | `chatbot` | Chatbot AI |

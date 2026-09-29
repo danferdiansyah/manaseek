@@ -20,6 +20,7 @@ import { MutawifModule } from './modules/mutawif/mutawif.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ReviewsModule } from './modules/reviews/reviews.module';
 import { UsersModule } from './modules/users/users.module';
+import { UmrahModule } from './modules/umrah/umrah.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { UsersModule } from './modules/users/users.module';
     InternalModule,
     ContentModule,
     ChatModule,
+    UmrahModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

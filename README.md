@@ -81,11 +81,12 @@ Config validator menolak start bila flag ini menyala di produksi.
 | Waktu shalat di beranda | jalan, dihitung di perangkat |
 | Arah kiblat | jalan, kompas dengan cadangan manual |
 | Konverter Riyal ↔ Rupiah | jalan, kurs statis XE per 29 September 2026; dua arah dan nominal cepat |
+| Pembelian paket umroh | jalan, 3 paket demo lengkap; jadwal, kamar, data jamaah, pesanan dan bukti pembayaran tersimpan di PostgreSQL |
 | Chatbot AI | jalan, menjawab dari pustaka panduan dengan sitasi |
 | Riwayat AI Chat | jalan, tersimpan per akun; buka ulang, lanjutkan percakapan, atau mulai chat baru |
 | Push notification (FCM) | belum, menunggu kredensial Firebase |
 | Upload dokumen verifikasi mutawif | belum, API baru menerima URL |
-| Pembayaran | di luar cakupan; booking diselesaikan di luar aplikasi |
+| Pembayaran | paket umroh memakai dummy yang langsung berhasil; booking mutawif tetap diselesaikan di luar aplikasi |
 | Mitra B2B travel dan KBIHU | ditunda |
 
 Lokasi diambil dua tahap: satu fix kasar seketika supaya layar punya jawaban,
