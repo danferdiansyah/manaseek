@@ -10,7 +10,7 @@ const TABS = [
 
 export default function BottomNav({ active, navigate }) {
   return (
-    <nav aria-label="Navigasi utama" className="app-bottom-nav glass-bar">
+    <nav aria-label="Navigasi utama" className="app-bottom-nav">
       {TABS.map(({ id, label, icon }) => (
         <button key={id} type="button" onClick={() => navigate(id)} aria-current={active === id ? 'page' : undefined}>
           <GlassIcon name={icon} size="nav" bare={active !== id} />

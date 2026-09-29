@@ -52,7 +52,16 @@ button:disabled { cursor: default; }
 .page-header-art { background: linear-gradient(140deg, rgb(255 255 255 / .28), rgb(255 255 255 / .08)); border-color: rgb(255 255 255 / .32); box-shadow: inset 1px 1px 0 rgb(255 255 255 / .3), 0 12px 24px -16px #00261c; }
 .page-header-art::after { opacity: .2; }
 .page-header-content { margin-top: 22px; }
-.app-bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 420px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); z-index: 50; padding: 6px 8px env(safe-area-inset-bottom, 0px); }
+.app-bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 420px; display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr)); z-index: 50;
+  padding: 6px 8px env(safe-area-inset-bottom, 0px);
+  background: #fff;
+  border-top: 1px solid #e7eee7;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -8px 30px -20px rgb(15 61 34 / .5);
+}
 .app-page .app-bottom-nav { padding-bottom: env(safe-area-inset-bottom, 0px); }
 .app-bottom-nav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 76px; color: #63776a; font-size: 11px; font-weight: 500; }
 .app-bottom-nav button[aria-current='page'] { color: #07533b; font-weight: 750; }
