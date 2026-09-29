@@ -1,11 +1,15 @@
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
 import GlassIcon from '../components/GlassIcon'
 
 export function Loading({ label = 'Memuat…' }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 gap-4" role="status" aria-live="polite">
-      <GlassIcon name="umrah" size="hero" />
-      <p className="flex items-center gap-2 text-sm text-ink-soft"><Loader2 size={16} className="animate-spin" aria-hidden="true" />{label}</p>
+      <div className="loading-dots" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
+      <p className="text-sm text-ink-soft">{label}</p>
     </div>
   )
 }
