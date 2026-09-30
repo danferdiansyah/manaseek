@@ -1,0 +1,41 @@
+name: Android
+
+on:
+  push:
+    branches: [main]
+    paths: ['manaseek-mobile/**', 'packages/shared/**', '.github/workflows/mobile.yml']
+  pull_request:
+    paths: ['manaseek-mobile/**', 'packages/shared/**', '.github/workflows/mobile.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: manaseek-mobile
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: manaseek-mobile/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - run: npm run test:preview
+      - run: npx expo prebuild --platform android --no-install
+        env:
+          CI: '1'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-bundle
+          path: manaseek-mobile/dist

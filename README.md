@@ -14,6 +14,8 @@ layanan: panduan ibadah mandiri, asisten AI, dan mutawif on-demand.
 ```
 manaseek-ui/       aplikasi web (React + Vite)
 manaseek-api/      backend (NestJS + Prisma + PostgreSQL)
+manaseek-mobile/   aplikasi Android (React Native + Expo + TypeScript)
+packages/shared/  kalkulasi ibadah, kurs, dan format bersama web/mobile
 docs/              proposal, materi marketing, ringkasan produk
 assets/            logo, background, QR code
 vercel.json        konfigurasi project web, termasuk proxy /api ke backend
@@ -50,6 +52,12 @@ Vite mem-proxy `/api` ke `localhost:3000`, sama seperti perilaku produksi.
 
 Detail lengkap backend — kontrak error, siklus booking, deployment, jebakan
 koneksi Supabase — ada di [`manaseek-api/README.md`](manaseek-api/README.md).
+
+Aplikasi Android memakai API dan database yang sama. Cara menjalankan,
+build APK/AAB, konfigurasi Google Sign-In/FCM, dan cakupan offline ada di
+[`manaseek-mobile/README.md`](manaseek-mobile/README.md). Project mobile berada
+dalam repo ini dengan dependensi dan proses build sendiri; deployment web
+tetap menggunakan `manaseek-ui`.
 
 ### Masuk tanpa akun Google
 

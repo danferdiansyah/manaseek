@@ -2,6 +2,12 @@
 
 Prototype UI/UX mobile app Manaseek — Pendamping Ibadah Haji & Umrah.
 
+Folder ini adalah frontend **web** React + Vite. Aplikasi Android native dengan
+React Native + Expo berada di [`../manaseek-mobile`](../manaseek-mobile/README.md)
+dan memakai backend yang sama. Kalkulasi ibadah, konverter, dan format data
+bersama disimpan di `../packages/shared`; modul dalam `src/lib` mengekspornya
+kembali agar import web tetap kompatibel.
+
 ## Menjalankan Dev Server
 
 ```bash
@@ -33,7 +39,7 @@ pada **29 September 2026, 00.55 UTC / 07.55 WIB**. Tanggal acuan tetap ditampilk
 aplikasi tidak memperbarui kurs secara otomatis.
 
 Untuk mengganti acuan, perbarui nilai, timestamp, dan sumber `SAR_IDR_RATE`
-di `src/lib/currency.js` bersama-sama. Sesuaikan ekspektasi snapshot di
+di `../packages/shared/currency.js` bersama-sama. Sesuaikan ekspektasi snapshot di
 `scripts/check-currency.mjs` jika kurs berubah.
 
 ```bash
