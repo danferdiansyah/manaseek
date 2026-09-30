@@ -1,0 +1,12 @@
+export type Position = { latitude: number; longitude: number };
+export type Method = { id: string; label: string; note: string; fajrAngle: number; isha: { minutesAfterMaghrib?: number; angle?: number } };
+export type PrayerTime = { id: string; label: string; at: Date | null; informational?: boolean };
+export const METHODS: Record<string, Method>;
+export const KAABA: Position;
+export function methodFor(position: Position): Method;
+export function prayerTimes(options: Position & { date?: Date; method?: Method; elevation?: number }): { method: Method; times: PrayerTime[] };
+export function nextPrayer(options: Position & { now?: Date; method?: Method }): { next: PrayerTime | undefined; current: PrayerTime | null; method: Method };
+export function deviceTimezoneLabel(date?: Date): string;
+export function timezoneLooksWrong(position: { longitude: number }, date?: Date): boolean;
+export function formatClock(date: Date | null): string;
+export function formatCountdown(target: Date | null, now?: Date): string;
