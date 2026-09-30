@@ -5,7 +5,6 @@
   --landing-gold: #98773e;
   color: #243e32;
   background: var(--landing-cream);
-  font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
   line-height: 1.6;
   overflow: clip;
 }
@@ -32,8 +31,8 @@
 .landing-hero { display: grid; grid-template-columns: 1.13fr 1fr; align-items: center; gap: 54px; min-height: 710px; padding-block: 62px 75px; }
 .landing-eyebrow { display: flex; align-items: center; gap: 9px; font-size: 10px; font-weight: 650; letter-spacing: 1.65px; line-height: 1.6; color: var(--landing-green); }
 .landing-eyebrow > span { width: 7px; height: 7px; background: #a98e51; border-radius: 50%; box-shadow: 0 0 0 5px #eae8db; margin-right: 5px; }
-.landing-hero h1 { margin-block: 22px; font-size: clamp(52px, 5.3vw, 76px); font-weight: 500; letter-spacing: -3.8px; line-height: 1.08; }
-.landing-page em { font-family: Georgia, "Times New Roman", serif; font-weight: 400; color: var(--landing-gold); letter-spacing: -.04em; }
+.landing-hero h1 { margin-block: 22px; font-size: clamp(52px, 5.3vw, 76px); font-weight: 650; letter-spacing: -.025em; line-height: 1.15; }
+.landing-page em { font-style: normal; font-weight: inherit; color: var(--landing-gold); }
 .landing-hero-description { max-width: 425px; color: #6d746b; font-size: 16px; line-height: 1.85; }
 .landing-hero-actions { display: flex; align-items: center; gap: 27px; margin-top: 30px; }
 .landing-text-link { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 44px; color: var(--landing-green); font-size: 12px; font-weight: 600; }
@@ -54,7 +53,7 @@
 .landing-float strong { display: block; color: #355140; font-size: 11px; font-weight: 600; }
 .landing-float small { display: block; color: #7a7d6d; font-size: 9px; line-height: 1.9; }
 .landing-mini-check { color: white; background: #5b805c; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; margin-left: 8px; }
-.landing-visual-star { position: absolute; top: -22px; right: 1px; font-size: 66px; font-family: Georgia, serif; color: #9a8248; font-weight: 400; line-height: 1; }
+.landing-visual-star { position: absolute; top: -22px; right: 1px; font-size: 66px; color: #9a8248; font-weight: 400; line-height: 1; }
 .landing-visual-note { display: block; margin-top: 19px; text-align: right; font-size: 8px; letter-spacing: 2.1px; color: #929080; }
 .landing-essentials { border-block: 1px solid #e4e6da; background: #f0f1e9; }
 .landing-essentials-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; min-height: 109px; padding-block: 23px; }
@@ -64,7 +63,7 @@
 .landing-essentials-inner > span svg { color: #7e8a64; stroke-width: 1.4; }
 .landing-section { padding-block: 100px; }
 .landing-section-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 30px; margin-bottom: 37px; }
-.landing-page h2 { margin-top: 15px; font-weight: 500; font-size: clamp(32px, 3.2vw, 44px); line-height: 1.23; letter-spacing: -1.65px; }
+.landing-page h2 { margin-top: 15px; font-weight: 650; font-size: clamp(32px, 3.2vw, 44px); line-height: 1.23; letter-spacing: -.025em; }
 .landing-section-heading > p { margin-bottom: 3px; font-size: 14px; line-height: 1.9; color: var(--landing-muted); }
 .landing-feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .landing-feature { display: flex; flex-direction: column; padding: 26px; border-radius: 18px; border: 1px solid #e3e6d8; }
@@ -74,7 +73,7 @@
 .landing-feature-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 11px; font-weight: 550; }
 .landing-feature-top > span:last-child { font-size: 10px; color: #8d947f; }
 .landing-feature-art { width: 128px; height: 128px; object-fit: contain; margin: 23px auto 22px; filter: drop-shadow(0 10px 14px #47634310); transition: transform 220ms; }
-.landing-feature h3 { font-size: 21px; font-weight: 550; letter-spacing: -.65px; margin-bottom: 12px; }
+.landing-feature h3 { font-size: 21px; font-weight: 650; letter-spacing: -.025em; margin-bottom: 12px; }
 .landing-feature > p { font-size: 14px; color: #657060; line-height: 1.85; }
 .landing-feature-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: auto; padding-top: 23px; }
 .landing-feature-tags span { border: 1px solid #b6b9a44d; border-radius: 30px; padding: 5px 9px; font-size: 9px; color: #67715c; }
@@ -87,13 +86,13 @@
 .landing-journey-caption { position: absolute; z-index: 1; bottom: 31px; left: 33px; right: 20px; color: #fffcf0; }
 .landing-journey-caption > span { display: flex; align-items: center; gap: 7px; font-size: 9px; letter-spacing: 1.3px; }
 .landing-journey-caption > span:last-child { font-size: 10px; letter-spacing: .2px; opacity: .8; margin-top: 24px; }
-.landing-journey-caption p { font-size: 30px; line-height: 1.25; letter-spacing: -.7px; margin-top: 14px; }
+.landing-journey-caption p { font-size: 30px; font-weight: 650; line-height: 1.25; letter-spacing: -.025em; margin-top: 14px; }
 .landing-journey-caption em { color: #e4d5ab; }
 .landing-steps { list-style: none; padding: 0; margin-top: 32px; }
 .landing-steps li { position: relative; display: flex; align-items: flex-start; gap: 19px; padding-bottom: 27px; }
 .landing-steps li:not(:last-child)::after { content: ''; position: absolute; left: 19px; top: 42px; bottom: 3px; border-left: 1px dashed #c9d1bd; }
 .landing-step-number { display: grid; place-items: center; width: 39px; height: 39px; flex-shrink: 0; border: 1px solid #d4dbc8; background: #f9f9f1; border-radius: 50%; color: #79835f; font-size: 11px; }
-.landing-steps h3 { font-size: 15px; font-weight: 600; margin-top: 5px; }
+.landing-steps h3 { font-size: 15px; font-weight: 650; letter-spacing: -.025em; margin-top: 5px; }
 .landing-steps p { font-size: 14px; color: #6a7363; line-height: 1.85; max-width: 355px; margin-top: 5px; }
 .landing-journey-copy > .landing-text-link { border-bottom: 1px solid #a6b19a; font-size: 12px; }
 .landing-faq { display: grid; grid-template-columns: .85fr 1.35fr; gap: 90px; }
@@ -134,7 +133,7 @@
 @media (max-width: 1100px) {
   .landing-container { width: calc(100% - 64px); }
   .landing-hero { gap: 40px; min-height: 660px; }
-  .landing-hero h1 { font-size: 61px; letter-spacing: -3px; }
+  .landing-hero h1 { font-size: 61px; }
   .landing-hero-photo { height: 475px; }
   .landing-hero-actions { gap: 19px; flex-wrap: wrap; }
   .landing-float--guide { left: -28px; }
@@ -158,7 +157,7 @@
   .landing-nav-links a { font-size: 11px; }
   .landing-button--small { padding-inline: 17px; }
   .landing-hero { min-height: 590px; gap: 28px; padding-block: 60px; }
-  .landing-hero h1 { font-size: 49px; letter-spacing: -2.5px; }
+  .landing-hero h1 { font-size: 49px; }
   .landing-hero .landing-eyebrow { font-size: 8px; letter-spacing: 1.1px; }
   .landing-hero-description { font-size: 14px; }
   .landing-hero-actions { gap: 10px 20px; margin-top: 24px; }
@@ -213,7 +212,7 @@
   .landing-hero { grid-template-columns: 1fr; gap: 49px; padding-block: 43px 38px; }
   .landing-hero-copy { text-align: center; }
   .landing-hero .landing-eyebrow { justify-content: center; font-size: 8px; letter-spacing: 1.2px; }
-  .landing-hero h1 { font-size: clamp(46px, 11.7vw, 67px); margin-block: 22px; line-height: 1.08; letter-spacing: -2.7px; }
+  .landing-hero h1 { font-size: clamp(40px, 10.8vw, 62px); margin-block: 22px; }
   .landing-hero-description { font-size: 14px; max-width: 370px; margin-inline: auto; padding-inline: 2px; line-height: 1.85; }
   .landing-hero-actions { justify-content: center; gap: 17px; margin-top: 26px; }
   .landing-hero-actions .landing-button { padding-inline: 20px; min-height: 50px; gap: 15px; font-size: 12px; }
@@ -238,7 +237,7 @@
   .landing-section { padding-block: 60px; }
   .landing-section-heading { flex-direction: column; gap: 19px; margin-bottom: 26px; }
   .landing-eyebrow { font-size: 8px; letter-spacing: 1.35px; }
-  .landing-page h2 { font-size: 34px; letter-spacing: -1.3px; }
+  .landing-page h2 { font-size: 34px; }
   .landing-section-heading > p { max-width: 350px; font-size: 14px; }
   .landing-feature-grid { grid-template-columns: 1fr; gap: 16px; }
   .landing-feature { padding: 24px; }
