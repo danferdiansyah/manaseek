@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react'
+import { ArrowLeft } from 'lucide-react'
 import GlassIcon from '../components/GlassIcon'
 import mark from '../assets/home/manaseek-mark.png'
 import kaaba from '../assets/home/kaaba-cutout.png'
@@ -38,7 +39,10 @@ export default function SplashScreen({ navigate }) {
   return (
     <div className="app-page flex flex-col min-h-full bg-white">
       <div className="welcome-hero canopy">
-        <img src={mark} alt="Manaseek" className="page-brand" width="38" height="38" />
+        <div className="flex items-center justify-between gap-4">
+          <img src={mark} alt="Manaseek" className="page-brand" width="38" height="38" />
+          <a href="/" className="flex items-center gap-2 py-2 text-xs text-white"><ArrowLeft size={14} aria-hidden="true" /> Halaman utama</a>
+        </div>
         <h1>Langkah tenang,<br />ibadah khusyuk.</h1>
         <p>Manaseek menemani perjalanan haji dan umrahmu, dari persiapan hingga ibadah.</p>
         <img src={kaaba} alt="" width="640" height="640" className="welcome-illustration" />

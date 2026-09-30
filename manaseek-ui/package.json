@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "test:landing": "node scripts/check-landing.mjs",
     "test:chat-history": "node scripts/check-chat-history.mjs",
     "test:currency": "node scripts/check-currency.mjs",
     "test:umrah": "node scripts/check-umrah.mjs",

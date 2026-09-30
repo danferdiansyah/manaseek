@@ -40,7 +40,7 @@ export default function ProfileScreen({ navigate }) {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('splash')
+    navigate('landing')
   }
 
   return (

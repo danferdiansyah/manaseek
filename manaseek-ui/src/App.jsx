@@ -2,23 +2,26 @@ import { lazy, Suspense, useCallback, useState } from 'react'
 import { AuthProvider } from './lib/auth'
 import { useAuth } from './lib/auth-context'
 import { Loading } from './lib/ui'
-import SplashScreen from './screens/SplashScreen'
-import HomeScreen from './screens/HomeScreen'
-import GuidanceScreen from './screens/GuidanceScreen'
-import GuidanceDetailScreen from './screens/GuidanceDetailScreen'
-import ChatbotScreen from './screens/ChatbotScreen'
-import MutawifListScreen from './screens/MutawifListScreen'
-import MutawifProfileScreen from './screens/MutawifProfileScreen'
-import BookingScreen from './screens/BookingScreen'
-import BookingSuccessScreen from './screens/BookingSuccessScreen'
-import ProfileScreen from './screens/ProfileScreen'
-import ChecklistScreen from './screens/ChecklistScreen'
-import NotificationsScreen from './screens/NotificationsScreen'
-import QiblaScreen from './screens/QiblaScreen'
-import CurrencyScreen from './screens/CurrencyScreen'
-import MutawifDashboardScreen from './screens/MutawifDashboardScreen'
-import OnboardingScreen from './screens/OnboardingScreen'
+import LandingScreen from './screens/LandingScreen'
 
+// Visitors can read the public page without downloading the app, map, or
+// sign-in UI. Those screens load when the visitor enters the application.
+const SplashScreen = lazy(() => import('./screens/SplashScreen'))
+const HomeScreen = lazy(() => import('./screens/HomeScreen'))
+const GuidanceScreen = lazy(() => import('./screens/GuidanceScreen'))
+const GuidanceDetailScreen = lazy(() => import('./screens/GuidanceDetailScreen'))
+const ChatbotScreen = lazy(() => import('./screens/ChatbotScreen'))
+const MutawifListScreen = lazy(() => import('./screens/MutawifListScreen'))
+const MutawifProfileScreen = lazy(() => import('./screens/MutawifProfileScreen'))
+const BookingScreen = lazy(() => import('./screens/BookingScreen'))
+const BookingSuccessScreen = lazy(() => import('./screens/BookingSuccessScreen'))
+const ProfileScreen = lazy(() => import('./screens/ProfileScreen'))
+const ChecklistScreen = lazy(() => import('./screens/ChecklistScreen'))
+const NotificationsScreen = lazy(() => import('./screens/NotificationsScreen'))
+const QiblaScreen = lazy(() => import('./screens/QiblaScreen'))
+const CurrencyScreen = lazy(() => import('./screens/CurrencyScreen'))
+const MutawifDashboardScreen = lazy(() => import('./screens/MutawifDashboardScreen'))
+const OnboardingScreen = lazy(() => import('./screens/OnboardingScreen'))
 const UmrahPackagesScreen = lazy(() => import('./screens/UmrahPackagesScreen'))
 const UmrahPackageScreen = lazy(() => import('./screens/UmrahPackageScreen'))
 const UmrahCheckoutScreen = lazy(() => import('./screens/UmrahCheckoutScreen'))
@@ -26,6 +29,8 @@ const UmrahOrdersScreen = lazy(() => import('./screens/UmrahOrdersScreen'))
 const UmrahOrderScreen = lazy(() => import('./screens/UmrahOrderScreen'))
 
 const screens = {
+  landing: LandingScreen,
+  login: SplashScreen,
   splash: SplashScreen,
   home: HomeScreen,
   guidance: GuidanceScreen,
@@ -50,7 +55,7 @@ const screens = {
 }
 
 /** Screens reachable without a session. */
-const PUBLIC_SCREENS = new Set(['splash'])
+const PUBLIC_SCREENS = new Set(['landing', 'login', 'splash'])
 
 function SessionLoadingScreen() {
   return (
@@ -66,7 +71,7 @@ function Shell() {
   const urlScreen = params.get('screen')
   const isCapture = params.get('capture') === '1'
 
-  const [current, setCurrent] = useState(urlScreen || 'splash')
+  const [current, setCurrent] = useState(urlScreen || 'landing')
   // Route parameters, e.g. which mutawif a booking is for.
   const [routeParams, setRouteParams] = useState(() => Object.fromEntries(
     [...params].filter(([key]) => key !== 'screen' && key !== 'capture'),
@@ -79,11 +84,16 @@ function Shell() {
     // parameters contain identifiers only, never checkout/contact data.
     const url = new URL(window.location.href)
     const capture = url.searchParams.get('capture')
-    url.search = new URLSearchParams({ screen, ...nextParams }).toString()
+    url.search = screen === 'landing' ? '' : new URLSearchParams({ screen, ...nextParams }).toString()
+    url.hash = ''
     if (capture) url.searchParams.set('capture', capture)
     window.history.replaceState(null, '', url)
     window.scrollTo({ top: 0, behavior: 'instant' })
   }, [])
+
+  // The public website uses the whole viewport and remains available while a
+  // stored session is being restored. Only application screens use the frame.
+  if (current === 'landing') return <LandingScreen />
 
   // Screenshot mode keeps the old behaviour: render any screen with no auth.
   if (isCapture) {
@@ -102,7 +112,7 @@ function Shell() {
   } else if (status === 'signedOut' && !PUBLIC_SCREENS.has(current)) {
     // Any screen behind the gate falls back to the entry screen.
     ActiveScreen = SplashScreen
-  } else if (status === 'signedIn' && current === 'splash') {
+  } else if (status === 'signedIn' && ['login', 'splash'].includes(current)) {
     ActiveScreen = user?.needsOnboarding
       ? OnboardingScreen
       : user?.role === 'MUTAWIF'

@@ -1,6 +1,6 @@
 # Manaseek UI
 
-Prototype UI/UX mobile app Manaseek — Pendamping Ibadah Haji & Umrah.
+Website dan aplikasi web Manaseek — Pendamping Ibadah Haji & Umrah.
 
 Folder ini adalah frontend **web** React + Vite. Aplikasi Android native dengan
 React Native + Expo berada di [`../manaseek-mobile`](../manaseek-mobile/README.md)
@@ -17,6 +17,28 @@ npm run dev -- --port 5174
 ```
 
 Buka browser di `http://localhost:5174`
+
+## Landing page dan login
+
+URL utama `/` menampilkan landing page publik yang responsif di desktop dan HP,
+termasuk saat pengguna sudah memiliki sesi. Tombol **Login** membuka
+`?screen=login` untuk masuk dengan Google; pengguna yang sudah masuk melihat
+**Buka aplikasi** dan diteruskan sesuai peran atau kebutuhan onboarding.
+`?screen=splash` tetap tersedia sebagai alias layar login. Logout mengembalikan
+pengguna ke landing page. Halaman aplikasi lainnya tetap memerlukan sesi.
+
+Landing page memakai ilustrasi Makkah, Madinah, dan ikon yang sudah tersedia
+di `src/assets`, dengan navigasi bagian, menu mobile, dan FAQ yang bisa dibuka.
+Layar aplikasi dimuat sesuai kebutuhan agar kunjungan ke landing page tidak
+ikut mengunduh peta dan seluruh aplikasi.
+
+```bash
+npm run test:landing
+```
+
+Pengecekan browser memakai fixture API dan Google Sign-In, tanpa akun sungguhan.
+Mencakup halaman default, menu mobile, FAQ, navigasi keyboard, ukuran 320–1440px,
+login jamaah/mutawif, onboarding, pemulihan sesi, proteksi halaman, dan logout.
 
 ## Memeriksa riwayat AI Chat
 
@@ -102,7 +124,9 @@ Akses tiap screen langsung via URL param `?screen=<id>`:
 
 | ID | Screen |
 |----|--------|
-| `splash` | Splash / onboarding |
+| `landing` | Landing page publik (default `/`) |
+| `login` | Masuk dengan Google |
+| `splash` | Alias layar login |
 | `home` | Beranda |
 | `currency` | Konverter Riyal ↔ Rupiah |
 | `umrah-packages` | Katalog paket umroh demo |

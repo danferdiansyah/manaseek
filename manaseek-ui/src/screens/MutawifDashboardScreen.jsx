@@ -134,7 +134,7 @@ function BookingCard({ booking, actionKey, onAction }) {
   )
 }
 
-export default function MutawifDashboardScreen() {
+export default function MutawifDashboardScreen({ navigate }) {
   const { user, signOut } = useAuth()
   const [actionKey, setActionKey] = useState(null)
   const [actionError, setActionError] = useState(null)
@@ -350,7 +350,7 @@ export default function MutawifDashboardScreen() {
 
         <button
           type="button"
-          onClick={signOut}
+          onClick={async () => { await signOut(); navigate('landing') }}
           className="quiet-danger w-full py-3 text-sm font-semibold flex items-center justify-center gap-2"
         >
           <LogOut size={15} /> Keluar dari akun
