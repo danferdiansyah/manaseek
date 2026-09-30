@@ -1,0 +1,67 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      google_web_client_id:
+        description: Public Google Web OAuth client ID accepted by the backend
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: manaseek-mobile
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      EXPO_PUBLIC_API_URL: https://manaseek-api.vercel.app/api
+      EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ inputs.google_web_client_id }}
+      EXPO_PUBLIC_DEV_LOGIN: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: manaseek-mobile/package-lock.json
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install Android build tools
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006" "cmake;3.30.5"
+      - run: npm ci
+      - run: npm run typecheck && npm run lint && npm test
+      - name: Compile standalone APK
+        run: npm run build:apk
+      - name: Verify APK signature, manifest, and embedded bundle
+        run: |
+          APK=$(find out/android -maxdepth 1 -name '*.apk' -print -quit)
+          test -n "$APK"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs "$APK" > out/android/build-info.txt
+          apkanalyzer apk summary "$APK" >> out/android/build-info.txt
+          apkanalyzer manifest min-sdk "$APK" >> out/android/build-info.txt
+          apkanalyzer manifest target-sdk "$APK" >> out/android/build-info.txt
+          test "$(apkanalyzer manifest debuggable "$APK")" = 'false'
+          unzip -p "$APK" assets/index.android.bundle | wc -c >> out/android/build-info.txt
+          unzip -l "$APK" 'lib/*/*.so' >> out/android/build-info.txt
+          cat out/android/build-info.txt
+          printf 'APK compiled and signature verified. Download **manaseek-apk** below. Internal testing certificate; Android 7+, ARM 32/64-bit.\n' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: manaseek-apk
+          path: manaseek-mobile/out/android/
+          if-no-files-found: error
+          retention-days: 30

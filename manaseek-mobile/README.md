@@ -46,6 +46,64 @@ Build belum berarti publikasi ke Google Play. Signing dan akun store perlu
 disiapkan sebelum distribusi produksi. Simpan signing key untuk seluruh pembaruan.
 `android/` dan `ios/` dihasilkan Expo, diabaikan Git, dan tidak diedit manual.
 
+## APK lokal untuk dipasang di HP
+
+Build ini memakai varian **release** dengan JavaScript tertanam, sehingga bisa
+dibuka tanpa Metro atau Expo Go. Sertifikatnya masih **debug bawaan template
+Expo**, khusus pengujian internal; gunakan signing key sendiri untuk distribusi
+produksi.
+
+Siapkan Node.js 24, JDK 21, Android SDK platform 36, build tools 36.0.0, NDK
+27.1.12297006, dan CMake 3.30.5. Contoh instalasi toolchain di macOS dengan Homebrew:
+
+```bash
+brew install openjdk@21 android-commandlinetools
+export JAVA_HOME="$(brew --prefix openjdk@21)/libexec/openjdk.jdk/Contents/Home"
+export ANDROID_HOME="$(brew --prefix)/share/android-commandlinetools"
+sdkmanager --licenses
+sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" \
+  "ndk;27.1.12297006" "cmake;3.30.5"
+```
+
+Jika memakai SDK Android Studio, arahkan `ANDROID_HOME` ke folder SDK tersebut.
+Dari folder `manaseek-mobile`, sesudah mengisi `.env`:
+
+```bash
+npm ci
+npm run build:apk
+```
+
+Hasilnya `out/android/manaseek-1.0.0.apk` (nama mengikuti versi aplikasi), beserta
+checksum `.sha256`. APK mendukung Android 7+ di HP ARM 64-bit dan 32-bit. Untuk
+menambahkan emulator Intel, jalankan dengan
+`ANDROID_ABIS=arm64-v8a,armeabi-v7a,x86_64 npm run build:apk`.
+
+Salin APK ke HP, buka dari aplikasi Files, lalu izinkan pemasangan dari aplikasi
+tersebut jika diminta Android. Atau, dengan USB debugging aktif:
+
+```bash
+"$ANDROID_HOME/platform-tools/adb" install -r out/android/manaseek-1.0.0.apk
+```
+
+Untuk mendaftarkan login Google, lihat SHA-1 sertifikat APK yang benar-benar
+dipasang (bukan checksum file `.sha256`):
+
+```bash
+"$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --print-certs \
+  out/android/manaseek-1.0.0.apk
+```
+
+Daftarkan nilai `Signer #1 certificate SHA-1 digest` bersama package
+`id.manaseek.app` sesuai bagian berikut. Build APK tidak otomatis membuat OAuth
+client Android atau mengaktifkan Firebase.
+
+Jika toolchain lokal belum tersedia, buka **GitHub Actions → Android APK → Run
+workflow**, isi public Google Web client ID yang sama dengan `.env`, lalu unduh
+artifact **manaseek-apk** setelah berhasil. ZIP berisi APK, checksum, dan laporan
+verifikasi signature/manifest. Workflow ini dijalankan manual dan artifact
+disimpan selama 30 hari. Client ID bukan secret; jangan masukkan OAuth client
+secret ke kolom tersebut.
+
 ## Konfigurasi backend
 
 `EXPO_PUBLIC_API_URL` harus URL lengkap, termasuk `/api`. Default:
