@@ -30,13 +30,13 @@ const services: {
 }[] = [
   {
     title: "Panduan ibadah",
-    subtitle: "Satu langkah setiap hari",
+    subtitle: "Alur umrah & haji, tahap demi tahap",
     href: "/guidance",
     image: require("../../assets/services/hajj.webp"),
   },
   {
     title: "Tanya Manaseek",
-    subtitle: "Asisten dari pustaka panduan",
+    subtitle: "Teman tanya jawab Islami",
     href: "/chat",
     image: require("../../assets/services/chat.webp"),
   },

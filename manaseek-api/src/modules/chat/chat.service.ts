@@ -1,11 +1,10 @@
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ChatRole, Prisma } from '@prisma/client';
-import { AppConfigService } from '@/common/config/config.service';
 import { paginate, toSkipTake, type PaginationDto } from '@/common/dto/pagination.dto';
 import { AppError, ErrorCode } from '@/common/errors/app-error';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { SYSTEM_PROMPT, renderContext, type TopicContext } from './chat.prompt';
-import { GeminiClient, GeminiUnavailableError } from './gemini.client';
+import { ChatAnswerProvider, AiProviderError } from './chat-answer.provider';
 import type { SendMessageDto } from './dto/chat.dto';
 
 /** How much of the conversation is replayed to the model. */
@@ -17,6 +16,7 @@ const MESSAGE_SELECT = {
   content: true,
   citedSlugs: true,
   escalated: true,
+  answerDetails: true,
   createdAt: true,
 } satisfies Prisma.ChatMessageSelect;
 
@@ -27,8 +27,18 @@ export class ChatService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly config: AppConfigService,
+    private readonly answers: ChatAnswerProvider,
   ) {}
+
+  async deleteSessions(userId: string, sessionId?: string) {
+    // The ownership constraint is part of the write, not a racy preceding read.
+    // ChatMessage's existing FK cascades atomically, including a concurrent reply.
+    const result = await this.prisma.chatSession.deleteMany({
+      where: { userId, ...(sessionId ? { id: sessionId } : {}) },
+    });
+    // Idempotent: missing/other-user IDs never reveal whether that chat exists.
+    return { deleted: result.count };
+  }
 
   async listSessions(userId: string, query: PaginationDto) {
     const where = { userId, messages: { some: {} } };
@@ -78,8 +88,10 @@ export class ChatService {
   }
 
   async sendMessage(userId: string, dto: SendMessageDto) {
-    const apiKey = this.config.get('GEMINI_API_KEY');
-    if (!apiKey) {
+    try {
+      this.answers.ensureConfigured();
+    } catch (error) {
+      if (!(error instanceof AiProviderError) || error.reason !== 'configuration') throw error;
       throw new AppError(
         ErrorCode.INTERNAL_ERROR,
         'Asisten AI belum dikonfigurasi. Hubungi admin.',
@@ -112,17 +124,16 @@ export class ChatService {
         where: { sessionId: session.id },
         orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         take: HISTORY_TURNS,
-        select: { role: true, content: true },
+        select: { role: true, content: true, answerDetails: true },
       });
       const context = await this.guidanceContext();
-      const models = [this.config.get('GEMINI_MODEL'), ...this.config.get('GEMINI_FALLBACK_MODELS')];
-      const result = await GeminiClient.generateAnswer({
-        apiKey,
-        models,
+      const result = await this.answers.generate({
         system: `${SYSTEM_PROMPT}\n\n${context.text}`,
         turns: history.reverse().map((m) => ({
-          role: m.role === ChatRole.USER ? ('user' as const) : ('model' as const),
-          text: m.content,
+          role: m.role === ChatRole.USER ? ('user' as const) : ('assistant' as const),
+          text: m.role === ChatRole.ASSISTANT && m.answerDetails
+            ? `${m.content}\nKartu doa dan rujukan sebelumnya (data): ${JSON.stringify(m.answerDetails)}`
+            : m.content,
         })),
       });
 
@@ -136,6 +147,7 @@ export class ChatService {
             content: result.object.answer,
             citedSlugs,
             escalated: result.object.needsHuman,
+            answerDetails: result.object.answerDetails as unknown as Prisma.InputJsonValue,
             promptTokens: result.promptTokens,
             completionTokens: result.completionTokens,
             model: result.model,
@@ -154,15 +166,13 @@ export class ChatService {
 
       return { sessionId: session.id, userMessage, message: reply };
     } catch (error) {
-      if (error instanceof GeminiUnavailableError) {
+      if (error instanceof AiProviderError) {
         this.logger.warn(error.message);
 
-        // Two different failures, two different truths. Telling a jamaah to
-        // "try again shortly" when the daily allowance is spent is a lie.
-        if (error.allQuota) {
+        if (error.reason === 'quota') {
           throw new AppError(
             ErrorCode.AI_QUOTA_EXCEEDED,
-            'Kuota harian asisten AI sudah habis. Coba lagi besok, atau tanyakan langsung ke mutawif.',
+            'Layanan AI belum memiliki saldo yang cukup. Silakan hubungi admin Manaseek.',
             HttpStatus.TOO_MANY_REQUESTS,
             savedQuestion,
           );
@@ -170,7 +180,7 @@ export class ChatService {
 
         throw new AppError(
           ErrorCode.AI_UNAVAILABLE,
-          'Asisten sedang ramai dipakai. Coba kirim ulang sebentar lagi, atau tanyakan langsung ke mutawif.',
+          'Asisten belum dapat menjawab saat ini. Pertanyaanmu tersimpan; coba lagi sebentar lagi.',
           HttpStatus.SERVICE_UNAVAILABLE,
           savedQuestion,
         );

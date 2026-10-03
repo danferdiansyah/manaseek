@@ -693,6 +693,9 @@ model ChatMessage {
   /// Set when the assistant decided this needs a human mutawif.
   escalated  Boolean  @default(false)
 
+  /// Versioned references and structured prayer cards; null for legacy messages.
+  answerDetails Json?
+
   /// Kept per message so AI spend can be attributed without a separate ledger.
   promptTokens     Int?
   completionTokens Int?

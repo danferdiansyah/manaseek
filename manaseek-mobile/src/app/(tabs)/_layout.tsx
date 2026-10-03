@@ -11,6 +11,7 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors.muted,
         tabBarStyle: { backgroundColor: "#FFF", borderTopColor: colors.line },
         tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+        tabBarHideOnKeyboard: true,
       }}
     >
       <Tabs.Screen
@@ -32,20 +33,25 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="umrah"
-        options={{
-          title: "Umroh",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="airplane-outline" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="mutawif"
         options={{
           title: "Mutawif",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="people-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="chat"
+        options={{
+          title: "Tanya",
+          tabBarAccessibilityLabel: "Tanya Manaseek",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons
+              name="chatbubble-ellipses-outline"
+              color={color}
+              size={size}
+            />
           ),
         }}
       />

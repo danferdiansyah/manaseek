@@ -6,6 +6,7 @@ export type User = {
   avatarUrl?: string;
   role: "JAMAAH" | "MUTAWIF" | "ADMIN";
   needsOnboarding?: boolean;
+  permissions?: { aiChat: boolean };
 };
 export type Page<T> = {
   items: T[];
@@ -92,11 +93,24 @@ export type ChatSession = {
   updatedAt: string;
   messageCount: number;
 };
+export type ChatAnswerDetails = {
+  version: 1;
+  status: "sourced" | "unverified" | "off_topic" | "greeting" | "clarify";
+  references: { id: number; url: string; title: string; publisher: string }[];
+  prayers: {
+    title: string;
+    arabic: string;
+    translation: string;
+    evidence: string;
+    sourceId: number;
+  }[];
+};
 export type ChatMessage = {
   id: string;
   role: "USER" | "ASSISTANT";
   content: string;
   citedSlugs: string[];
+  answerDetails?: ChatAnswerDetails | null;
   escalated: boolean;
   createdAt: string;
 };

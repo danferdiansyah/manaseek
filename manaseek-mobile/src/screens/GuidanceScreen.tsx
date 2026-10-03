@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { Text, View } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Text, View } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Linking from "expo-linking";
 import {
   AccountGate,
   Body,
@@ -12,6 +14,7 @@ import {
   ResourceState,
   RowLink,
   Title,
+  colors,
   s,
 } from "../components/ui";
 import { useResource } from "../lib/resource";
@@ -19,8 +22,128 @@ import { api, errorMessage } from "../lib/api";
 import { storage } from "../lib/storage";
 import { useAuth } from "../lib/auth";
 import type { Prayer, Topic } from "../lib/models";
+import { GuidanceJourney } from "../components/GuidanceJourney";
+import {
+  emptyGuideProgress,
+  normalizeGuideProgress,
+  type GuideProgress,
+} from "../lib/guidance-journeys";
 
 export default function GuidanceScreen() {
+  const { user } = useAuth();
+  return (
+    <Page
+      title="Panduan ibadah"
+      subtitle="Satu perjalanan, selangkah demi selangkah."
+    >
+      <AccountGate>
+        {user ? <JourneyContent key={user.id} userId={user.id} /> : null}
+      </AccountGate>
+    </Page>
+  );
+}
+function JourneyContent({ userId }: { userId: string }) {
+  const insets = useSafeAreaInsets();
+  const [progress, setProgress] = useState<GuideProgress>(emptyGuideProgress);
+  const current = useRef(progress);
+  const alive = useRef(true);
+  const queue = useRef(Promise.resolve());
+  const revision = useRef(0);
+  const [loaded, setLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [sourceError, setSourceError] = useState<string | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const key = `user:${userId}:guidance-progress:v1`;
+  useEffect(() => {
+    alive.current = true;
+    return () => {
+      alive.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    let active = true;
+    storage
+      .get<unknown>(key)
+      .then((value) => {
+        if (!active) return;
+        const restored = normalizeGuideProgress(value);
+        current.current = restored;
+        setProgress(restored);
+        setLoaded(true);
+      })
+      .catch(() => {
+        if (active) setLoadError(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [key, loadAttempt]);
+  function save(value: GuideProgress) {
+    const ticket = ++revision.current;
+    const sessionVersion = api.sessionVersion;
+    current.current = value;
+    setProgress(value);
+    setSaveError(null);
+    // Serialize writes so a slower old save cannot replace the latest marks.
+    queue.current = queue.current
+      .catch(() => {})
+      .then(async () => {
+        if (api.sessionVersion !== sessionVersion) return;
+        try {
+          await storage.set(key, value);
+          if (alive.current && ticket === revision.current) setSaveError(null);
+        } catch {
+          if (alive.current && ticket === revision.current)
+            setSaveError(
+              "Penanda belum tersimpan di perangkat. Ketuk untuk mencoba lagi.",
+            );
+        }
+      });
+  }
+  if (!loaded)
+    return loadError ? (
+      <>
+        <Notice error>Penanda bacaan belum bisa dimuat.</Notice>
+        <Button
+          title="Coba lagi"
+          onPress={() => {
+            setLoadError(false);
+            setLoadAttempt((value) => value + 1);
+          }}
+        />
+      </>
+    ) : (
+      <ActivityIndicator
+        color={colors.green}
+        accessibilityLabel="Memuat panduan"
+      />
+    );
+  return (
+    <GuidanceJourney
+      progress={progress}
+      onChange={save}
+      topInset={insets.top}
+      bottomInset={insets.bottom}
+      saveError={saveError}
+      onRetrySave={() => save(current.current)}
+      sourceError={sourceError}
+      onSource={(source) => {
+        setSourceError(null);
+        void Linking.openURL(source.url).catch(() => {
+          if (alive.current)
+            setSourceError(
+              "Sumber belum bisa dibuka. Periksa koneksi lalu ketuk tautannya lagi.",
+            );
+        });
+      }}
+      onLibrary={() => router.push("/guidance/library")}
+      onPrayers={() => router.push("/prayers")}
+      onChecklist={() => router.push("/checklist")}
+    />
+  );
+}
+export function GuidanceLibraryScreen() {
   const auth = useAuth();
   const resource = useResource<{ items: Topic[] }>("/content/topics", true);
   const [search, setSearch] = useState("");
@@ -58,8 +181,9 @@ export default function GuidanceScreen() {
   }
   return (
     <Page
-      title="Langkah yang bermakna"
-      subtitle="Panduan ibadah, dari persiapan hingga kepulangan."
+      title="Perpustakaan panduan"
+      subtitle="Bacaan tambahan untuk mendalami setiap ibadah."
+      back
       onRefresh={resource.reload}
       refreshing={resource.loading && !!resource.data}
     >

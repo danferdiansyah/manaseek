@@ -13,6 +13,7 @@ const user = {
   phone: "+628123456789",
   role: "JAMAAH",
   needsOnboarding: false,
+  permissions: { aiChat: true },
 };
 const topic = {
   id: id(2),
@@ -412,7 +413,7 @@ try {
             getComputedStyle(e).visibility !== "hidden" &&
             (exact
               ? e.innerText.trim().split("\n").at(-1) === v
-              : e.innerText.includes(v)),
+              : (e.innerText.includes(v) || e.getAttribute("aria-label") === v)),
         ),
       {},
       value,
@@ -429,7 +430,7 @@ try {
             getComputedStyle(e).visibility !== "hidden" &&
             (exact
               ? e.innerText.trim().split("\n").at(-1) === v
-              : e.innerText.includes(v)),
+              : (e.innerText.includes(v) || e.getAttribute("aria-label") === v)),
         );
         el.click();
       },
@@ -482,8 +483,10 @@ try {
   await back();
   stage("chat history and continuation");
   await click("Tanya Manaseek");
+  await click("Riwayat percakapan");
+  await click("Percakapan tersimpan");
   await text("Jawaban sebelumnya dari riwayat.");
-  await input("Pesanmu", "Bagaimana persiapan ihram?");
+  await input("Pertanyaan tentang Islam", "Bagaimana persiapan ihram?");
   await click("Kirim pertanyaan");
   await text("Jawaban baru dengan rujukan.");
   await back();

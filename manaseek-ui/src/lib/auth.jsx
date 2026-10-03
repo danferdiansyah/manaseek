@@ -3,6 +3,7 @@ import {
   api,
   clearTokens,
   getTokens,
+  getSessionVersion,
   loginWithGoogleToken,
   saveTokens,
   setUnauthenticatedHandler,
@@ -50,7 +51,9 @@ export function AuthProvider({ children }) {
 
   const signInWithSession = useCallback(async (session) => {
     saveTokens(session)
+    const version = getSessionVersion()
     const me = await api.get('/auth/me')
+    if (version !== getSessionVersion()) throw new Error('Sesi akun sudah berubah.')
     const nextUser = {
       ...me,
       isNewUser: session.user?.isNewUser ?? false,

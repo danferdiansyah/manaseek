@@ -43,15 +43,9 @@ export const envSchema = z.object({
   // when the real verification workflow is ready.
   MUTAWIF_VERIFICATION_REQUIRED: verificationRequired,
 
-  // Google AI Studio key. Without it the chatbot endpoints answer with a clear
-  // "not configured" error instead of failing somewhere deeper.
-  GEMINI_API_KEY: z.string().optional(),
-  GEMINI_MODEL: z.string().default('gemini-2.5-flash'),
-  // Tried in order when the primary model is out of its daily free-tier quota.
-  GEMINI_FALLBACK_MODELS: z
-    .string()
-    .default('gemini-2.5-flash-lite')
-    .transform((value) => value.split(',').map((m) => m.trim()).filter(Boolean)),
+  // Server-only credentials; never expose these through EXPO_PUBLIC variables.
+  OPENROUTER_API_KEY: z.string().optional(),
+  OPENROUTER_MODEL: z.string().default('xiaomi/mimo-v2.6-pro'),
 
   PUSH_PROVIDER: z.enum(['noop', 'fcm']).default('noop'),
   FCM_PROJECT_ID: z.string().optional(),

@@ -8,6 +8,7 @@ import {
   type UserRole,
 } from '@prisma/client';
 import { AppConfigService } from '@/common/config/config.service';
+import { canAccessAi } from '@/common/access/ai-access';
 import { AppError, ErrorCode } from '@/common/errors/app-error';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { normalizePhone } from '@/common/utils/phone.util';
@@ -25,6 +26,7 @@ export interface AuthSession extends TokenPair {
     role: UserRole;
     isNewUser: boolean;
     needsOnboarding: boolean;
+    permissions: { aiChat: boolean };
   };
 }
 
@@ -182,6 +184,7 @@ export class AuthService {
         role: user.role,
         isNewUser: false,
         needsOnboarding: false,
+        permissions: { aiChat: canAccessAi(user) },
       },
     };
   }
@@ -240,6 +243,7 @@ export class AuthService {
 
     return {
       ...user,
+      permissions: { aiChat: canAccessAi(user) },
       needsOnboarding: !user.mutawifProfile && !user.jamaahProfile?.city,
     };
   }
@@ -319,6 +323,7 @@ export class AuthService {
         role: user.role,
         isNewUser: !existing,
         needsOnboarding: !existing,
+        permissions: { aiChat: canAccessAi(user) },
       },
     };
   }

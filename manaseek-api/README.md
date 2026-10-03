@@ -125,6 +125,27 @@ caller on the anonymous auth routes.
 
 ## The assistant
 
+### AI access policy
+
+Every `/chat` endpoint requires both authentication and `AiAccessGuard`.
+The global JWT guard loads the current account once per request; the AI guard
+checks its server-derived permission and allows only active,
+email-verified accounts in `src/common/access/ai-access.ts`. The seven approved
+emails are matched exactly after trimming/lowercasing; aliases and ADMIN roles
+do not bypass the list. Other accounts receive `403 AI_ACCESS_DENIED` before
+any history operation or model call. No history is deleted by this restriction.
+
+Login, onboarding, and `/auth/me` return `permissions.aiChat` for the current
+account. This is a display hint for clients, never proof of authorization.
+The mobile screen shows an access notice when permission is absent or false.
+Update the server policy and redeploy to change membership; no APK rebuild or
+database migration is needed for future list changes.
+
+`npm run test:ai-access` exercises the compiled controller and real JWT guard
+over local HTTP, using in-memory identities and stubbed chat operations only.
+It verifies all seven accounts, denied users, admin/alias/spoof attempts,
+missing/unverified/suspended accounts, and revocation with an existing token.
+
 ### User chat history
 
 The AI Chat screen restores the account's most recently active conversation.
@@ -142,6 +163,18 @@ session returns `404 NOT_FOUND`.
 | `GET /api/chat/sessions?page=1&limit=20` | `{ items, meta }`, sorted by latest activity; each item has `id`, `title`, `preview`, `messageCount`, `createdAt`, and `updatedAt` |
 | `GET /api/chat/sessions/:id/messages?page=1&limit=50` | `{ items, meta, session }`; page 1 contains the newest messages, in chronological display order; later pages contain older messages |
 | `POST /api/chat/messages` | `{ sessionId, userMessage, message }`; include `sessionId` to continue an existing conversation |
+| `DELETE /api/chat/sessions/:id` | `{ deleted }`; permanently removes one owned conversation and its messages; missing or foreign IDs return `0` |
+| `DELETE /api/chat/sessions` | `{ deleted }`; permanently removes all conversations belonging to the authenticated user, including unloaded pages |
+
+The mobile history sheet confirms deletion before sending either request. The
+ownership filter is applied directly in the database write; existing foreign-key
+cascades remove all messages atomically. Deleting the currently open conversation
+also resets the mobile composer. No database migration is needed.
+
+To verify real persistence after `npm run build`, run
+`node --env-file=.env scripts/check-chat-deletion-db.mjs`. It creates synthetic
+users and chats inside a transaction that always rolls back, and checks ownership,
+message cascades, delete-all, and repeated deletion without touching existing data.
 
 Pagination limits are validated from 1 to 100. `meta` contains `page`, `limit`,
 `total`, and `totalPages`. Messages retain their citations and human-escalation
@@ -161,47 +194,60 @@ it does not contact real accounts or invoke the AI provider.
 
 ### Answer generation
 
-`POST /api/chat/messages` answers from the guidance library and nothing else.
-The whole curated library is small enough to sit in one prompt, so there is no
-retrieval step and the model has nothing outside it to draw on. Three rules are
-enforced rather than hoped for:
+`POST /api/chat/messages` uses server-only `OPENROUTER_API_KEY` and
+`OPENROUTER_MODEL` (default `xiaomi/mimo-v2.6-pro`). Never put these credentials
+in an `EXPO_PUBLIC_*` variable.
 
-- The answer comes back as structured output with `citedSlugs` and
-  `needsHuman`, so escalation is a field we branch on, not a phrase we grep.
-- Any slug the model cites that is not in the library is dropped before the
-  reply is stored; a citation that leads nowhere is worse than none.
-- Prompt and completion tokens are stored per message, so AI spend can be
-  attributed without a separate ledger.
+Answer generation uses the following stages, with a shared 110-second deadline:
 
-Set `GEMINI_API_KEY` from https://aistudio.google.com/apikey. Without it the
-endpoint answers 503 with a clear message instead of failing deeper in.
+1. Classify the current question in context. Greetings, ambiguous questions,
+   and off-topic requests receive fixed responses without web search.
+2. For Islamic questions, retrieve web excerpts through OpenRouter's Exa web
+   plugin, restricted to Kemenag, NU, MUI, Muhammadiyah, Quran.com, Sunnah.com
+   and Egypt's Dar al-Ifta (`dar-alifta.org`) for additional Arabic evidence.
+   Generate a structured answer with numbered references and optional prayers.
+   A recitation-only request is presented as a brief introduction plus the
+   requested prayer cards; unsolicited prose is removed before verification.
+   Combined requests for prayers and practices retain their explanation.
+3. Require reference URLs to match actual provider retrieval annotations, match
+   evidence quotations against those excerpts, check Arabic wording against its
+   source (ignoring diacritics, direction marks and punctuation, never words or
+   gaps between excerpts), and separately review every substantive claim,
+   attribution and translation against the retrieved evidence. Repeated source
+   URLs are coalesced and citation numbers remapped after validating each quote.
+   Typography-only quote differences are normalized. A misplaced prayer link
+   can be resolved to another retrieved page only if that page contains the
+   exact Arabic wording; its attribution and translation are still reviewed.
+   Unused references are removed, then the canonical answer is reviewed.
+4. A failed check may trigger one evidence-based rewrite and one fresh search
+   (Exa deep-lite, up to eight results, with an Arabic topic query). Every new
+   draft must pass the same checks; scope rejection never triggers repair.
+   Transient recovery timeouts may use the remaining attempt; long Arabic
+   recitations have the same generation budget as the initial response.
+   The entire workflow shares the 110-second deadline. If recovery fails,
+   return a verification-failure message without implying the prayer does not
+   exist or routing a technical retrieval failure to a human adviser.
 
-**The free tier allows 20 requests per day, per model.** A single demo session
-can exhaust it, and Gemini also returns 503 when a model is briefly overloaded.
-`GEMINI_FALLBACK_MODELS` is tried in order for both cases, so neither takes the
-assistant down; each model carries its own daily allowance.
+This checks source provenance and model-assessed support; it is not human
+scholarly verification or a guarantee of correctness. The Sunni/Shafi'i default
+reflects common Indonesian practice while preserving named differences and
+explicit user requests for another school. Search results are untrusted data.
+No unsourced or model fallback is used. A first-pass success uses one Exa search
+and three model calls. Bounded recovery can use up to two searches and seven
+model calls. Diagnostics record stages/counts only, never questions or drafts.
 
-The whole chain runs against one 25-second budget rather than a timeout per
-call, because six sequential calls at 45s each would outlast the function's own
-60s ceiling. A model that hangs is abandoned at 10s and treated like any other
-unavailable model.
+`answerDetails` is an additive nullable JSON column, version 1, storing status,
+numbered references (provider titles and URLs), and Arabic/Indonesian prayer
+cards with attribution. Older messages retain their original contents and are
+marked in mobile as lacking the new references; they are not retroactively
+labelled verified. Questions remain in history if generation fails. Token
+accounting totals classification, generation, review and recovery. Provider error bodies and keys are never
+included in logs or API responses. The Vercel function allows 120 seconds.
 
-Measure a model before adding it to the list. Several ids answer correctly but
-take over a minute — `gemini-flash-latest`, `gemini-3.6-flash` and
-`gemini-3.8-flash` all did during testing — which consumes the entire budget
-and starves the healthy models behind them. Which ids exist at all depends on
-the key: models retired for one project still appear in the catalogue listing
-but return 404 on use, so a 404 is treated as one more reason to move down the
-chain rather than a hard failure.
-
-The key travels in the `x-goog-api-key` header rather than a `?key=` query
-parameter, so it never lands in a URL that something might log.
-
-When every model is spent the API answers `429 AI_QUOTA_EXCEEDED`; when they
-are merely busy it answers `503 AI_UNAVAILABLE`. The two say different things
-to the jamaah, because "try again shortly" is a lie when the allowance is
-daily. Either way the client still offers the route to a human mutawif.
-Enabling billing on the Google Cloud project lifts the daily cap.
+Run `npm run db:generate`, `npm test`, `npm run build`, and `npm run lint`.
+Regression tests cover owner isolation, saved-question recovery, persisted
+answer metadata, missing/forged sources, URL spoofing, unsupported claims,
+Arabic mismatches, and classifier rejection before any search.
 
 **Boundary rule:** a module never queries another module's tables. Cross-module
 access goes through the owning module's exported service.

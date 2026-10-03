@@ -5,6 +5,7 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
+  rmSync,
   writeFileSync,
 } from "node:fs";
 import { homedir } from "node:os";
@@ -43,25 +44,42 @@ const env = {
   CI: "1",
 };
 function run(command, args, cwd = project) {
-  const result = spawnSync(command, args, { cwd, env, stdio: "inherit" });
+  const result = spawnSync(command, args, {
+    cwd,
+    env,
+    stdio: "inherit",
+    shell: process.platform === "win32" && command.endsWith(".bat"),
+  });
   if (result.error) throw result.error;
   if (result.status !== 0) process.exit(result.status || 1);
 }
 
-run(process.execPath, [
-  "node_modules/expo/bin/cli",
-  "prebuild",
-  "--platform",
-  "android",
-  "--no-install",
-]);
+if (!process.argv.includes("--skip-prebuild")) {
+  run(process.execPath, [
+    "node_modules/expo/bin/cli",
+    "prebuild",
+    "--platform",
+    "android",
+    "--no-install",
+  ]);
+}
+// Gradle does not track .env as a bundle input. Force regeneration so release
+// APKs cannot silently retain a previous API URL or Google client ID.
+rmSync(
+  path.join(
+    project,
+    "android/app/build/generated/assets/react/release/index.android.bundle",
+  ),
+  { force: true },
+);
 run(
-  "./gradlew",
+  process.platform === "win32" ? "gradlew.bat" : "./gradlew",
   [
     ":app:assembleRelease",
     `-PreactNativeArchitectures=${architectures}`,
     "--max-workers=2",
     "--console=plain",
+    "--no-daemon",
   ],
   path.join(project, "android"),
 );

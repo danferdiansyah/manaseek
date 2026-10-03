@@ -48,6 +48,36 @@ disiapkan sebelum distribusi produksi. Simpan signing key untuk seluruh pembarua
 
 ## APK lokal untuk dipasang di HP
 
+### Windows dengan toolchain di dalam repo
+
+Pada workspace ini Node portable, JDK, Android SDK/NDK, dan cache build berada
+di `../.local-android/` (diabaikan Git). Sesudah toolchain disiapkan, sambungkan
+satu HP dengan USB debugging dan izinkan dialog RSA, lalu dari folder mobile:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/run-usb.ps1
+```
+
+Skrip membangun APK release untuk arsitektur HP, memasang, lalu membukanya.
+Gunakan `-SkipBuild` untuk memasang ulang APK yang sudah ada.
+Build berikutnya memakai native project dan cache yang sudah ada. Tambahkan
+`-Regenerate` setelah mengubah konfigurasi native atau dependensi native.
+APK dapat berjalan tanpa Metro. Google Sign-In tetap membutuhkan konfigurasi OAuth di bawah.
+Variabel lingkungan hanya berlaku pada proses PowerShell tersebut; PATH Windows
+tidak diubah permanen dan tidak ada Android Studio/emulator baru yang dipasang.
+Toolchain lokal memakai Ninja 1.13.2 pada CMake SDK untuk mendukung path panjang
+Windows; Ninja 1.10.2 bawaan SDK gagal pada file codegen gesture handler.
+
+Sebelum menghapus repo, tutup proses build dan hentikan ADB milik toolchain ini:
+
+```powershell
+& ../.local-android/sdk/platform-tools/adb.exe kill-server
+```
+
+Menghapus folder `manaseek` menghapus toolchain/cache baru dan `node_modules`.
+APK yang telah terpasang di HP tetap ada sampai dihapus dari HP. Node/ADB yang
+sudah terpasang di komputer sebelum setup ini tidak ikut dihapus.
+
 Build ini memakai varian **release** dengan JavaScript tertanam, sehingga bisa
 dibuka tanpa Metro atau Expo Go. Sertifikatnya masih **debug bawaan template
 Expo**, khusus pengujian internal; gunakan signing key sendiri untuk distribusi
@@ -162,15 +192,21 @@ bahwa fitur belum tersedia.
 
 ## Fitur dan perilaku
 
+Navigasi bawah: **Beranda · Panduan · Mutawif · Tanya · Profil**. Tab Tanya
+membuka chatbot Tanya Manaseek; katalog paket umrah tetap tersedia dari Beranda.
+
+Akses Tanya Manaseek mengikuti `permissions.aiChat` dari server. Akun tanpa izin
+melihat pemberitahuan akses terbatas; daftar email tidak dibundel ke aplikasi.
+
 | Area | Implementasi |
 | --- | --- |
 | Akun | Google Sign-In, onboarding jamaah/mutawif, profil, logout |
 | Beranda | Waktu shalat lokal, pilihan kota atau GPS, pintasan layanan |
-| Panduan & doa | Daftar, detail, langkah, rujukan, unduh untuk offline |
+| Panduan & doa | Pilihan Umrah/Haji (Tamattu’, Ifrad, Qiran), rundown, pencarian tahap, penanda bacaan, sumber tiap tahap, perpustakaan dan doa |
 | Checklist | Progres per akun, perubahan offline, sinkronisasi saat tersambung |
 | Kiblat | Bearing lokal, heading perangkat saat tersedia, cadangan arah manual |
 | Konverter | Kalkulasi SAR/IDR dan tanggal snapshot yang sama dengan web |
-| Chat | Riwayat berhalaman, lanjutkan sesi, chat baru, sitasi, penanganan pertanyaan tersimpan saat jawaban gagal |
+| Chat | Riwayat berhalaman, lanjutkan sesi, chat baru, hapus satu/semua riwayat dengan konfirmasi, sitasi, penanganan pertanyaan tersimpan saat jawaban gagal |
 | Mutawif | Pencarian jarak sebenarnya, filter layanan, profil, ulasan |
 | Booking | Pemesanan dengan waktu Saudi, riwayat, status, pembatalan, rating |
 | Dashboard mutawif | Online/offline, lokasi foreground, permintaan, aksi status, tarif, profil dan pengajuan verifikasi |
@@ -178,7 +214,16 @@ bahwa fitur belum tersedia.
 | Umroh | Katalog, detail, jadwal/kamar, 1–6 jamaah, checkout demo, riwayat dan bukti pesanan |
 | Notifikasi | Riwayat, FCM opt-in, pembukaan detail booking |
 
-Panduan offline perlu diunduh saat login dan terhubung. Cache dan antrean checklist
+Alur dan ringkasan panduan Umrah/Haji disertakan dalam aplikasi, sehingga dapat
+dibaca tanpa internet setelah login. Pilihan perjalanan, tahap terakhir dibuka,
+dan tanda sudah dibaca disimpan per akun pada perangkat; tidak tersinkron ke
+perangkat lain dan dibersihkan saat logout. Tanda ini adalah progres membaca,
+bukan penilaian sah atau selesainya ibadah. Ringkasan mengacu pada sumber Kemenag
+dan NU Online yang ditautkan per tahap. Jadwal rombongan dan keringanan khusus
+tetap dikonfirmasi kepada pembimbing.
+
+Perpustakaan panduan dan kumpulan doa tambahan tetap dapat diakses. Bacaan
+tambahan untuk offline perlu diunduh saat login dan terhubung. Cache dan antrean checklist
 dipisahkan per akun, kemudian dihapus saat logout. Jadwal shalat, bearing kiblat,
 dan konverter tidak membutuhkan jaringan setelah lokasi tersedia. Pilihan kota
 merupakan titik acuan kota, bukan klaim lokasi GPS perangkat.

@@ -48,6 +48,7 @@ export default function UmrahScreen() {
     <Page
       title="Perjalanan ke Tanah Suci"
       subtitle="Temukan rencana umroh yang sesuai untukmu."
+      back
       onRefresh={resource.reload}
       refreshing={resource.loading && !!resource.data}
     >

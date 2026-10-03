@@ -1,17 +1,31 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import type { PaginationDto } from '@/common/dto/pagination.dto';
 import { ZodValidationPipe } from '@/common/pipes/zod-validation.pipe';
 import { ChatService } from './chat.service';
+import { AiAccessGuard } from './ai-access.guard';
 import { chatMessagesQuerySchema, chatSessionsQuerySchema, sendMessageSchema, type SendMessageDto } from './dto/chat.dto';
 
 @ApiTags('chat')
 @ApiBearerAuth('access-token')
 @Controller('chat')
+@UseGuards(AiAccessGuard)
 export class ChatController {
   constructor(private readonly chat: ChatService) {}
+
+  @Delete('sessions')
+  @ApiOperation({ summary: 'Permanently delete all conversations owned by the current user' })
+  deleteHistory(@CurrentUser('id') userId: string) {
+    return this.chat.deleteSessions(userId);
+  }
+
+  @Delete('sessions/:id')
+  @ApiOperation({ summary: 'Permanently delete one owned conversation and its messages' })
+  deleteSession(@CurrentUser('id') userId: string, @Param('id', ParseUUIDPipe) id: string) {
+    return this.chat.deleteSessions(userId, id);
+  }
 
   @Get('sessions')
   @ApiOperation({ summary: 'Paginated chat history for the current user, newest activity first' })

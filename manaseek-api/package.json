@@ -12,6 +12,7 @@
     "lint": "eslint \"src/**/*.ts\"",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:ai-access": "npm run build && node scripts/check-ai-access.mjs",
     "test:umrah-db": "node --env-file-if-exists=.env scripts/check-umrah-db.mjs",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",

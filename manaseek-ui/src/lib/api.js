@@ -11,6 +11,10 @@ const ACCESS_KEY = 'manaseek.accessToken'
 const REFRESH_KEY = 'manaseek.refreshToken'
 
 let onUnauthenticated = () => {}
+let sessionVersion = 0
+let refreshFlight = null
+
+export const getSessionVersion = () => sessionVersion
 
 export function setUnauthenticatedHandler(handler) {
   onUnauthenticated = handler
@@ -29,6 +33,11 @@ export function getTokens() {
 }
 
 export function saveTokens({ accessToken, refreshToken }) {
+  sessionVersion++
+  persistTokens({ accessToken, refreshToken })
+}
+
+function persistTokens({ accessToken, refreshToken }) {
   try {
     localStorage.setItem(ACCESS_KEY, accessToken)
     localStorage.setItem(REFRESH_KEY, refreshToken)
@@ -38,6 +47,7 @@ export function saveTokens({ accessToken, refreshToken }) {
 }
 
 export function clearTokens() {
+  sessionVersion++
   try {
     localStorage.removeItem(ACCESS_KEY)
     localStorage.removeItem(REFRESH_KEY)
@@ -93,33 +103,59 @@ async function rawRequest(path, { method = 'GET', body, token } = {}) {
 }
 
 /**
- * Exchanges the stored refresh token for a new pair. Runs at most once per
- * failed request; if it fails the session is over.
+ * Exchanges the stored refresh token once for concurrent requests. Session
+ * changes invalidate in-flight work; temporary failures preserve credentials.
  */
-async function refreshSession() {
+function assertCurrent(version) {
+  if (version !== sessionVersion) {
+    throw new ApiError({ code: 'SESSION_CHANGED', message: 'Sesi akun sudah berubah.', status: 401 })
+  }
+}
+
+async function refreshSession(version) {
+  assertCurrent(version)
   const { refreshToken } = getTokens()
   if (!refreshToken) return null
-
+  if (refreshFlight?.version === version) return refreshFlight.promise
+  const flight = {
+    version,
+    promise: (async () => {
+      try {
+        const tokens = await rawRequest('/auth/refresh', {
+          method: 'POST', body: { refreshToken },
+        })
+        assertCurrent(version)
+        persistTokens(tokens)
+        return tokens.accessToken
+      } catch (error) {
+        assertCurrent(version)
+        // Network/provider outages do not invalidate a recoverable session.
+        if (error instanceof ApiError && [401, 403].includes(error.status)) {
+          clearTokens()
+          onUnauthenticated()
+        }
+        throw error
+      }
+    })(),
+  }
+  refreshFlight = flight
   try {
-    const tokens = await rawRequest('/auth/refresh', {
-      method: 'POST',
-      body: { refreshToken },
-    })
-    saveTokens(tokens)
-    return tokens.accessToken
-  } catch {
-    clearTokens()
-    onUnauthenticated()
-    return null
+    return await flight.promise
+  } finally {
+    if (refreshFlight === flight) refreshFlight = null
   }
 }
 
 export async function request(path, options = {}) {
+  const version = sessionVersion
   const { accessToken } = getTokens()
 
   try {
-    return await rawRequest(path, { ...options, token: accessToken })
+    const result = await rawRequest(path, { ...options, token: accessToken })
+    assertCurrent(version)
+    return result
   } catch (error) {
+    assertCurrent(version)
     const expired =
       error instanceof ApiError &&
       error.status === 401 &&
@@ -127,10 +163,15 @@ export async function request(path, options = {}) {
 
     if (!expired || options.retried) throw error
 
-    const fresh = await refreshSession()
+    // A late 401 can arrive after another request already rotated the token.
+    const fresh = getTokens().accessToken !== accessToken
+      ? getTokens().accessToken : await refreshSession(version)
+    assertCurrent(version)
     if (!fresh) throw error
 
-    return rawRequest(path, { ...options, token: fresh, retried: true })
+    const result = await rawRequest(path, { ...options, token: fresh, retried: true })
+    assertCurrent(version)
+    return result
   }
 }
 

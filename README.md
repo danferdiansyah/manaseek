@@ -21,6 +21,10 @@ assets/            logo, background, QR code
 vercel.json        konfigurasi project web, termasuk proxy /api ke backend
 ```
 
+Catatan review, perubahan batas tanggung jawab, hasil pemeriksaan, dan temuan
+yang masih perlu ditindaklanjuti tersedia di
+[`docs/architecture-review.md`](docs/architecture-review.md).
+
 Dua project Vercel dideploy dari repo yang sama: `manaseek` (root repo, aplikasi
 web) dan `manaseek-api` (root directory `manaseek-api`). Aplikasi web
 mem-proxy `/api/*` ke backend, jadi browser hanya mengenal satu origin dan tidak
